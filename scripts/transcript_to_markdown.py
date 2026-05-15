@@ -2,7 +2,7 @@
 """
 Claude Code transcript JSONL → 일자별 마크다운 누적 변환기.
 
-증분 모드 (기본): 0.Pprompt/ 안의 다른 날짜 파일들의 마지막 timestamp 이후 메시지만
+증분 모드 (기본): 0.Prompt/ 안의 다른 날짜 파일들의 마지막 timestamp 이후 메시지만
                   오늘 파일로 빌드. 어제까지의 기록은 보존.
 전체 모드 (--full): JSONL 전체를 오늘 파일로 빌드.
 
@@ -91,7 +91,7 @@ def format_timestamp_kst(ts: Optional[str]) -> str:
 
 def find_cutoff(prompt_dir: Path, today_filename: str) -> Optional[str]:
     """
-    0.Pprompt/ 안의 오늘이 아닌 대화기록 파일들에서 마지막 ISO timestamp 추출.
+    0.Prompt/ 안의 오늘이 아닌 대화기록 파일들에서 마지막 ISO timestamp 추출.
     가장 최근(date) 파일의 가장 마지막 임베드 timestamp 반환.
     파일들에 timestamp marker가 없으면 None.
     """
@@ -365,7 +365,7 @@ def main():
     project_name = project_root.name
 
     # 출력 폴더
-    prompt_dir = project_root / '0.Pprompt'
+    prompt_dir = project_root / '0.Prompt'
     prompt_dir.mkdir(parents=True, exist_ok=True)
 
     # 오늘 파일명 (KST)

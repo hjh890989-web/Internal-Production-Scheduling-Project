@@ -2,11 +2,11 @@
 # Internal Production Scheduling Project — .gitignore
 # =============================================================================
 
-# -------- 대화기록 (민감정보 보호 — 공개 저장소 commit 절대 금지) --------
-# scripts/transcript_to_markdown.py 출력 위치
-0.Pprompt/
-대화기록_*.md
-대화기록_*_*.md
+# -------- 대화기록 정책 (2026-05-15 사용자 결정) --------
+# 0.Prompt/ 폴더는 git에 commit (.gitignore 처리 안 함).
+# 대화기록(대화기록_YYYY-MM-DD.md)은 인계·감사·복기 목적으로 저장소에 보존.
+# ※ 민감정보(secrets·credentials·개인정보)는 본 폴더에 절대 저장 금지 —
+#   commit 전 검토 필수.
 
 # -------- Excel / Office 임시 lock 파일 --------
 ~$*.xlsx
