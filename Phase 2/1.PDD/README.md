@@ -18,7 +18,7 @@
 | 1 | [1.process_order_consolidation.md](1.process_order_consolidation.md) | 수주 정보 통합 | Draft v1.0 | GAP=4, DOS=4.0 (1순위) |
 | 2 | [2.process_vulcanization_scheduling.md](2.process_vulcanization_scheduling.md) | 성형 공정 스케줄링 | Draft v1.0 | GAP=4, DOS=4.0 (성형 제약 검증) |
 | 3 | [3.process_extrusion_scheduling.md](3.process_extrusion_scheduling.md) | 압출 공정 스케줄링 | Draft v1.0 | GAP=4, DOS=4.0 (성형-압출 연동) |
-| **4** | **[4.PDD_master_integrated_Opus.md](4.PDD_master_integrated_Opus.md)** | **3개 PDD 통합본 + PRD + ERD + ADR (Master)** | **Draft v1.3 (6/6 PASS)** | **SRS·구현·테스트 단일 기준 문서** (PDD + PRD + ERD + ADR + Cheatsheet) |
+| **4** | **[4.PDD_master_integrated_Opus_final.md](4.PDD_master_integrated_Opus_final.md)** | **3개 PDD 통합본 + PRD + ERD + ADR (Master)** | **Draft v1.5** | **SRS·구현·테스트 단일 기준 문서** (PDD + PRD + ERD + ADR + Cheatsheet) |
 | 5 | [5.PDD_master_Gemini.md](5.PDD_master_Gemini.md) | 순수 PRD (Gemini 작성) | Draft v0.1 | 비교/참조용 — 핵심 강점은 4번에 흡수 |
 
 ---

@@ -56,7 +56,7 @@
 |---|---|
 | 위치 | [WBS v1.1 §5 전체](TASK-001_WBS_v1.1.md), 특히 §11 추적성 매트릭스 |
 | 발견 | grep 결과: WBS의 REQ-NF 참조 **6건만 산발 등장** (PER-004·PER-006·OPS-001~007 일괄·REL-005·SEC-004·USA-003). SRS v1.4 §4.2의 60 NFR 중 PER 8·REL 6·SEC 7·USA 5·OPS 7·COM 5·COS 3·KPI 19개 **대부분 명시적 Task 없음** |
-| SRS 출처 | [SRS v1.4 §4.2.1~4.2.8 라인 731~828](../2.SRS/SRS-001_공정스케줄링시스템_v1.4.md) |
+| SRS 출처 | [SRS v1.4 §4.2.1~4.2.8 라인 731~828](../2.SRS/SRS-001_Production_Scheduling_System_v1.4.md) |
 | 영향 | 비기능 요건(성능·보안·사용성·관측성 등) 검증·구현이 Sprint Plan에서 누락 → Phase 1.0 출시 시 NFR-PER-001 (1만 row 60초)·NFR-REL-001 (99.5% 가용성) 등 측정 가능한 게이트 부재 |
 | 권장 조치 (v1.2) | NFR 분해 Epic **EP-40~47** 신규 (PER·REL·SEC·USA·OPS·COM·COS·KPI 각 1 Epic). 각 NFR은 1 Story 이상으로 분해 |
 | 검증 | v1.2에서 grep `REQ-NF-` 결과 **≥60건** 매핑 |
@@ -67,7 +67,7 @@
 |---|---|
 | 위치 | [WBS v1.1 §13 리스크 ↔ Task 매핑](TASK-001_WBS_v1.1.md#13-리스크--task-매핑-mitigation) |
 | 발견 | WBS §13 매핑은 PRD R-X01~R-V09·SAD-RSK-009~012만 다룸. SRS v1.4 §1.7의 SRS-RSK-001~014 **전부 미언급** |
-| SRS 출처 | [SRS v1.4 §1.7 라인 173~221](../2.SRS/SRS-001_공정스케줄링시스템_v1.4.md) |
+| SRS 출처 | [SRS v1.4 §1.7 라인 173~221](../2.SRS/SRS-001_Production_Scheduling_System_v1.4.md) |
 | 영향 | SRS는 14 리스크 모두에 명시적 완화 REQ를 연결 (`§1.7.5 리스크 → 완화 커버리지 — 잔류 0`). WBS는 이 추적성을 끊음 → Sprint Review에서 리스크 검증 누락 가능 |
 | 권장 조치 (v1.2) | §13에 SRS-RSK-001~014 행 추가, 각 리스크의 완화 REQ → WBS Task 매핑 명시 |
 | 검증 | v1.2에서 grep `SRS-RSK-0` 결과 14건 이상 |
@@ -89,7 +89,7 @@
 | 위치 | [WBS v1.1 §1·§2.4](TASK-001_WBS_v1.1.md) (line 5, 57, 137, 779~781) |
 | 발견 | 다음 4가지가 SRS·PDD·SAD 원천에 없음:<br>(a) `Velocity 35 SP/Sprint × 5 Sprint = 175 SP` — 산정 가정<br>(b) `2-person team × 10 days = 20 person-days/Sprint` — 인력 가정<br>(c) Fibonacci SP 척도 (1·2·3·5·8·13) — 추정 방법론<br>(d) 표준 참조 `PMBOK 7th + Scrum Guide 2020 + INVEST` — SRS는 ISO 12207·29148만 인용 |
 | 영향 | 사용자 기준 "SRS를 넘어서는 임의 내용이 없을 것"에 형식적 위배. 특히 (b) 인력 가정은 실제 사내 자원과 다를 시 SP 합계·Sprint 분배 의미 상실 |
-| 권장 조치 (v1.2) | (a)(b) [SRS NFR-COS-003 (≤0.5 FTE 평상 운영) + PDD-04 §17.5.4 (각 Must 4 PD 추정)](../2.SRS/SRS-001_공정스케줄링시스템_v1.4.md) 인용으로 정당화 + 사용자 검토 게이트 명시. (c)(d) WBS 방법론 부록으로 분리하여 "SRS 외 보조 도구" 명시 |
+| 권장 조치 (v1.2) | (a)(b) [SRS NFR-COS-003 (≤0.5 FTE 평상 운영) + PDD-04 §17.5.4 (각 Must 4 PD 추정)](../2.SRS/SRS-001_Production_Scheduling_System_v1.4.md) 인용으로 정당화 + 사용자 검토 게이트 명시. (c)(d) WBS 방법론 부록으로 분리하여 "SRS 외 보조 도구" 명시 |
 | 검증 | v1.2 §2.4에 정당화 출처 + 사용자 검토 필요 명시 |
 
 ### REV-D-005 — AC 텍스트 본문 미포함 (REQ ID만 참조) [C3, Medium]
@@ -109,7 +109,7 @@
 |---|---|
 | 위치 | WBS v1.1 §5 Story 표 |
 | 발견 | SRS §4.1.6은 ISO/IEC/IEEE 29148:2018 Annex C에 따른 검증 방법 8종(Inspection / Analysis / Demonstration / Unit·Integration·Load·Soak·UAT) 카탈로그를 제공. WBS는 Task에 검증 방법을 매핑 안 함 |
-| SRS 출처 | [SRS v1.4 §4.1.6 라인 641~728](../2.SRS/SRS-001_공정스케줄링시스템_v1.4.md) |
+| SRS 출처 | [SRS v1.4 §4.1.6 라인 641~728](../2.SRS/SRS-001_Production_Scheduling_System_v1.4.md) |
 | 영향 | DoD에 "단위 테스트 ≥80%"만 있고, Story별로 어떤 검증 카테고리가 요구되는지 불명확 |
 | 권장 조치 (v1.2) | §11 추적성 매트릭스에 "검증 방법" 열 추가, SRS §4.1.6 카탈로그 인용 |
 | 검증 | v1.2 §11 각 REQ 행에 1차/2차 검증 방법 명시 |
@@ -207,8 +207,8 @@
 | 분류 | 문서 |
 |------|------|
 | 검토 대상 | [TASK-001 WBS v1.1](TASK-001_WBS_v1.1.md) |
-| 원천 SRS | [SRS v1.4](../2.SRS/SRS-001_공정스케줄링시스템_v1.4.md) (75 REQ-FUNC + 60 REQ-NF + 14 SRS-RSK) |
-| 원천 PDD | [PDD-04 v1.5](../1.PDD/4.PDD_master_integrated_Opus.md) |
+| 원천 SRS | [SRS v1.4](../2.SRS/SRS-001_Production_Scheduling_System_v1.4.md) (75 REQ-FUNC + 60 REQ-NF + 14 SRS-RSK) |
+| 원천 PDD | [PDD-04 v1.5](../1.PDD/4.PDD_master_integrated_Opus_final.md) |
 | 원천 SAD | [SAD v1.1](../3.SAD/SAD-001_공정스케줄링시스템_v1.0.md) (in-place v1.1) |
 | 표준 | ISO/IEC/IEEE 29148:2018 §6.4 Requirements verification |
 | 표준 | IEEE 1028-2008 Software Reviews and Audits |
