@@ -208,8 +208,8 @@
 |------|------|
 | 검토 대상 | [TASK-001 WBS v1.1](TASK-001_WBS_v1.1.md) |
 | 원천 SRS | [SRS v1.4](../2.SRS/SRS-001_Production_Scheduling_System_v1.4.md) (75 REQ-FUNC + 60 REQ-NF + 14 SRS-RSK) |
-| 원천 PDD | [PDD-04 v1.5](../1.PDD/4.PDD_master_integrated_Opus_final.md) |
-| 원천 SAD | [SAD v1.1](../3.SAD/SAD-001_공정스케줄링시스템_v1.0.md) (in-place v1.1) |
+| 원천 PDD | [PDD-04 v1.6](../1.PDD/4.PDD_master_integrated_Opus_final.md) |
+| 원천 SAD | [SAD v1.1](../3.SAD/SAD-001_Production_Scheduling_System_v1.0.md) (in-place v1.1) |
 | 표준 | ISO/IEC/IEEE 29148:2018 §6.4 Requirements verification |
 | 표준 | IEEE 1028-2008 Software Reviews and Audits |
 | 방법론 | PMBOK 7th Edition §5.3 Scope Validation |

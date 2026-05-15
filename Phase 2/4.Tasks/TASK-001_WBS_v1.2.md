@@ -6,9 +6,9 @@
 
 시스템 명: **사내 공정 스케줄링 시스템 (Internal Production Scheduling System)**
 원천 문서:
-- [REF-PDD] `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.5 (PDD+PRD 통합)
+- [REF-PDD] `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.6 (PDD+PRD 통합)
 - [REF-SRS] `Phase 2/2.SRS/SRS-001_Production_Scheduling_System_v1.4.md` (요구사항 75 REQ-FUNC + 60 REQ-NF + 14 SRS-RSK)
-- [REF-SAD] `Phase 2/3.SAD/SAD-001_공정스케줄링시스템_v1.0.md` v1.1 (아키텍처 + ADR-008~017)
+- [REF-SAD] `Phase 2/3.SAD/SAD-001_Production_Scheduling_System_v1.0.md` v1.1 (아키텍처 + ADR-008~017)
 - [REF-PDD-02] `Phase 2/1.PDD/2.process_vulcanization_scheduling_Opus.md` v1.1 (성형 — BR-V07 재정의 + BR-V12~17)
 - [REF-PDD-03] `Phase 2/1.PDD/3.process_extrusion_scheduling_Opus.md` v1.1 (압출 — BR-E12 cross-reference)
 - [REF-REVIEW] `Phase 2/4.Tasks/TASK-002_WBS_Review_Report_v1.0.md` (v1.1 결함 10건 식별 + v1.2 보강 계획)
@@ -49,9 +49,9 @@
 
 | ID | 문서 |
 |----|------|
-| REF-PDD | `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.5 |
+| REF-PDD | `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.6 |
 | REF-SRS | `Phase 2/2.SRS/SRS-001_Production_Scheduling_System_v1.4.md` |
-| REF-SAD | `Phase 2/3.SAD/SAD-001_공정스케줄링시스템_v1.0.md` v1.1 |
+| REF-SAD | `Phase 2/3.SAD/SAD-001_Production_Scheduling_System_v1.0.md` v1.1 |
 | REF-PDD-01 | `Phase 2/1.PDD/1.process_order_consolidation_Opus.md` |
 | REF-PDD-02 | `Phase 2/1.PDD/2.process_vulcanization_scheduling_Opus.md` v1.1 |
 | REF-PDD-03 | `Phase 2/1.PDD/3.process_extrusion_scheduling_Opus.md` v1.1 |
@@ -1291,9 +1291,9 @@ python3 link_dependencies.py --issues-map mapping.json
 
 | 분류 | 문서 |
 |------|------|
-| 원천 PDD | REF-PDD `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.5 |
+| 원천 PDD | REF-PDD `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.6 |
 | 원천 SRS | REF-SRS `Phase 2/2.SRS/SRS-001_Production_Scheduling_System_v1.4.md` |
-| 원천 SAD | REF-SAD `Phase 2/3.SAD/SAD-001_공정스케줄링시스템_v1.0.md` v1.1 |
+| 원천 SAD | REF-SAD `Phase 2/3.SAD/SAD-001_Production_Scheduling_System_v1.0.md` v1.1 |
 | 상세 PDD-02 | `Phase 2/1.PDD/2.process_vulcanization_scheduling_Opus.md` v1.1 |
 | 상세 PDD-03 | `Phase 2/1.PDD/3.process_extrusion_scheduling_Opus.md` v1.1 |
 | 표준 | PMBOK 7th Edition — WBS guidance |

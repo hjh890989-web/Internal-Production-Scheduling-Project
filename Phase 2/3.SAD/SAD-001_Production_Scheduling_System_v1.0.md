@@ -7,7 +7,7 @@
 시스템 명: **사내 공정 스케줄링 시스템 (Internal Production Scheduling System)**
 원천 문서:
 - [REF-SRS] `Phase 2/2.SRS/SRS-001_Production_Scheduling_System_v1.4.md` (요구사항)
-- [REF-PRD] `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.5 (PDD+PRD)
+- [REF-PRD] `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.6 (PDD+PRD)
 
 문서 상태: **Draft v1.1 (사용자 검토 대기)** — v1.0의 기술 스택 선택은 유지. v1.1 변경: SRS v1.4의 VC 제약 7건(BR-V07 재정의 + BR-V12~17) 반영을 위한 데이터 스키마·컴포넌트 책임·ADR-016/017 신규 추가.
 
@@ -54,7 +54,7 @@ SRS §1.3을 상속하며, 본 SAD에서 추가되는 용어:
 | ID | 문서 |
 |----|------|
 | REF-SRS | `Phase 2/2.SRS/SRS-001_Production_Scheduling_System_v1.4.md` |
-| REF-PRD | `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.5 |
+| REF-PRD | `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.6 |
 | REF-PDD-1,2,3 | `Phase 2/1.PDD/1·2·3.process_*_Opus.md` |
 | REF-CSF | `Phase 1/3.Analysis/2.critical_success_factors.md` |
 | ARC42 | arc42 v8 — https://arc42.org |
@@ -1070,6 +1070,7 @@ flowchart TD
 |-----|-----|------|------|
 | 1.0 | 2026-05-14 | 시니어 아키텍트 | 초안 발행 — 기술 스택 제안(ADR-008~015), 컨테이너·컴포넌트·배포 다이어그램, NFR 실현 매핑 |
 | 1.1 | 2026-05-15 | 시니어 아키텍트 | **SRS v1.4 VC 제약 7건 동기 — in-place 갱신** (별도 v1.1 파일 생성하지 않음, 본 파일 헤더만 1.1로 표기). REF-SRS·REF-PRD v1.3 → v1.4. **§6.1.1a 신규**: `master.VC_CONSTRAINT.lp_left_setting`/`lp_right_setting` 컬럼 추가, `master.VC_HOSE_RULE`/`master.PRODUCT_PRIORITY`/`master.KD_ORDER` 테이블 신규. **§6.1.2 인덱스**: `VC_SCHEDULE` 당일 락 UNIQUE + 동시 점유 카운트 인덱스 추가. **§6.2 캐싱**: VC_HOSE_RULE·v_product_with_spec·PRODUCT_PRIORITY·KD_ORDER 캐시 정책. **§4 컴포넌트**: RuleEngineService(L/R·machine pin·hose-angle cap·spec-7·intra-day lock) + OptimizerService(당일 락·capa 분기) 책임 갱신. **§10 ADR 신규 2건**: ADR-016 (당일 락 RuleEngine + DB UNIQUE 이중 강제), ADR-017 (성형↔압출 cross-master VIEW + Caffeine). **§10.1 의사결정 그래프** Q9·Q10 추가. **§11 리스크 신규 4건**: SAD-RSK-009 (마이그레이션 위반 잔존), SAD-RSK-010 (마스터 K/L·B열 무결성), SAD-RSK-011 (cross-join 캐시 무효화 누락), SAD-RSK-012 (수주통합 지연 → BR-V12·V13 활성 공백). **§12 추적성 7행 추가**. PDD-02 v1.1 + PDD-04 v1.4 + SRS v1.4와 동기화 |
+| 1.1p1 | 2026-05-15 | (작성자) | **파일명 영문 통일 (rename only, 콘텐츠 변경 없음)** — 한글 파일명 `SAD-001_공정스케줄링시스템_v1.0.md` → 영문 `SAD-001_Production_Scheduling_System_v1.0.md` (사용자 정책: 영문 파일명 통일, SRS·PDD 패턴 일치). 콘텐츠는 v1.1과 100% 동일. git rename detection 통과 — 모든 cross-reference (WBS·Review Report·PDD-03) 동기 갱신 |
 
 ---
 
@@ -1078,7 +1079,7 @@ flowchart TD
 | 분류 | 문서 |
 |-----|------|
 | 원천 요구 | REF-SRS `Phase 2/2.SRS/SRS-001_Production_Scheduling_System_v1.4.md` |
-| 원천 비즈니스 | REF-PRD `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.5 |
+| 원천 비즈니스 | REF-PRD `Phase 2/1.PDD/4.PDD_master_integrated_Opus_final.md` v1.6 |
 | 표준 | ISO/IEC/IEEE 42010:2011 (Architecture description) |
 | 표준 | arc42 v8 — https://arc42.org |
 | 모델 | C4 Model — https://c4model.com |
