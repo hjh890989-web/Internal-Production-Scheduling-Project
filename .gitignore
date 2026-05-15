@@ -1,0 +1,50 @@
+# =============================================================================
+# Internal Production Scheduling Project — .gitignore
+# =============================================================================
+
+# -------- 대화기록 (민감정보 보호 — 공개 저장소 commit 절대 금지) --------
+# scripts/transcript_to_markdown.py 출력 위치
+0.Pprompt/
+대화기록_*.md
+대화기록_*_*.md
+
+# -------- Excel / Office 임시 lock 파일 --------
+~$*.xlsx
+~$*.xls
+~$*.docx
+~$*.doc
+~$*.pptx
+
+# -------- OS 시스템 파일 --------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+.Spotlight-V100
+.Trashes
+
+# -------- IDE / 에디터 --------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# -------- Python --------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+env/
+.env
+
+# -------- 임시·캐시·로그 --------
+*.log
+*.tmp
+*.bak
+.cache/
