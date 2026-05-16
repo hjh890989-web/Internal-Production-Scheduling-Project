@@ -48,3 +48,5 @@ env/
 *.tmp
 *.bak
 .cache/
+scripts/github-sync/0?-output.log
+scripts/github-sync/*.log
