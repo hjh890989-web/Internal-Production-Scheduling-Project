@@ -1,0 +1,14 @@
+---
+name: 101-build-and-env-setup
+description: Defines the project build steps, environment variable setup for development and deployment.
+---
+Globs: /**/*
+
+# BUILDING PROCESS
+- Depends on selected languages/frameworks.
+# ENV VARIABLES FOR DEVELOPMENT
+- Add `.env` file with necessary dev variables.
+# ENV VARIABLES FOR DEPLOYMENT
+- Specify `.env` or configuration files needed for deployment.
+# CURRENT FILE STRUCTURE
+tree -L 4 -a -I 'node_modules|.git|__pycache__|.DS_Store|.pytest_cache|.vscode'
