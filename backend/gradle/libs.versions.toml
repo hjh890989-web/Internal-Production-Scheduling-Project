@@ -1,0 +1,71 @@
+# =============================================================================
+# Version Catalog — Internal Production Scheduling Project
+# =============================================================================
+# 핵심 stack (2026-05 시점 stable):
+#   - Java 21 LTS
+#   - Gradle 8.14.5
+#   - Spring Boot 3.5.14
+#   - Spring Modulith 1.4.11 (SB 3.5.14 호환 명시)
+#
+# Spring Boot BOM이 대부분 라이브러리 버전 관리 (PostgreSQL, Hibernate, Jackson,
+# Testcontainers, Springdoc 등). 본 catalog는 BOM이 다루지 않는 부수 의존성만 pin.
+# =============================================================================
+
+[versions]
+java                = "21"
+spring-boot         = "3.5.14"
+spring-modulith     = "1.4.11"
+spring-dep-mgmt     = "1.1.6"
+apache-poi          = "5.3.0"
+caffeine            = "3.1.8"
+testcontainers      = "1.20.3"
+archunit            = "1.3.0"
+springdoc           = "2.6.0"
+flyway              = "10.20.1"
+problem-spring-web  = "0.29.1"
+
+[libraries]
+# Spring Boot starters
+spring-boot-starter-web        = { module = "org.springframework.boot:spring-boot-starter-web" }
+spring-boot-starter-data-jpa   = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
+spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
+spring-boot-starter-security   = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-boot-starter-websocket  = { module = "org.springframework.boot:spring-boot-starter-websocket" }
+spring-boot-starter-actuator   = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+spring-boot-starter-test       = { module = "org.springframework.boot:spring-boot-starter-test" }
+
+# Modulith
+spring-modulith-starter-core   = { module = "org.springframework.modulith:spring-modulith-starter-core" }
+spring-modulith-starter-jpa    = { module = "org.springframework.modulith:spring-modulith-starter-jpa" }
+spring-modulith-events-api     = { module = "org.springframework.modulith:spring-modulith-events-api" }
+spring-modulith-events-jpa     = { module = "org.springframework.modulith:spring-modulith-events-jpa" }
+spring-modulith-test           = { module = "org.springframework.modulith:spring-modulith-test" }
+
+# Data
+flyway-core                    = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-postgresql              = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+postgresql                     = { module = "org.postgresql:postgresql" }
+caffeine                       = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+
+# Excel
+apache-poi                     = { module = "org.apache.poi:poi-ooxml", version.ref = "apache-poi" }
+
+# API Docs
+springdoc-openapi              = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+
+# Test
+testcontainers                 = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+testcontainers-postgresql      = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+testcontainers-junit           = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+archunit-junit5                = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
+
+[bundles]
+spring-web      = ["spring-boot-starter-web", "spring-boot-starter-validation", "spring-boot-starter-actuator"]
+spring-data     = ["spring-boot-starter-data-jpa", "spring-boot-starter-data-redis", "flyway-core", "flyway-postgresql", "postgresql"]
+test-core       = ["spring-boot-starter-test", "testcontainers", "testcontainers-postgresql", "testcontainers-junit"]
+test-arch       = ["archunit-junit5", "spring-modulith-test"]
+
+[plugins]
+spring-boot         = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-deps         = { id = "io.spring.dependency-management", version.ref = "spring-dep-mgmt" }

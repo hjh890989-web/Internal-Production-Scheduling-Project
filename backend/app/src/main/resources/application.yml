@@ -1,0 +1,87 @@
+# =============================================================================
+# application.yml — 메인 entrypoint 설정
+# =============================================================================
+# 본 Task (TK-00-2-1) 단계 — Datasource·Redis·Flyway 설정은 모두 환경 변수로 외부화.
+# 환경 변수 미설정 시 부팅 가능하도록 datasource/Redis는 'optional' 처리 (Sprint 1+ Task로 활성).
+# =============================================================================
+
+spring:
+  application:
+    name: scheduling
+
+  # JPA/SQL/Redis auto-config — Sprint 1 PG/Redis Task 전에는 비활성 (필요 시 profile로 활성화)
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc.time_zone: Asia/Seoul     # BR-X04
+
+server:
+  port: 8080
+  forward-headers-strategy: framework   # NGINX X-Forwarded-Proto 인식
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.scheduling: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+
+# =============================================================================
+# Profile: 'with-infra' — Sprint 1 PG/Redis 연동 후 활성
+# =============================================================================
+---
+spring:
+  config:
+    activate:
+      on-profile: with-infra
+
+  autoconfigure:
+    exclude: []     # auto-config 복원
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:scheduling}
+    username: ${POSTGRES_USER:app_user}
+    password: ${POSTGRES_PASSWORD:}
+    hikari:
+      maximum-pool-size: 20
+      connection-init-sql: "SET TIME ZONE 'Asia/Seoul'"
+
+  jpa:
+    hibernate:
+      ddl-auto: validate     # Flyway가 스키마 관리
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+  flyway:
+    enabled: true
+    schemas: app,master,audit
+    locations: classpath:db/migration

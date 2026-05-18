@@ -30,6 +30,16 @@ Desktop.ini
 *.swo
 *~
 
+# -------- Java / Gradle --------
+.gradle/
+**/build/
+!**/src/**/build/
+out/
+bin/
+*.class
+hs_err_pid*
+replay_pid*
+
 # -------- Python --------
 __pycache__/
 *.py[cod]
