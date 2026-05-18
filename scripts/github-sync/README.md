@@ -74,3 +74,51 @@ gh auth status    # 확인
 3. **NFR Epics** — Table, filter `label:type:nfr`
 4. **Timeline (Roadmap)** — Roadmap, Start/Target, group by Sprint
 5. **v1.4 신규** — Table, filter `label:v1.4-new` ⭐
+
+## RCPM 일자 자동 계산 (11)
+
+`09-fill-date-fields.ps1` 은 Sprint 단위 동일 일자만 채워서 Roadmap 겹침 + cross-owner 의존성·자원 한계 모두 무시.
+→ Resource-Constrained Critical Path Method 기반 Task별 일자 계산 + Project 일자 필드 갱신.
+
+```powershell
+# Python 3.10+, gh CLI 인증 (read:project,project scope 필요)
+python scripts\github-sync\11-fill-task-level-dates.py --dry-run                       # 계산만, GitHub 미연동
+python scripts\github-sync\11-fill-task-level-dates.py --report task_dates_report.md   # 마크다운 리포트
+python scripts\github-sync\11-fill-task-level-dates.py                                 # 실제 update
+```
+
+알고리즘:
+1. **파싱** — `Phase 2/4.Tasks/Tasks/EP-*/ST-*/TK-*.md` 320 Task 전체:
+   - `sprint:`·`epic:`·`story:`·`owner:` 라벨, `**추정**: X.X PD`
+   - `**연관**: 선행 [TK-…](url)` / `**선행**: [TK-…](url)` 4종 표기 모두 처리 → predecessors 집합
+2. **DAG 구축** — 존재하지 않는 ID·자기 자신 drop. cycle 감지 시 경고 + Sprint 순 강제 추가.
+3. **Topological sort** — Kahn's algorithm, tie-break = Sprint 순서 → Epic → Task ID
+4. **Forward pass** (RCPM):
+   ```
+   earliest_start = max(
+       모든 predecessor.end + 1 영업일,
+       owner_busy_until[primary_owner],
+       sprint_start
+   )
+   end = add_business_days(start, ceil(PD) - 1)
+   owner_busy_until[primary_owner] = end + 1 영업일
+   ```
+   ※ multi-owner (`backend+qa`) 는 첫 owner 만 자원 점유 (단순화 가정).
+5. **Backward pass** → slack=0 Task = Critical Path → 리포트 ⭐ 표시
+6. **GitHub Project update** — 두 필드 쌍 모두 (Roadmap이 어느 필드 쓰든 동작):
+   - `Start date` / `Target date` — Project v2 표준 (Roadmap 기본)
+   - `Start` / `Target`           — 기존 커스텀 (`09-*` 산출물 호환)
+
+샘플 결과 (320 Task):
+- Root (선행 없음) 21건 → Sprint 시작일에 owner별 병렬 출발
+- 선행 보유 299건 → 의존성 + owner 자원 따라 sequential
+- Critical Path 23건 → Beta GO blocking chain (대부분 S5 NFR + E2E 검증)
+
+⚠ **알려진 한계**:
+- Multi-owner 첫 owner 점유 가정 → 보조 owner 자원 낭비 가능
+- 같은 owner role 의 실제 인력 N명 ≠ 1 (현재 단일 슬롯 모델) — N병렬 지원하려면 owner_busy 큐 확장
+- 1주 standup 기반 보정 권장 (DAG 정밀도가 ±1일 수준이라 실행 일정은 매주 갱신)
+- DAG cycle 발견 시 경고 — Task 파일의 선행/후행 cross-reference 점검 필요
+
+⚠ GraphQL rate limit: 5000 points/시간. 320 Task × 2 쌍 = ~1280 호출 → 여유 충분하지만,
+   하루 여러 번 반복 실행은 피할 것 (item-list 등 부가 호출 포함 시 한도 도달 가능).
