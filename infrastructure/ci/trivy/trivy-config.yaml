@@ -1,0 +1,33 @@
+# =============================================================================
+# Trivy config — TK-32-2-1 (CI 보안 게이트)
+# =============================================================================
+# Jenkins agent 가 본 설정으로 `trivy image / fs / config` 호출.
+# HIGH/CRITICAL 발견 시 exit-code=1 → Jenkinsfile 가 빌드 FAILED 처리.
+# ignore-unfixed=true → 패치 없는 CVE 는 보고만 (실용성).
+# =============================================================================
+
+severity:
+  - HIGH
+  - CRITICAL
+
+exit-code: 1
+ignore-unfixed: true
+no-progress: true
+format: json
+
+scan:
+  scanners:
+    - vuln
+    - misconfig
+    - secret
+
+vulnerability:
+  type:
+    - os
+    - library
+
+# 캐시는 Jenkins agent 의 workspace 안 — 동일 build agent 에서 빌드간 재사용 OK
+cache:
+  dir: .trivy-cache
+
+# JSON 출력은 Jenkinsfile 의 trivyScan 함수가 readJSON 으로 파싱 → Slack 알림.
