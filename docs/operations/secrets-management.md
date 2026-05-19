@@ -57,10 +57,18 @@ git check-ignore -v infrastructure/.env.prod.example
 - **분기 1회 rotation** (Q1·Q2·Q3·Q4 — IT 인프라팀 + DevOps)
 - 절차: vault 갱신 → `docker compose restart postgres redis backend-*` → 검증
 
-### 3.2 Keycloak admin·DB 비밀번호
-- `KEYCLOAK_ADMIN_PASSWORD`, `KEYCLOAK_DB_PASSWORD`
-- 분기 1회 rotation + emergency 계정 별도 (idp-failover.md)
+### 3.2 Keycloak admin·DB 비밀번호 + 일반 사용자 PIN (NFR-SEC-007 v1.5)
+- `KEYCLOAK_ADMIN_PASSWORD`, `KEYCLOAK_DB_PASSWORD` (관리자) — 분기 1회 rotation
+- 일반 사용자 PIN — 사용자 자율 변경 권장 (분기 캠페인). Login ID = 사번 8자리.
+- emergency 계정 (`99000001`~`99000003`) — 봉인 봉투 (idp-failover.md)
 - 절차: Keycloak Admin REST API → vault 갱신 → `docker compose restart keycloak`
+
+#### PIN 정책 운영 (NFR-SEC-007 §pin-policy — 2026-05-19 v1.5)
+- **사용자 ID**: 사번 (숫자 8자리) — IT 부서 발급. 이메일 로그인 불허.
+- **PIN**: 숫자 4자리 (`^[0-9]{4}$`). 5회 실패 → 10분 자동 잠금.
+- **잠금 후 즉시 해제 필요 시**: IT lead 가 Keycloak Admin Console → Users → Unlock.
+- **보안 교육 (분기)**: (a) PIN 추측 회피 (1234·0000 등 금지 권장 — 정책 강제 아님),
+  (b) 어깨너머 보기 차단 (블록 입력기 사용), (c) PIN 공유 금지 (1인 1계정 audit).
 
 ### 3.3 Jenkins admin · Harbor · Sonar token
 - `JENKINS_ADMIN_PASSWORD`, `HARBOR_PASSWORD`, `SONARQUBE_TOKEN`

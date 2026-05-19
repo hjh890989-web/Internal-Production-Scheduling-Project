@@ -37,7 +37,7 @@ REQ-NF-OPS-003 (60초 이내) + REQ-NF-OPS-004 (에스컬레이션) 정합.
 3. Bot Token 발급 (`xoxb-...`) — Jenkins credentials 등록 (`slack-bot-token`)
 4. 각 채널 초대: `/invite @scheduling-bot`
 
-### Token Rotation (NFR-SEC-007)
+### Token Rotation (NFR-SEC-005 secrets 정책)
 - 분기 1회 (1월·4월·7월·10월) Bot Token 재발급
 - 사내 vault 또는 Jenkins CASC `${SLACK_BOT_TOKEN}` 갱신
 - 갱신 후 첫 알림 도달 확인 → 사고 시 IT lead 즉시 호출

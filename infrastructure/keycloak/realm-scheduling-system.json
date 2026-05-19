@@ -4,22 +4,22 @@
   "enabled": true,
   "sslRequired": "external",
   "registrationAllowed": false,
-  "registrationEmailAsUsername": true,
+  "registrationEmailAsUsername": false,
   "rememberMe": true,
   "verifyEmail": false,
-  "loginWithEmailAllowed": true,
+  "loginWithEmailAllowed": false,
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "bruteForceProtected": true,
   "permanentLockout": false,
-  "maxFailureWaitSeconds": 900,
+  "maxFailureWaitSeconds": 600,
   "minimumQuickLoginWaitSeconds": 60,
   "waitIncrementSeconds": 60,
   "quickLoginCheckMilliSeconds": 1000,
   "maxDeltaTimeSeconds": 43200,
   "failureFactor": 5,
-  "passwordPolicy": "length(12) and digits(1) and upperCase(1) and specialChars(1) and notUsername(undefined)",
+  "passwordPolicy": "length(4) and regexPattern(^[0-9]{4}$) and notUsername(undefined)",
   "accessTokenLifespan": 1800,
   "ssoSessionIdleTimeout": 28800,
   "ssoSessionMaxLifespan": 36000,
@@ -144,48 +144,45 @@
 
   "users": [
     {
-      "username": "emergency-planner-1",
-      "email": "emergency-planner-1@scheduling.internal",
+      "username": "99000001",
       "firstName": "Emergency",
       "lastName": "Planner-1",
       "enabled": true,
-      "emailVerified": true,
+      "emailVerified": false,
       "credentials": [
         {
           "type": "password",
-          "value": "Emergency_Plan1_#2026",
+          "value": "9001",
           "temporary": true
         }
       ],
       "realmRoles": ["PLANNER"]
     },
     {
-      "username": "emergency-planner-2",
-      "email": "emergency-planner-2@scheduling.internal",
+      "username": "99000002",
       "firstName": "Emergency",
       "lastName": "Planner-2",
       "enabled": true,
-      "emailVerified": true,
+      "emailVerified": false,
       "credentials": [
         {
           "type": "password",
-          "value": "Emergency_Plan2_#2026",
+          "value": "9002",
           "temporary": true
         }
       ],
       "realmRoles": ["PLANNER"]
     },
     {
-      "username": "emergency-itops",
-      "email": "emergency-itops@scheduling.internal",
+      "username": "99000003",
       "firstName": "Emergency",
       "lastName": "IT-Ops",
       "enabled": true,
-      "emailVerified": true,
+      "emailVerified": false,
       "credentials": [
         {
           "type": "password",
-          "value": "Emergency_ITOps_#2026",
+          "value": "9003",
           "temporary": true
         }
       ],

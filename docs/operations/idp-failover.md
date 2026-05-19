@@ -46,9 +46,9 @@ DEV/PROD realm `scheduling-system` 에 자동 import (`realm-scheduling-system.j
 
 | Username | Role | 용도 |
 |---|---|---|
-| `emergency-planner-1` | PLANNER | 생산계획팀 1차 대응 |
-| `emergency-planner-2` | PLANNER | 생산계획팀 2차 대응 |
-| `emergency-itops` | IT_OPS | IT 운영 직접 복구 |
+| `99000001` | PLANNER | 생산계획팀 1차 대응 |
+| `99000002` | PLANNER | 생산계획팀 2차 대응 |
+| `99000003` | IT_OPS | IT 운영 직접 복구 |
 
 **초기 비밀번호** (DEV — `realm-scheduling-system.json` 명시):
 - `Emergency_Plan1_#2026`
@@ -69,7 +69,7 @@ DEV/PROD realm `scheduling-system` 에 자동 import (`realm-scheduling-system.j
 # 1. admin token (master realm)
 $tok = ...
 
-# 2. emergency-planner-1 비밀번호 갱신 (새 봉인 봉투용)
+# 2. 99000001 비밀번호 갱신 (새 봉인 봉투용)
 $NEW_PWD = "Q2_2026_Planner1_$(Get-Random -Maximum 99999)#"
 $body = @{
     type = "password"; value = $NEW_PWD; temporary = $true
@@ -88,8 +88,8 @@ Invoke-WebRequest -Uri "http://localhost:8180/admin/realms/scheduling-system/use
 1. **사전 공지**: 드릴 시간 IT 부서 + DevOps + PM 에게 공유 (실 사용자 영향 회피)
 2. **사내 IdP 응답 차단**: 사내 firewall 일시 차단 또는 Keycloak admin 에서 corporate-saml.enabled=false
 3. **로그인 검증**:
-   - emergency-planner-1 로 로그인 → PLANNER role 토큰 발급 확인
-   - emergency-itops 로 로그인 → IT_OPS role 토큰 발급 확인
+   - 99000001 로 로그인 → PLANNER role 토큰 발급 확인
+   - 99000003 로 로그인 → IT_OPS role 토큰 발급 확인
 4. **복구**: IdP 차단 해제 + Keycloak corporate-saml.enabled=true
 5. **결과 기록**: 결과 + 발견 이슈 회의록 + Slack #operations 공유
 
@@ -100,7 +100,7 @@ Invoke-WebRequest -Uri "http://localhost:8180/admin/realms/scheduling-system/use
 emergency 계정 로그인 시 자동 알림 (Sprint 1+ — EP-44 ST-44-3 Slack webhook):
 
 ```
-Keycloak event: USER_LOGIN  user=emergency-planner-1  realm=scheduling-system
+Keycloak event: USER_LOGIN  user=99000001  realm=scheduling-system
   → Slack #security-alerts 채널 자동 알림
   → "Emergency 계정 사용 — IT lead 결재 확인 필요"
 ```
@@ -116,7 +116,7 @@ Keycloak event: USER_LOGIN  user=emergency-planner-1  realm=scheduling-system
 | 증상 | 원인 | 대처 |
 |---|---|---|
 | Fallback 화면 안 보임 (IdP 만 표시) | identity-provider-redirector requirement=REQUIRED | Admin Console → Authentication → browser flow → identity-provider-redirector → ALTERNATIVE 변경 |
-| emergency 계정 로그인 거부 (Account is disabled) | enabled=false 또는 lockout | Admin Console → Users → emergency-planner-1 → Enable + Reset failures |
+| emergency 계정 로그인 거부 (Account is disabled) | enabled=false 또는 lockout | Admin Console → Users → 99000001 → Enable + Reset failures |
 | 비밀번호 변경 강제 안 됨 | credentials.temporary=false | Reset password 시 Temporary 체크 |
 | 사내 IdP 복구 후에도 fallback 화면 표시 | Keycloak corporate-saml.enabled=false 상태 | Admin Console → Identity Providers → Enable |
 | brute-force lockout 5회 후 잠금 | 실패 5회 (TK-30-1-1 정책) | 60초 대기 또는 Admin Console → Sessions → Reset user |
@@ -131,18 +131,19 @@ Keycloak event: USER_LOGIN  user=emergency-planner-1  realm=scheduling-system
 | Fallback 발동 알림 | 로그만 | Slack #security-alerts 자동 (Sprint 1+) |
 | 드릴 주기 | 임의 | 분기 1회 의무 |
 | 초기 비밀번호 temporary | true | true |
-| 패스워드 정책 | 12자+ 3종 (NFR-SEC-007) | 동일 |
+| 패스워드 정책 | 숫자 4자리 PIN + 5회/10분 잠금 (NFR-SEC-007 v1.5, 2026-05-19~) | 동일 |
+| Login ID | 사번 (숫자 8자리). emergency 계정은 `99000001~99000003` 예약 | 동일 |
 
 ---
 
 ## 9. 검증 (DEV)
 
 ```powershell
-# 1. emergency-planner-1 로그인 시도 (admin token 발급)
+# 1. 99000001 로그인 시도 (admin token 발급)
 $body = @{
     grant_type = 'password'; client_id = 'admin-cli'
-    username = 'emergency-planner-1'
-    password = 'Emergency_Plan1_#2026'
+    username = '99000001'
+    password = '9001'   # NFR-SEC-007 v1.5 — 4자리 PIN (변경 후 새 PIN)
 } 
 $r = Invoke-WebRequest -Uri 'http://localhost:8180/realms/scheduling-system/protocol/openid-connect/token' `
      -Method POST -Body $body -UseBasicParsing
@@ -158,7 +159,7 @@ DEV 검증 시 `Account is not fully set up` 응답 받을 수 있음 — `tempo
 - [ ] emergency 계정 3개 사전 생성 + temporary 비밀번호 봉인
 - [ ] Authentication Flow `browser` — identity-provider-redirector ALTERNATIVE 확인
 - [ ] IdP 차단 시뮬레이션 → fallback ID/PW 화면 자동 표시 확인
-- [ ] emergency-planner-1 로 로그인 → PLANNER role 토큰 정상 발급
+- [ ] 99000001 로 로그인 → PLANNER role 토큰 정상 발급
 - [ ] 비밀번호 변경 후 정상 로그인 + audit 로그 기록
 - [ ] IT 부서 sign-off (장애 대응 절차 검토)
 - [ ] 분기 드릴 일정 등록
