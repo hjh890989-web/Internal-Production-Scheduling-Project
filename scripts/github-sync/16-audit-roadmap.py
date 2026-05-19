@@ -60,7 +60,10 @@ TASK_ID_TK = re.compile(r'\*\*Task ID\*\*[:：]\s*(TK-[A-Z0-9]+(?:-\d+)+)')
 
 # WBS Epic 추출: ### EP-XX 제목 + Sprint
 WBS_EPIC_RE = re.compile(r'^###\s+(EP-[A-Z0-9]+)\s+(.+?)$', re.MULTILINE)
-WBS_SPRINT_RE = re.compile(r'\*\*Sprint\*\*:\s*(S\d)')
+# WBS Sprint 라인 전체 (\*\*Sprint\*\*:.*) 에서 모든 S\d 추출 — cross-cutting 표기 처리
+# 예) "S0~S1 분산", "S0(기반) + S2·S3·S4(WebSocket)·S5", "S2~S5"
+WBS_SPRINT_LINE_RE = re.compile(r'\*\*Sprint\*\*:\s*([^/\n]+)')
+WBS_SX_RE = re.compile(r'\bS(\d)\b')
 
 
 def parse_task_files() -> dict[str, dict]:
@@ -110,11 +113,14 @@ def parse_task_files() -> dict[str, dict]:
     return out
 
 
-def parse_wbs_epic_sprint() -> dict[str, str]:
-    """WBS v1.2 에서 Epic → Sprint 매핑 추출."""
+def parse_wbs_epic_sprint() -> dict[str, set[str]]:
+    """WBS v1.2 에서 Epic → Sprint 집합 매핑 (cross-cutting 다중 Sprint 표기 지원).
+    예) "S0~S5 분산" → {S0,S1,S2,S3,S4,S5}
+        "S0(기반) + S2·S3" → {S0,S2,S3}
+        "S0" → {S0}
+    """
     content = WBS_FILE.read_text(encoding='utf-8')
-    out: dict[str, str] = {}
-    # ### EP-XX ... 다음에 **Sprint**: SN
+    out: dict[str, set[str]] = {}
     lines = content.splitlines()
     current_epic = None
     for line in lines:
@@ -123,10 +129,18 @@ def parse_wbs_epic_sprint() -> dict[str, str]:
             current_epic = m.group(1)
             continue
         if current_epic:
-            sm = WBS_SPRINT_RE.search(line)
-            if sm:
-                out[current_epic] = sm.group(1)
-                current_epic = None
+            lm = WBS_SPRINT_LINE_RE.search(line)
+            if lm:
+                sprint_text = lm.group(1)
+                nums = WBS_SX_RE.findall(sprint_text)
+                if nums:
+                    # '~' 또는 '분산' 같은 범위 표기면 시작·끝 사이 모두 포함
+                    if '~' in sprint_text and len(nums) >= 2:
+                        start, end = int(nums[0]), int(nums[-1])
+                        out[current_epic] = {f'S{i}' for i in range(start, end+1)}
+                    else:
+                        out[current_epic] = {f'S{n}' for n in nums}
+                    current_epic = None
     return out
 
 
@@ -213,10 +227,10 @@ def main():
         ep = meta['epic']
         if not ep or ep not in wbs_epic_sprint:
             continue
-        wbs_sp = wbs_epic_sprint[ep]
+        wbs_sprints = wbs_epic_sprint[ep]    # set
         tk_sp = meta['sprint']
-        if tk_sp and tk_sp != wbs_sp:
-            mismatch.append((tk, ep, wbs_sp, tk_sp))
+        if tk_sp and tk_sp not in wbs_sprints:
+            mismatch.append((tk, ep, sorted(wbs_sprints), tk_sp))
     if mismatch:
         print(f"❌ 불일치 {len(mismatch)}건:")
         for tk, ep, wbs_sp, tk_sp in mismatch[:30]:

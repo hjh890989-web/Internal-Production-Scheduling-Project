@@ -570,7 +570,7 @@ flowchart LR
 
 ### EP-44 운영·관측성 NFR (Operations) — 7 NFR
 
-**Sprint**: S0~S2 인프라 + S4 분산 / **출처**: SRS §4.2.5 / **SP**: 12 / **선행**: EP-31
+**Sprint**: S0~S2 인프라 + S4 분산 + S5(ST-44-7 인프로덕트 설문) / **출처**: SRS §4.2.5 / **SP**: 12 / **선행**: EP-31
 
 | Story | 제목 | 핵심 Task | SP | AC 핵심 텍스트 | 검증 |
 |---|---|---|:---:|---|---|
@@ -1283,6 +1283,7 @@ python3 link_dependencies.py --issues-map mapping.json
 |----|-----|------|------|
 | 1.0 | 2026-05-15 | (작성자) | **초안 발행** — REF-PDD v1.4 §17.5 Sprint 1~5 + REF-SRS v1.4 75 REQ-FUNC + REF-SAD v1.1 ADR-008~017을 Epic·Story·Task 3단계로 분해. v1.4 신규 VC 7건(EP-21·EP-13) 반영. Deferred 항목 2건(EP-22·EP-23) 명시. 횡단 작업 4건(EP-30~33) 분리. Sprint 0(Phase 0 사전 준비) 신설 — 인프라·마스터 검증. (§14 합계 행에 산술 오류 및 EP-34 누락 — v1.1에서 정정) |
 | 1.1 | 2026-05-15 | (작성자) | **§14 추정 요약 합계 행 정정 (신규 파일, 콘텐츠 룰·SP 변경 없음)** — Phase 2 산출물 일괄 검토에서 발견된 산술 오류 수정. (1) §14 합계 Epic 수: **28 → 32** (E2E + EP-34 누락 분 + Deferred 가산 반영). (2) §14 횡단 행: **4 (EP-30~33) → 5 (EP-30~34)** — EP-34 횡단 공통 기능(CO Requirements) 누락 분 포함. (3) §14 Story 수: **64 → 68** (S2·S5 재집계). (4) REF-PDD `v1.4` → **`v1.5`** (PDD-04 Constituent PDDs 동기 정정 반영). 본문 §3~§10 Epic 정의·SP·Task는 모두 v1.0과 동일 — 본 개정은 metadata·요약 정합성만 처리 |
+| 1.2-patch1 | 2026-05-19 | Claude | **EP-44 Sprint 표기 정정 (in-place patch — 콘텐츠 룰 변경 없음)** — TK-44-7-1·-2 (분기 인프로덕트 설문, sprint:S5 라벨) 가 EP-44 헤더의 Sprint 표기 (`S0~S2 인프라 + S4 분산`) 에 누락되어 있어 `+ S5(ST-44-7 인프로덕트 설문)` 추가. 16-audit-roadmap.py 검출 결과 — Task 라벨이 진실, WBS Epic 헤더 표기만 보강. |
 | 1.2 | 2026-05-15 | (작성자) | **5개 기준 부합성 전면 보강 — TASK-002 검토 보고서 결함 10건 해소 (신규 파일)**. REF-REVIEW [TASK-002 v1.0](TASK-002_WBS_Review_Report_v1.0.md) 기반.<br>**(REV-D-001)** NFR 60건 분해 — Epic **EP-40~47** 신규 8개 (PER 8 + REL 6 + SEC 7 + USA 5 + OPS 7 + COM 5 + COS 3 + KPI 19). 30 Story, +76 SP.<br>**(REV-D-002)** SRS-RSK 14건 완화 Task 매핑 — §13.1 신규.<br>**(REV-D-003)** "포함" Story 6건 명시 Epic 신규 — **EP-VC15·EP-VC16·EP-EX11·EP-EX12·EP-EX13·EP-EX14** (+14 SP).<br>**(REV-D-004)** §2.4 인력·Velocity 가정 정당화 — SRS [REQ-NF-COS-003](../2.SRS/SRS-001_Production_Scheduling_System_v1.4.md) + PDD-04 §17.5.4 인용, **사용자 검토 게이트** 명시.<br>**(REV-D-005)** 모든 Story 표에 "AC 핵심 텍스트" 열 추가 — SRS 원문 인용.<br>**(REV-D-006)** §11.7 ISO/IEC/IEEE 29148:2018 Annex C 검증 방법 카탈로그 (I·A·D·T-U/T-I/T-L/T-S/T-UAT) 매핑.<br>**(REV-D-007)** **§19 GitHub Project Import 가이드 신규** — 라벨 정의·Milestone 정의·Issue Title 규칙·Issue Body 템플릿·gh CLI 스크립트 의사코드·Projects v2 View 정의·의존성 변환·자동화 후속.<br>**(REV-D-008)** §12.1 Critical Path 명시 — 8 Sprint 흐름, 120 SP, 84 PD.<br>**(REV-D-009)** §12.2 병렬 실행 그룹 + N-person 시나리오별 총 기간.<br>**(REV-D-010)** §14.2 인력 시나리오 A·B·C·D 비교 + Float/Slack 표기.<br>**전체 수치**: 32 → **46 Epic**, 68 → **104 Story**, ~190 → **~290 Task**, 185 → **275 SP** (Phase 1.0) + 10 SP Deferred = **285 SP 총**. **C1~C5 5개 기준 모두 충족** — Phase 3 진입 게이트 통과 |
 
 ---
