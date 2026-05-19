@@ -1,22 +1,26 @@
 # =============================================================================
-# Internal Production Scheduling — Docker Compose (Sprint 0 ST-00-1)
+# Internal Production Scheduling — Docker Compose (Sprint 0 ST-00-1 통합 완성)
 # =============================================================================
-# 서비스:
-#   postgres : PostgreSQL 16-alpine (TK-00-1-1) — app·audit·master 3 schema
-#   redis    : Redis 7-alpine        (TK-00-1-2) — 세션 + 캐시 + Pub/Sub
-#   nginx    : NGINX 1.25-alpine     (TK-00-1-3) — TLS termination + reverse proxy + WebSocket
+# 5 서비스 (TK-00-1-4 Sprint 0 DoD 항목 1):
+#   postgres : PostgreSQL 16-alpine        (TK-00-1-1) — app·audit·master 3 schema
+#   redis    : Redis 7-alpine              (TK-00-1-2) — 세션 + 캐시 + Pub/Sub
+#   backend  : Spring Boot 3.5.14 jar      (TK-00-2-1) — 7 모듈 합성 app
+#   frontend : node 빌드 + NGINX serve     (TK-00-3-1) — React SPA, dist→volume
+#   nginx    : NGINX 1.25-alpine           (TK-00-1-3) — TLS + reverse proxy + WS
 #
-# 통합 검증 (TK-00-1-4 — backend·frontend 추가):
-#   - backend  (Spring Boot 3.5.14 — ST-00-2 산출물, TK-00-1-4 에서 활성)
-#   - frontend (React SPA — ST-00-3 산출물, 정적 파일로 NGINX 서빙)
+# 부팅 순서 (depends_on + service_healthy — Compose v2):
+#   postgres·redis  →  backend  →  nginx
+#   frontend (독립, NGINX healthcheck 대기로 nginx도 frontend 대기)
 #
 # DEV 가정: 모든 ports 127.0.0.1 바인딩 (NFR-SEC-001 사내망 전용 추가 가드).
 # STG/PROD: 사내 IP whitelist + 사내 CA 인증서 (ports 변경, docker-compose.staging.yml).
 # =============================================================================
 
+name: scheduling
+
 services:
   # ---------------------------------------------------------------------------
-  # PostgreSQL 16 (TK-00-1-1)
+  # 1. PostgreSQL 16 (TK-00-1-1)
   # ---------------------------------------------------------------------------
   postgres:
     image: postgres:16-alpine
@@ -28,7 +32,7 @@ services:
       TZ: Asia/Seoul                  # BR-X04
       PGTZ: Asia/Seoul
     ports:
-      - "127.0.0.1:5432:5432"         # DEV: localhost only
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
@@ -45,7 +49,7 @@ services:
       - scheduling-net
 
   # ---------------------------------------------------------------------------
-  # Redis 7 (TK-00-1-2)
+  # 2. Redis 7 (TK-00-1-2)
   # ---------------------------------------------------------------------------
   redis:
     image: redis:7-alpine
@@ -56,7 +60,7 @@ services:
       - --requirepass
       - ${REDIS_PASSWORD:?password 필수 — .env에서 설정}
     ports:
-      - "127.0.0.1:6379:6379"         # DEV: localhost only
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis-data:/data
       - ./redis/redis.conf:/etc/redis/redis.conf:ro
@@ -71,29 +75,98 @@ services:
       - scheduling-net
 
   # ---------------------------------------------------------------------------
-  # NGINX 1.25 (TK-00-1-3)
+  # 3. Backend (Spring Boot 3.5.14 + Modulith 1.4.11 — TK-00-2-1)
+  # ---------------------------------------------------------------------------
+  # backend/ 디렉토리의 Dockerfile (multi-stage: JDK 21 builder → JRE 21 alpine)
+  # 본 Task 단계: app/application.yml 의 'default' profile (PG/Redis auto-config exclude)
+  #              → 컨테이너 부팅 성공, /actuator/health/liveness 200 OK
+  # Sprint 1+: 'with-infra' profile 활성 + Flyway 마이그레이션 → PG 연결
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: scheduling-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      JAVA_OPTS: ${JAVA_OPTS:--Xms512m -Xmx2g}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-scheduling}
+      POSTGRES_USER: ${POSTGRES_USER:-app_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      TZ: Asia/Seoul
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health/liveness"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s          # JVM 부팅 여유 (Spring Boot 30~45s)
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - scheduling-net
+
+  # ---------------------------------------------------------------------------
+  # 4. Frontend (React SPA dist → frontend-static volume — TK-00-3-1)
+  # ---------------------------------------------------------------------------
+  # frontend/Dockerfile (multi-stage: node:20 builder → nginx:1.25 serve).
+  # 본 컨테이너는 자체 NGINX로 serve 가능하지만, scheduling-nginx 가 frontend-static
+  # volume 을 통해 정적 파일을 직접 서빙 → 본 컨테이너 healthcheck 통과 후 nginx 시작.
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: scheduling-frontend
+    volumes:
+      - frontend-static:/usr/share/nginx/html
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - scheduling-net
+
+  # ---------------------------------------------------------------------------
+  # 5. NGINX 1.25 (TK-00-1-3) — TLS + reverse proxy + WebSocket + 정적 서빙
   # ---------------------------------------------------------------------------
   nginx:
     image: nginx:1.25-alpine
     container_name: scheduling-nginx
     ports:
-      - "127.0.0.1:80:80"             # DEV: localhost only (HTTP → HTTPS 리다이렉트)
-      - "127.0.0.1:443:443"           # DEV: localhost only (HTTPS)
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
-      - frontend-static:/usr/share/nginx/html:ro   # Frontend 빌드 산출물 (ST-00-3)
+      - frontend-static:/usr/share/nginx/html:ro
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      # BusyBox wget 가 localhost → IPv6 우선 → nginx IPv4 only → fail.
+      # 127.0.0.1 명시로 IPv4 강제 (frontend도 동일 패턴).
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/health"]
       interval: 10s
       timeout: 3s
       retries: 5
       start_period: 5s
-    # backend 서비스 (ST-00-2 / TK-00-1-4) 추가 후 depends_on 활성:
-    # depends_on:
-    #   backend:
-    #     condition: service_healthy
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - scheduling-net
@@ -110,3 +183,4 @@ volumes:
 networks:
   scheduling-net:
     driver: bridge
+    name: scheduling-net
