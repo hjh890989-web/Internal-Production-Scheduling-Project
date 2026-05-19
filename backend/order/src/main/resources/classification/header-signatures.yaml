@@ -1,0 +1,61 @@
+# =============================================================================
+# header-signatures.yaml — TK-01-1-2 워크북 출처 분류 룰셋
+# =============================================================================
+# 영업·관리 부서가 양식을 약간 변경해도 코드 수정 없이 본 파일만 갱신.
+# SRS-RSK-007 (포맷 분화 → 매핑 룰 폭증) 완화.
+#
+# 시그니처 매칭:
+#   - 워크북 sheet name + 첫 5 row 의 셀 + 파일명 을 token 으로 추출
+#   - 대소문자 무시·부분 일치
+#   - excluded 1개라도 매치 → score 0
+#   - requiredAny 매치 개수 / 전체 × weight → score (max 1.0)
+#   - 임계치 0.5 미만 → UNRECOGNIZED
+# =============================================================================
+
+signatures:
+  MONTHLY_FORECAST:
+    requiredAny:
+      - "월별 예상"
+      - "월간 예상"
+      - "월별 발주"
+      - "발주 예측"
+      - "FORECAST"
+    excluded:
+      - "KD"
+      - "주간"
+      - "WEEKLY"
+    weight: 1.0
+
+  WEEKLY_PLAN:
+    requiredAny:
+      - "주간 계획"
+      - "주간 발주"
+      - "주차"
+      - "WEEKLY"
+      - "주별"
+    excluded:
+      - "KD"
+      - "월별"
+    weight: 1.0
+
+  CONFIRMED_ORDER:
+    requiredAny:
+      - "확정"
+      - "CONFIRMED"
+      - "정식 발주"
+      - "발주 확정"
+    excluded:
+      - "KD"
+      - "예상"
+      - "예측"
+    weight: 1.0
+
+  KD_ORDER:
+    requiredAny:
+      - "KD 발주"
+      - "KD"
+      - "Knock-Down"
+      - "knockdown"
+      - "이중관"
+    excluded: []
+    weight: 1.5    # KD = 강한 시그니처 (cross-source 오분류 차단)
