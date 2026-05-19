@@ -59,6 +59,7 @@ infrastructure/nginx/ssl/*.pem
 infrastructure/.env
 infrastructure/.env.*
 !infrastructure/.env.example
+!infrastructure/.env.*.example
 infrastructure/jenkins/secrets/*
 !infrastructure/jenkins/secrets/.gitkeep
 
