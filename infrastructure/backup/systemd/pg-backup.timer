@@ -1,0 +1,16 @@
+# =============================================================================
+# pg-backup.timer — TK-33-2-1 PROD systemd timer (02:00 KST 매일)
+# =============================================================================
+
+[Unit]
+Description=Daily PostgreSQL backup at 02:00 KST
+
+[Timer]
+OnCalendar=*-*-* 02:00:00 Asia/Seoul
+Persistent=true                        # 부팅 중이었으면 다음 부팅 시 1회 실행
+RandomizedDelaySec=300                 # 0~5분 jitter (NAS 부하 분산)
+AccuracySec=1m
+Unit=pg-backup.service
+
+[Install]
+WantedBy=timers.target

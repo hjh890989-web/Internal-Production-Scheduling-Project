@@ -1,0 +1,34 @@
+# =============================================================================
+# pg-backup.service — TK-33-2-1 PROD systemd unit
+# =============================================================================
+# 설치:
+#   sudo cp pg-backup.service /etc/systemd/system/
+#   sudo cp pg-backup.timer   /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now pg-backup.timer
+#
+# 환경: PROD Linux host. backup 전용 user/group 생성 권장.
+# =============================================================================
+
+[Unit]
+Description=PostgreSQL full backup (pg_basebackup)
+After=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=backup
+Group=backup
+EnvironmentFile=/etc/scheduling/.env.prod
+ExecStart=/usr/local/bin/pg-backup.sh
+StandardOutput=journal
+StandardError=journal
+# rsync to NAS (옵션) — PROD 에서 본 명령 활성
+# ExecStartPost=/usr/bin/rsync -a /backup/base/ /mnt/nas/scheduling-backup/base/
+
+# Sandboxing
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/backup
+ProtectHome=true
