@@ -9,6 +9,12 @@ spring:
   application:
     name: scheduling
 
+  # KST 통일 (BR-X04) — JSON serialize / deserialize 시 Asia/Seoul 강제
+  jackson:
+    time-zone: Asia/Seoul
+    date-format: yyyy-MM-dd'T'HH:mm:ssXXX
+    default-property-inclusion: non_null
+
   # JPA/SQL/Redis auto-config — Sprint 1 PG/Redis Task 전에는 비활성 (필요 시 profile로 활성화)
   autoconfigure:
     exclude:
