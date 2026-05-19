@@ -7,4 +7,6 @@ plugins {
 dependencies {
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.modulith.starter.core)
+    // Micrometer facade — TK-31-1-1: 도메인 모듈이 custom metric 등록 시 사용
+    implementation("io.micrometer:micrometer-core")
 }
