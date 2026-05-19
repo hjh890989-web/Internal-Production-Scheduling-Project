@@ -1,0 +1,35 @@
+{
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "confirm": "확인",
+    "delete": "삭제",
+    "edit": "수정",
+    "search": "검색",
+    "filter": "필터",
+    "loading": "불러오는 중...",
+    "error": "오류 발생",
+    "success": "성공",
+    "retry": "재시도",
+    "close": "닫기"
+  },
+  "app": {
+    "title": "사내 공정 스케줄링 시스템",
+    "subtitle": "Internal Production Scheduling System"
+  },
+  "menu": {
+    "home": "홈",
+    "orders": "수주 통합",
+    "vc": "성형 스케줄",
+    "ex": "압출 스케줄",
+    "master": "마스터 데이터",
+    "audit": "감사 로그",
+    "settings": "설정"
+  },
+  "messages": {
+    "constraint_violation": "제약 조건 위반: {{detail}}",
+    "save_success": "저장이 완료되었습니다.",
+    "save_failure": "저장에 실패했습니다.",
+    "session_expired": "세션이 만료되었습니다. 다시 로그인해 주세요."
+  }
+}

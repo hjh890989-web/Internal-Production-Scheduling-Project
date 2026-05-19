@@ -40,6 +40,18 @@ bin/
 hs_err_pid*
 replay_pid*
 
+# -------- Node.js / Frontend --------
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+coverage/
+
 # -------- 인프라 비밀 (TLS·env) --------
 infrastructure/nginx/ssl/*.key
 infrastructure/nginx/ssl/*.crt
