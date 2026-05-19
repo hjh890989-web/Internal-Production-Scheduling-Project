@@ -1,0 +1,109 @@
+# =============================================================================
+# Internal Production Scheduling — Docker Compose PROD (Sprint 0 ST-33-1)
+# =============================================================================
+# PROD 환경 — 실 사용자 + production data. Blue/Green 무중단 배포.
+# DEV docker-compose.yml 의 backend 단일 컨테이너 → PROD 는 backend-blue + backend-green
+# NGINX upstream toggle (prod-active.conf 가 prod-blue.conf 또는 prod-green.conf 가리킴).
+#
+# 부팅: cd infrastructure && \
+#       docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
+# 배포: bash infrastructure/scripts/blue-green-switch.sh <blue|green>
+# =============================================================================
+
+name: scheduling
+
+services:
+  # ---------------------------------------------------------------------------
+  # PROD: backend 단일 → blue + green 2 컨테이너 (Blue-Green)
+  # docker-compose.yml 의 backend service 를 override.
+  # ---------------------------------------------------------------------------
+  backend:
+    # PROD 는 build 안 함 — Harbor 에서 image pull
+    profiles: ["__disabled__"]   # 기본 backend 비활성, 아래 blue/green 만 활성
+
+  backend-blue:
+    image: ${HARBOR_REGISTRY:-harbor.internal/scheduling}/backend:${TAG_BLUE:-latest}
+    container_name: scheduling-backend-blue
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod,with-infra}
+      DEPLOYMENT_COLOR: blue
+      JAVA_OPTS: ${JAVA_OPTS:--Xms1g -Xmx4g}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      TZ: Asia/Seoul
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - scheduling-net
+
+  backend-green:
+    image: ${HARBOR_REGISTRY:-harbor.internal/scheduling}/backend:${TAG_GREEN:-latest}
+    container_name: scheduling-backend-green
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod,with-infra}
+      DEPLOYMENT_COLOR: green
+      JAVA_OPTS: ${JAVA_OPTS:--Xms1g -Xmx4g}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      TZ: Asia/Seoul
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - scheduling-net
+
+  # ---------------------------------------------------------------------------
+  # NGINX — PROD active conf 마운트 (prod-active.conf 가 blue/green 가리킴)
+  # ---------------------------------------------------------------------------
+  nginx:
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/prod-active.conf:/etc/nginx/conf.d/scheduling.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - frontend-static:/usr/share/nginx/html:ro
+    # PROD 는 DEV 의 backend depends_on 완전 교체 — !reset 으로 명시 (Compose v2.24+)
+    depends_on: !reset
+      backend-blue:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+      # backend-green 는 별도 sidecar — nginx 가 기다리지 않음 (운영 시 활성)
+    ports:
+      # PROD 는 0.0.0.0:80, 0.0.0.0:443 (사내망 IP whitelist 는 별도 firewall)
+      - "80:80"
+      - "443:443"
