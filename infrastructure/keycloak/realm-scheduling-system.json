@@ -1,0 +1,92 @@
+{
+  "realm": "scheduling-system",
+  "displayName": "Internal Production Scheduling System",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
+  "passwordPolicy": "length(12) and digits(1) and upperCase(1) and specialChars(1) and notUsername(undefined)",
+  "accessTokenLifespan": 1800,
+  "ssoSessionIdleTimeout": 28800,
+  "ssoSessionMaxLifespan": 36000,
+  "internationalizationEnabled": true,
+  "supportedLocales": ["ko"],
+  "defaultLocale": "ko",
+
+  "roles": {
+    "realm": [
+      {
+        "name": "PLANNER",
+        "description": "생산계획 — 작성·확정·override (BR-X05 작성자 ≠ 승인자)",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "STK_USER",
+        "description": "현장 STK — 시뮬뷰·제안",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "IT_OPS",
+        "description": "IT 운영 — 마스터·Actuator·Grafana",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "READ_ONLY",
+        "description": "감사·임원 — 조회 only",
+        "composite": false,
+        "clientRole": false
+      }
+    ]
+  },
+
+  "clients": [
+    {
+      "clientId": "scheduling-app",
+      "name": "Scheduling Backend & Frontend",
+      "description": "Spring Boot + React SPA — OIDC Authorization Code + PKCE",
+      "enabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "clientAuthenticatorType": "client-secret",
+      "secret": "dev-client-secret-replace-in-prod",
+      "redirectUris": [
+        "https://localhost/*",
+        "https://scheduling.internal/*"
+      ],
+      "webOrigins": [
+        "https://localhost",
+        "https://scheduling.internal"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "implicitFlowEnabled": false,
+      "attributes": {
+        "access.token.lifespan": "1800",
+        "client.session.idle.timeout": "28800",
+        "client.session.max.lifespan": "36000",
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "openid",
+        "profile",
+        "email",
+        "roles"
+      ]
+    }
+  ]
+}
