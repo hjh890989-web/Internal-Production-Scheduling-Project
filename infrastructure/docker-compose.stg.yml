@@ -1,0 +1,76 @@
+# =============================================================================
+# Internal Production Scheduling — Docker Compose STG (Sprint 0 ST-33-1)
+# =============================================================================
+# STG (Staging) 환경 — 베타 사용자 + 통합 테스트 전용.
+# PROD 와 동일 stack 이지만:
+#   - backend 단일 (Blue-Green 불필요 — 자원 절약 + 빠른 배포)
+#   - DB scheduling_stg (운영 DB scheduling 과 분리)
+#   - 도메인 stg.scheduling.internal
+#   - Flyway profile=stg → test data seed 자동
+#   - Harbor image pull (PROD 와 동일 image, 다른 환경 변수)
+#
+# 부팅: docker compose --env-file .env.stg \
+#       -f docker-compose.yml -f docker-compose.stg.yml up -d
+# =============================================================================
+
+name: scheduling
+
+services:
+  # ---------------------------------------------------------------------------
+  # STG: backend 단일 컨테이너 (Harbor pull)
+  # ---------------------------------------------------------------------------
+  backend:
+    image: ${HARBOR_REGISTRY:-harbor.internal/scheduling}/backend:${TAG:-latest}
+    build: !reset null     # PROD 와 마찬가지로 build 안 함 (Harbor pull)
+    container_name: scheduling-backend-stg
+    environment:
+      SPRING_PROFILES_ACTIVE: stg,with-infra
+      JAVA_OPTS: ${JAVA_OPTS:--Xms512m -Xmx2g}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-scheduling_stg}
+      POSTGRES_USER: ${POSTGRES_USER:-app_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      TZ: Asia/Seoul
+    labels:
+      env: stg
+
+  # ---------------------------------------------------------------------------
+  # STG: PostgreSQL DB 분리 (scheduling_stg)
+  # ---------------------------------------------------------------------------
+  postgres:
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-scheduling_stg}
+      POSTGRES_USER: ${POSTGRES_USER:-app_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?password 필수 — .env.stg 에서 설정}
+      TZ: Asia/Seoul
+      PGTZ: Asia/Seoul
+    volumes:
+      # STG 전용 volume — DEV scheduling-postgres-data 와 분리
+      - postgres-stg-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+
+  # ---------------------------------------------------------------------------
+  # STG: NGINX 도메인 stg.scheduling.internal + STG 전용 conf
+  # ---------------------------------------------------------------------------
+  nginx:
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/stg.conf:/etc/nginx/conf.d/scheduling.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - frontend-static:/usr/share/nginx/html:ro
+    # STG 는 backend 단일 — DEV 의존 그대로 사용 (backend service)
+    ports:
+      # STG 는 사내 IP 노출 (0.0.0.0) — 사내 firewall 로 베타 사용자 IP whitelist
+      - "80:80"
+      - "443:443"
+
+# =============================================================================
+volumes:
+  # STG 전용 volume — DEV 와 분리
+  postgres-stg-data:
+    driver: local
