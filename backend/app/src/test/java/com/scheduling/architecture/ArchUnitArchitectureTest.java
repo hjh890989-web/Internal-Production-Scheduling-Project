@@ -63,25 +63,48 @@ class ArchUnitArchitectureTest {
         )
         .allowEmptyShould(true);
 
-    // ---------- 4. domain 패키지는 같은 모듈 내부에서만 접근 ----------
+    // ---------- 4. cross-module domain 접근 금지 ----------
+    // 각 모듈의 domain 패키지는 같은 모듈 내부에서만 접근 가능.
+    // 모듈별 개별 rule — same-module access (예: order.mapping → order.domain) 허용.
     @ArchTest
-    static final ArchRule domain_packages_only_from_same_module = noClasses()
-        .that().resideOutsideOfPackages(
-            "com.scheduling.order.domain..",
-            "com.scheduling.vc.domain..",
-            "com.scheduling.ex.domain..",
-            "com.scheduling.master.domain..",
-            "com.scheduling.audit.domain..",
-            "com.scheduling.notify.domain.."
-        )
-        .should().dependOnClassesThat()
-        .resideInAnyPackage(
-            "com.scheduling.order.domain..",
-            "com.scheduling.vc.domain..",
-            "com.scheduling.ex.domain..",
-            "com.scheduling.master.domain..",
-            "com.scheduling.audit.domain..",
-            "com.scheduling.notify.domain.."
-        )
+    static final ArchRule order_domain_only_from_order = noClasses()
+        .that().resideInAPackage("com.scheduling..")
+        .and().resideOutsideOfPackage("com.scheduling.order..")
+        .should().dependOnClassesThat().resideInAPackage("com.scheduling.order.domain..")
+        .allowEmptyShould(true);
+
+    @ArchTest
+    static final ArchRule vc_domain_only_from_vc = noClasses()
+        .that().resideInAPackage("com.scheduling..")
+        .and().resideOutsideOfPackage("com.scheduling.vc..")
+        .should().dependOnClassesThat().resideInAPackage("com.scheduling.vc.domain..")
+        .allowEmptyShould(true);
+
+    @ArchTest
+    static final ArchRule ex_domain_only_from_ex = noClasses()
+        .that().resideInAPackage("com.scheduling..")
+        .and().resideOutsideOfPackage("com.scheduling.ex..")
+        .should().dependOnClassesThat().resideInAPackage("com.scheduling.ex.domain..")
+        .allowEmptyShould(true);
+
+    @ArchTest
+    static final ArchRule master_domain_only_from_master = noClasses()
+        .that().resideInAPackage("com.scheduling..")
+        .and().resideOutsideOfPackage("com.scheduling.master..")
+        .should().dependOnClassesThat().resideInAPackage("com.scheduling.master.domain..")
+        .allowEmptyShould(true);
+
+    @ArchTest
+    static final ArchRule audit_domain_only_from_audit = noClasses()
+        .that().resideInAPackage("com.scheduling..")
+        .and().resideOutsideOfPackage("com.scheduling.audit..")
+        .should().dependOnClassesThat().resideInAPackage("com.scheduling.audit.domain..")
+        .allowEmptyShould(true);
+
+    @ArchTest
+    static final ArchRule notify_domain_only_from_notify = noClasses()
+        .that().resideInAPackage("com.scheduling..")
+        .and().resideOutsideOfPackage("com.scheduling.notify..")
+        .should().dependOnClassesThat().resideInAPackage("com.scheduling.notify.domain..")
         .allowEmptyShould(true);
 }

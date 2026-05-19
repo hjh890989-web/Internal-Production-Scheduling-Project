@@ -1,0 +1,36 @@
+# =============================================================================
+# rules-WEEKLY_PLAN.yaml — TK-01-2-1
+# =============================================================================
+# 주간 계획 워크북 매핑 룰. SourceType = WEEKLY_PLAN.
+# =============================================================================
+
+sourceType: WEEKLY_PLAN
+defaultOrderType: WEEKLY
+defaultCustomer: "내수"
+
+headerRowCandidates: [0, 1, 2]
+
+fields:
+  hose_id:
+    aliases: ["품번", "Hose", "Part", "Item", "Item Code", "PartNo", "제품코드"]
+    regexStrip: ""
+    toUpperCase: true
+    required: true
+
+  delivery_date:
+    aliases: ["주차", "Week", "납기", "납기일", "Mon", "Tue", "Wed", "Thu", "Fri"]
+    dateFormatHints:
+      - "yyyy-MM-dd"
+      - "yyyy/MM/dd"
+      - "yyyyMMdd"
+    required: true
+
+  qty:
+    aliases: ["수량", "Qty", "Quantity", "주간 수량", "주별 수량"]
+    coerceInteger: true
+    required: true
+
+  customer:
+    aliases: ["거래처", "Customer", "고객사"]
+    defaultValue: "내수"
+    required: false

@@ -1,0 +1,37 @@
+# =============================================================================
+# rules-CONFIRMED_ORDER.yaml — TK-01-2-1
+# =============================================================================
+# 확정 발주 워크북 매핑 룰. SourceType = CONFIRMED_ORDER. BR-X01 D-2 hard 강제.
+# =============================================================================
+
+sourceType: CONFIRMED_ORDER
+defaultOrderType: CONFIRMED
+defaultCustomer: "내수"
+
+headerRowCandidates: [0, 1, 2]
+
+fields:
+  hose_id:
+    aliases: ["품번", "Item Code", "PartNo", "Hose", "Part", "Item", "제품코드"]
+    regexStrip: ""
+    toUpperCase: true
+    required: true
+
+  delivery_date:
+    aliases: ["납기", "납기일", "납품", "납품일", "Delivery", "DueDate", "Due Date", "Date"]
+    dateFormatHints:
+      - "yyyy-MM-dd"
+      - "yyyy/MM/dd"
+      - "yyyyMMdd"
+      - "yyyy.MM.dd"
+    required: true
+
+  qty:
+    aliases: ["수량", "확정 수량", "Qty", "Quantity"]
+    coerceInteger: true
+    required: true
+
+  customer:
+    aliases: ["거래처", "Customer", "고객사", "Buyer"]
+    defaultValue: "내수"
+    required: false

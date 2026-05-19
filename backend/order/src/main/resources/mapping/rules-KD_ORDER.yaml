@@ -1,0 +1,36 @@
+# =============================================================================
+# rules-KD_ORDER.yaml — TK-01-2-1
+# =============================================================================
+# KD 발주 워크북 매핑 룰. SourceType = KD_ORDER. BR-V13 capa 부족 시 보충.
+# =============================================================================
+
+sourceType: KD_ORDER
+defaultOrderType: KD
+defaultCustomer: "KD"
+
+headerRowCandidates: [0, 1, 2]
+
+fields:
+  hose_id:
+    aliases: ["품번", "Hose", "Part", "Item", "Item Code", "PartNo", "제품코드"]
+    regexStrip: ""
+    toUpperCase: true
+    required: true
+
+  delivery_date:
+    aliases: ["납기", "납품", "납품일", "Delivery", "DueDate", "Date"]
+    dateFormatHints:
+      - "yyyy-MM-dd"
+      - "yyyy/MM/dd"
+      - "yyyyMMdd"
+    required: true
+
+  qty:
+    aliases: ["수량", "KD 수량", "KD Qty", "Qty", "Quantity", "Stock"]
+    coerceInteger: true
+    required: true
+
+  customer:
+    aliases: ["거래처", "Customer", "고객사"]
+    defaultValue: "KD"
+    required: false

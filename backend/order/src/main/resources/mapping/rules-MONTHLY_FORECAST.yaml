@@ -1,0 +1,39 @@
+# =============================================================================
+# rules-MONTHLY_FORECAST.yaml — TK-01-2-1
+# =============================================================================
+# 월별 예상 발주 워크북 매핑 룰. SourceType = MONTHLY_FORECAST.
+# 영업 부서 양식 변경 시 본 파일만 갱신.
+# =============================================================================
+
+sourceType: MONTHLY_FORECAST
+defaultOrderType: FORECAST
+defaultCustomer: "내수"
+
+headerRowCandidates: [0, 1, 2]
+
+fields:
+  hose_id:
+    aliases: ["품번", "Item Code", "PartNo", "제품코드", "Product", "Hose", "Part", "Item"]
+    regexStrip: ""
+    toUpperCase: true
+    required: true
+
+  delivery_date:
+    aliases: ["납기", "납기일", "납품", "납품일", "Delivery", "DueDate", "Due Date", "Date", "예상 납기"]
+    dateFormatHints:
+      - "yyyy-MM-dd"
+      - "yyyy/MM/dd"
+      - "yyyyMMdd"
+      - "yy-MM-dd"
+      - "yyyy.MM.dd"
+    required: true
+
+  qty:
+    aliases: ["수량", "예상 수량", "Qty", "Quantity", "발주량", "예측", "Forecast"]
+    coerceInteger: true
+    required: true
+
+  customer:
+    aliases: ["거래처", "Customer", "고객사", "Buyer"]
+    defaultValue: "내수"
+    required: false
