@@ -25,4 +25,7 @@ dependencies {
     // Modulith 모듈 경계 verify + docs 생성 (TK-00-2-2)
     testImplementation(libs.spring.modulith.test)
     testImplementation("org.springframework.modulith:spring-modulith-docs")
+
+    // ArchUnit 빌드 타임 강제 (TK-00-2-3) — Sprint 0 DoD 항목 2 달성
+    testImplementation(libs.bundles.test.arch)
 }
