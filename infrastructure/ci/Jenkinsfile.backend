@@ -1,10 +1,15 @@
 // =============================================================================
 // Jenkinsfile.backend — Spring Boot 3.5.14 + Modulith 1.4.11 + ArchUnit
 // =============================================================================
-// Sprint 0 ST-32-1 TK-32-1-2 — Backend 전용 파이프라인.
-// 8 stage: Checkout → Build → Test (Unit + ArchUnit) → Integration Test → SonarQube → Trivy → Docker → Harbor
-// (SonarQube·Trivy 는 ST-32-2 에서 실 step 채움)
+// Sprint 0 ST-32-1 + ST-32-2 통합:
+//   ST-32-1 TK-32-1-1·2·3 → 파이프라인 골격 + Blue-Green 배포
+//   ST-32-2 TK-32-2-1·2·3 → Trivy + SonarQube Quality Gate + Slack 알림
+//
+// 10 stages: Checkout → Build → Test+Jacoco+ArchUnit → Integration → Sonar →
+//            Quality Gate → Docker Build → Trivy → Harbor Push → Deploy
 // =============================================================================
+
+@Library('scheduling-shared-library') _
 
 pipeline {
     agent any
@@ -50,11 +55,11 @@ pipeline {
             }
         }
 
-        stage('Test (Unit + ArchUnit)') {
+        stage('Test (Unit + ArchUnit + Jacoco)') {
             steps {
                 dir('backend') {
                     // ArchUnit = ST-00-2 TK-00-2-3 모듈 경계 강제 (4 test class, 14 ArchTest)
-                    // 위반 시 빌드 FAILED (Sprint 0 DoD 항목 2 강제 게이트)
+                    // jacocoTestReport — TK-32-2-2 SonarQube 가 XML 리포트 활용
                     sh './gradlew test jacocoTestReport --no-daemon'
                 }
             }
@@ -86,15 +91,30 @@ pipeline {
             }
         }
 
-        stage('SonarQube') {
+        // TK-32-2-2 — SonarQube 분석. Quality Gate = 'Scheduling' (bootstrap-quality-gate.sh)
+        stage('SonarQube Analysis') {
+            when { not { branch 'feature/throwaway/*' } }
             steps {
-                echo 'ST-32-2 TK-32-2-2 에서 채움 — withSonarQubeEnv("SonarQube") { sh "./gradlew sonar" }'
+                dir('backend') {
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                            ./gradlew sonar \\
+                                -Dsonar.projectVersion=${env.APP_VERSION} \\
+                                -Dsonar.branch.name=${env.BRANCH_NAME ?: 'main'} \\
+                                --no-daemon
+                        """
+                    }
+                }
             }
         }
 
-        stage('Security Scan (Trivy)') {
+        // TK-32-2-2 — Quality Gate 결과 대기 (sonar.qualitygate.wait=true 와 결합)
+        stage('Quality Gate') {
+            when { not { branch 'feature/throwaway/*' } }
             steps {
-                echo 'ST-32-2 TK-32-2-1 에서 채움 — trivy image ${IMAGE_TAG} --severity HIGH,CRITICAL --exit-code 1'
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true   // 실패 시 빌드 중단 + post.failure
+                }
             }
         }
 
@@ -102,6 +122,37 @@ pipeline {
             steps {
                 dir('backend') {
                     sh "docker build -t ${IMAGE_TAG} -t ${HARBOR_REGISTRY}/${SERVICE_NAME}:latest ."
+                }
+            }
+        }
+
+        // TK-32-2-1 — Trivy 이미지 + 의존성 + IaC 스캔. HIGH/CRITICAL 0건 강제.
+        stage('Security Scan (Trivy)') {
+            steps {
+                trivyScan(
+                    imageTag:   env.IMAGE_TAG,
+                    projectDir: 'backend',
+                    reportName: 'trivy-backend'
+                )
+            }
+            post {
+                always {
+                    publishHTML([
+                        reportDir:    '.',
+                        reportFiles:  'trivy-backend-image.json',
+                        reportName:   'Trivy Image Scan',
+                        keepAll:      true,
+                        alwaysLinkToLastBuild: true,
+                        allowMissing: true,
+                    ])
+                }
+                failure {
+                    // TK-32-2-3 — Trivy 실패 시 #scheduling-security 채널 알림
+                    notifySlack(
+                        channel: '#scheduling-security',
+                        status:  'FAILURE',
+                        extra:   "Trivy 보안 스캔 실패 — ${env.IMAGE_TAG}"
+                    )
                 }
             }
         }
@@ -128,6 +179,12 @@ pipeline {
         stage('Deploy (Blue-Green)') {
             when { branch 'main' }
             steps {
+                // TK-32-2-3 — 배포 시작 알림
+                notifySlack(
+                    channel: '#scheduling-deploys',
+                    status:  'SUCCESS',
+                    extra:   "PROD 배포 시작 — ${env.IMAGE_TAG}"
+                )
                 sshagent(['prod-deploy-key']) {
                     sh """
                         ssh -o StrictHostKeyChecking=no deploy@prod-server '
@@ -139,6 +196,13 @@ pipeline {
                 }
             }
             post {
+                success {
+                    notifySlack(
+                        channel: '#scheduling-deploys',
+                        status:  'SUCCESS',
+                        extra:   "PROD 배포 완료 — ${env.IMAGE_TAG}"
+                    )
+                }
                 failure {
                     echo "❌ Deploy 실패 — 자동 롤백 시도"
                     sshagent(['prod-deploy-key']) {
@@ -149,26 +213,40 @@ pipeline {
                             ' || true
                         """
                     }
-                    // Sprint 1+ Slack 활성:
-                    // slackSend(channel: '#deploys', color: 'danger',
-                    //           message: "❌ Backend 배포 실패 + 자동 롤백 — ${env.IMAGE_TAG}")
-                }
-                success {
-                    echo "✅ Blue-Green 배포 SUCCESS — ${env.IMAGE_TAG}"
+                    notifySlack(
+                        channel: '#scheduling-deploys',
+                        status:  'FAILURE',
+                        extra:   "PROD 배포 실패 + 자동 롤백 시도 — ${env.IMAGE_TAG} 즉시 확인 필요!"
+                    )
                 }
             }
         }
     }
 
+    // TK-32-2-3 — 빌드 결과 통합 알림 (#scheduling-builds, 60초 SLA)
     post {
         success {
-            echo "✅ Backend Build SUCCESS  #${env.BUILD_NUMBER} (${env.GIT_AUTHOR}) — ${env.IMAGE_TAG}"
-            // Sprint 1+ Slack 활성:
-            // slackSend(channel: '#deploys', color: 'good',
-            //           message: "✅ Backend #${env.BUILD_NUMBER} ${env.IMAGE_TAG}")
+            notifySlack(channel: '#scheduling-builds', status: 'SUCCESS')
         }
         failure {
-            echo "❌ Backend Build FAILURE  #${env.BUILD_NUMBER} (${env.GIT_AUTHOR}) — ${env.GIT_MESSAGE}"
+            notifySlack(channel: '#scheduling-builds', status: 'FAILURE')
+            // Quality Gate 실패 시 #security 추가 알림
+            script {
+                if (currentBuild.description?.toLowerCase()?.contains('quality gate') ||
+                    currentBuild.description?.toLowerCase()?.contains('sonar')) {
+                    notifySlack(
+                        channel: '#scheduling-security',
+                        status:  'FAILURE',
+                        extra:   'SonarQube Quality Gate FAILED — 즉시 확인 필요'
+                    )
+                }
+            }
+        }
+        unstable {
+            notifySlack(channel: '#scheduling-builds', status: 'UNSTABLE')
+        }
+        aborted {
+            notifySlack(channel: '#scheduling-builds', status: 'ABORTED')
         }
         always {
             archiveArtifacts artifacts: 'backend/app/build/libs/*.jar',

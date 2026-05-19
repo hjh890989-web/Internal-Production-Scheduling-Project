@@ -39,17 +39,22 @@ unclassified:
     url: "http://localhost:8090/"
     adminAddress: "admin@scheduling.internal"
 
-  # Slack — Sprint 1+ EP-44 통합 후 webhook URL 설정
-  # slackNotifier:
-  #   teamDomain: "${SLACK_WORKSPACE}"
-  #   tokenCredentialId: "slack-token"
+  # Slack — TK-32-2-3 알림 통합. Bot token 은 credentials 의 slack-bot-token.
+  slackNotifier:
+    teamDomain: "${SLACK_WORKSPACE:-scheduling-team}"
+    tokenCredentialId: "slack-bot-token"
 
-  # SonarQube — ST-32-2 TK-32-2-2 에서 사내 SonarQube CE 활성
-  # sonarGlobalConfiguration:
-  #   installations:
-  #     - name: "SonarQube"
-  #       serverUrl: "http://sonarqube:9000"
-  #       credentialsId: "sonarqube-token"
+  # SonarQube — TK-32-2-2 사내 SonarQube CE.
+  # Jenkinsfile 의 withSonarQubeEnv("SonarQube") { ... } 가 본 설정 참조.
+  sonarGlobalConfiguration:
+    installations:
+      - name: "SonarQube"
+        serverUrl: "http://host.docker.internal:9001"   # DEV — sonar 별 compose
+        credentialsId: "sonarqube-token"
+        webhookSecretId: "sonarqube-webhook-secret"
+        triggers:
+          skipScmCause: false
+          skipUpstreamCause: false
 
 # DEV 단계 — 사내 vault 미사용. PROD 활성 시 ${VAR} 변수가 docker secrets 또는 vault 에서 주입.
 # credentials 섹션은 EP-30 ST-30-1 활성 후 별도 patch (운영 가이드 §Credentials-등록).
