@@ -40,6 +40,14 @@ bin/
 hs_err_pid*
 replay_pid*
 
+# -------- 인프라 비밀 (TLS·env) --------
+infrastructure/nginx/ssl/*.key
+infrastructure/nginx/ssl/*.crt
+infrastructure/nginx/ssl/*.pem
+infrastructure/.env
+infrastructure/.env.*
+!infrastructure/.env.example
+
 # -------- Python --------
 __pycache__/
 *.py[cod]
