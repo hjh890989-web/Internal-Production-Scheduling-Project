@@ -21,4 +21,8 @@ dependencies {
     implementation(libs.spring.modulith.starter.core)
     implementation(libs.springdoc.openapi)
     implementation(libs.caffeine)
+
+    // Modulith 모듈 경계 verify + docs 생성 (TK-00-2-2)
+    testImplementation(libs.spring.modulith.test)
+    testImplementation("org.springframework.modulith:spring-modulith-docs")
 }

@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":order"))    // OrderChangedEvent 구독 (REQ-FUNC-VC-015)
 
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.validation)
