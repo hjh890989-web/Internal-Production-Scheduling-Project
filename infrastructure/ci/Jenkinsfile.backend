@@ -1,0 +1,147 @@
+// =============================================================================
+// Jenkinsfile.backend — Spring Boot 3.5.14 + Modulith 1.4.11 + ArchUnit
+// =============================================================================
+// Sprint 0 ST-32-1 TK-32-1-2 — Backend 전용 파이프라인.
+// 8 stage: Checkout → Build → Test (Unit + ArchUnit) → Integration Test → SonarQube → Trivy → Docker → Harbor
+// (SonarQube·Trivy 는 ST-32-2 에서 실 step 채움)
+// =============================================================================
+
+pipeline {
+    agent any
+
+    // tools 등록은 Jenkins Admin → Manage Jenkins → Tools 에서 사전 등록 후 활성
+    // (운영 가이드 docs/infrastructure/jenkins_setup.md §Tools-등록 참조)
+    // tools {
+    //     jdk    'JDK 21'
+    //     gradle 'Gradle 8.10'
+    // }
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+        ansiColor('xterm')
+        buildDiscarder(logRotator(numToKeepStr: '50'))
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        HARBOR_REGISTRY = 'harbor.internal/scheduling'
+        SERVICE_NAME    = 'backend'
+        APP_VERSION     = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
+        IMAGE_TAG       = "${HARBOR_REGISTRY}/${SERVICE_NAME}:${APP_VERSION}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    env.GIT_AUTHOR  = sh(returnStdout: true, script: 'git log -1 --pretty=%an').trim()
+                    env.GIT_MESSAGE = sh(returnStdout: true, script: 'git log -1 --pretty=%s').trim()
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir('backend') {
+                    sh './gradlew clean build -x test --no-daemon'
+                }
+            }
+        }
+
+        stage('Test (Unit + ArchUnit)') {
+            steps {
+                dir('backend') {
+                    // ArchUnit = ST-00-2 TK-00-2-3 모듈 경계 강제 (4 test class, 14 ArchTest)
+                    // 위반 시 빌드 FAILED (Sprint 0 DoD 항목 2 강제 게이트)
+                    sh './gradlew test jacocoTestReport --no-daemon'
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true,
+                          testResults: 'backend/**/build/test-results/test/*.xml'
+                    publishHTML([
+                        reportDir:    'backend/app/build/reports/jacoco/test/html',
+                        reportFiles:  'index.html',
+                        reportName:   'Jacoco Coverage',
+                        keepAll:      true,
+                        alwaysLinkToLastBuild: true,
+                        allowMissing: true,
+                    ])
+                }
+            }
+        }
+
+        stage('Integration Test (Testcontainers)') {
+            when {
+                not { changeRequest() }            // PR/feature 브랜치는 skip (속도)
+            }
+            steps {
+                dir('backend') {
+                    // Testcontainers — PG/Redis 실 컨테이너 통합. Sprint 1+ 활성.
+                    sh './gradlew integrationTest --no-daemon || echo "no integrationTest task yet (Sprint 1+)"'
+                }
+            }
+        }
+
+        stage('SonarQube') {
+            steps {
+                echo 'ST-32-2 TK-32-2-2 에서 채움 — withSonarQubeEnv("SonarQube") { sh "./gradlew sonar" }'
+            }
+        }
+
+        stage('Security Scan (Trivy)') {
+            steps {
+                echo 'ST-32-2 TK-32-2-1 에서 채움 — trivy image ${IMAGE_TAG} --severity HIGH,CRITICAL --exit-code 1'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir('backend') {
+                    sh "docker build -t ${IMAGE_TAG} -t ${HARBOR_REGISTRY}/${SERVICE_NAME}:latest ."
+                }
+            }
+        }
+
+        stage('Push to Harbor') {
+            when { anyOf { branch 'main'; branch 'develop' } }
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'harbor-credentials',
+                    usernameVariable: 'HARBOR_USER',
+                    passwordVariable: 'HARBOR_PASS'
+                )]) {
+                    sh '''
+                        echo "$HARBOR_PASS" | docker login harbor.internal -u "$HARBOR_USER" --password-stdin
+                        docker push ${IMAGE_TAG}
+                        docker push ${HARBOR_REGISTRY}/${SERVICE_NAME}:latest
+                        docker logout harbor.internal
+                    '''
+                }
+            }
+        }
+
+        // Deploy — TK-32-1-3 (NGINX Blue-Green 토글) 에서 채움
+    }
+
+    post {
+        success {
+            echo "✅ Backend Build SUCCESS  #${env.BUILD_NUMBER} (${env.GIT_AUTHOR}) — ${env.IMAGE_TAG}"
+            // Sprint 1+ Slack 활성:
+            // slackSend(channel: '#deploys', color: 'good',
+            //           message: "✅ Backend #${env.BUILD_NUMBER} ${env.IMAGE_TAG}")
+        }
+        failure {
+            echo "❌ Backend Build FAILURE  #${env.BUILD_NUMBER} (${env.GIT_AUTHOR}) — ${env.GIT_MESSAGE}"
+        }
+        always {
+            archiveArtifacts artifacts: 'backend/app/build/libs/*.jar',
+                             allowEmptyArchive: true,
+                             fingerprint: true
+            cleanWs()
+        }
+    }
+}

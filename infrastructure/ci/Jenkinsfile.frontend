@@ -1,0 +1,135 @@
+// =============================================================================
+// Jenkinsfile.frontend — Vite 5 + TypeScript 5.4 + React 18.3 + Vitest
+// =============================================================================
+// Sprint 0 ST-32-1 TK-32-1-2 — Frontend 전용 파이프라인.
+// 8 stage: Checkout → Install → Lint·TypeCheck → Test (Vitest) → Build → SonarQube → Trivy → Docker → Harbor
+// =============================================================================
+
+pipeline {
+    agent any
+
+    // tools 등록은 Jenkins Admin → Manage Jenkins → Tools 에서 사전 등록 후 활성
+    // (운영 가이드 docs/infrastructure/jenkins_setup.md §Tools-등록 참조)
+    // tools {
+    //     nodejs 'NodeJS 20'
+    // }
+
+    options {
+        timeout(time: 15, unit: 'MINUTES')
+        timestamps()
+        ansiColor('xterm')
+        buildDiscarder(logRotator(numToKeepStr: '50'))
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        HARBOR_REGISTRY = 'harbor.internal/scheduling'
+        SERVICE_NAME    = 'frontend'
+        APP_VERSION     = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
+        IMAGE_TAG       = "${HARBOR_REGISTRY}/${SERVICE_NAME}:${APP_VERSION}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps { checkout scm }
+        }
+
+        stage('Install') {
+            steps {
+                dir('frontend') {
+                    sh 'npm ci --prefer-offline --no-audit'
+                }
+            }
+        }
+
+        stage('Lint + TypeCheck') {
+            steps {
+                dir('frontend') {
+                    sh 'npm run lint'
+                    sh 'npx tsc -b --noEmit'
+                }
+            }
+        }
+
+        stage('Test (Vitest)') {
+            steps {
+                dir('frontend') {
+                    sh 'npm run test:coverage || npm run test:run'
+                }
+            }
+            post {
+                always {
+                    publishHTML([
+                        reportDir:    'frontend/coverage',
+                        reportFiles:  'index.html',
+                        reportName:   'Vitest Coverage',
+                        keepAll:      true,
+                        alwaysLinkToLastBuild: true,
+                        allowMissing: true,
+                    ])
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir('frontend') {
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('SonarQube') {
+            steps {
+                echo 'ST-32-2 TK-32-2-2 에서 채움 — withSonarQubeEnv("SonarQube") { sh "npx sonar-scanner" }'
+            }
+        }
+
+        stage('Security Scan (Trivy)') {
+            steps {
+                echo 'ST-32-2 TK-32-2-1 에서 채움 — trivy image ${IMAGE_TAG} --severity HIGH,CRITICAL --exit-code 1'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir('frontend') {
+                    sh "docker build -t ${IMAGE_TAG} -t ${HARBOR_REGISTRY}/${SERVICE_NAME}:latest ."
+                }
+            }
+        }
+
+        stage('Push to Harbor') {
+            when { anyOf { branch 'main'; branch 'develop' } }
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'harbor-credentials',
+                    usernameVariable: 'HARBOR_USER',
+                    passwordVariable: 'HARBOR_PASS'
+                )]) {
+                    sh '''
+                        echo "$HARBOR_PASS" | docker login harbor.internal -u "$HARBOR_USER" --password-stdin
+                        docker push ${IMAGE_TAG}
+                        docker push ${HARBOR_REGISTRY}/${SERVICE_NAME}:latest
+                        docker logout harbor.internal
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Frontend Build SUCCESS  #${env.BUILD_NUMBER} — ${env.IMAGE_TAG}"
+        }
+        failure {
+            echo "❌ Frontend Build FAILURE  #${env.BUILD_NUMBER}"
+        }
+        always {
+            archiveArtifacts artifacts: 'frontend/dist/**/*',
+                             allowEmptyArchive: true,
+                             fingerprint: true
+            cleanWs()
+        }
+    }
+}

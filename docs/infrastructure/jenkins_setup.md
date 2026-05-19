@@ -103,6 +103,17 @@ credentials:
 
 `${VAR}` 변수는 환경 변수 또는 docker secrets 에서 주입.
 
+## 6.1 Tools 등록 (JDK 21 / Gradle 8.10 / NodeJS 20)
+
+Jenkinsfile.backend·frontend 의 `tools { }` 블록을 활성화하려면 Jenkins Admin 에서 사전 등록 (TK-32-1-2 산출물):
+
+1. **Manage Jenkins → Tools** → 각 도구별 add installation:
+   - **JDK installations**: name=`JDK 21`, Install from adoptium.net → version `jdk-21+35`
+   - **Gradle installations**: name=`Gradle 8.10`, Install from gradle.org → version `8.10.2`
+   - **NodeJS installations**: name=`NodeJS 20`, Install from nodejs.org → version `20.18.0`
+2. Save → `Jenkinsfile.backend`·`Jenkinsfile.frontend` 의 `tools { }` 주석 해제 → 빌드 시 자동 다운로드 + 사용
+3. 또는 CASC `casc/jenkins.yaml` 의 `tool:` 섹션에 명시해서 GitOps 관리 (`adoptium-installer`·`gradleInstaller`·`nodeJSInstaller` 플러그인 의존성 추가 필요)
+
 ## 7. Shared Library 등록 (선택, 권장)
 
 `infrastructure/jenkins/shared-library/vars/stdPipeline.groovy` 를 Jenkins Shared Library 로 등록:
