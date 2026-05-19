@@ -68,6 +68,8 @@ subprojects {
         // 모든 subproject 공통
         "implementation"("org.slf4j:slf4j-api")
         "testImplementation"(testCoreBundle)
+        // Gradle 8.x 번들 launcher 와 Spring Boot 3.5 junit-platform 1.12 정렬 (TK-01-1-1 fix)
+        "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
     }
 
     tasks.withType<JavaCompile> {

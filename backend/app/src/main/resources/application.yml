@@ -9,6 +9,12 @@ spring:
   application:
     name: scheduling
 
+  # TK-01-1-1 multipart 한도 (3 워크북 × 20MB)
+  servlet:
+    multipart:
+      max-file-size: 20MB               # 단일 파일
+      max-request-size: 60MB            # 3 파일 동시
+
   # KST 통일 (BR-X04) — JSON serialize / deserialize 시 Asia/Seoul 강제
   jackson:
     time-zone: Asia/Seoul
@@ -33,6 +39,14 @@ spring:
 server:
   port: 8080
   forward-headers-strategy: framework   # NGINX X-Forwarded-Proto 인식
+
+# TK-01-1-1 Excel parser 설정 (Apache POI streaming)
+scheduling:
+  excel:
+    max-file-size-mb: 20                # REQ-FUNC-OC-001
+    row-cache-size: 100                 # SXSSF buffer (≤256MB 보장)
+    buffer-size-bytes: 4096
+    timeout-seconds: 60                 # REQ-NF-PER-001
 
 management:
   endpoints:

@@ -11,4 +11,5 @@ dependencies {
     implementation(libs.spring.modulith.starter.core)
     // spring-modulith-starter-jpa (EventPublicationRegistry) 는 Sprint 1+ Task에서 활성
     implementation(libs.apache.poi)
+    implementation(libs.excel.streaming.reader)
 }

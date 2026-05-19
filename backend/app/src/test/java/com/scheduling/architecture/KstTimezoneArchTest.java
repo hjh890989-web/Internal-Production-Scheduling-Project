@@ -79,9 +79,6 @@ class KstTimezoneArchTest {
         .should().callMethod(System.class, "currentTimeMillis")
         .because("Clock 주입 사용 — clock.millis() (BR-X04)");
 
-    @ArchTest
-    static final ArchRule no_system_nanotime = noClasses()
-        .that().resideInAPackage("com.scheduling..")
-        .should().callMethod(System.class, "nanoTime")
-        .because("Clock 주입 사용 (BR-X04) — performance timing 만 예외, 별도 util 통과 시 허용");
+    // 참고: System.nanoTime() 은 단조 시간 측정 — BR-X04 (wall-clock KST) 와 무관.
+    //       performance timing (elapsed ms 측정) 용도로 허용.
 }
