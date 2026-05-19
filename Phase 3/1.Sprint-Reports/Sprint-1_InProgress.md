@@ -23,7 +23,7 @@
 | ST-01-1 (Excel 입력) | TK-01-1-1 POI streaming | ✓ | ca4476f |
 | | TK-01-1-2 SourceClassifier 4종 | ✓ | dad27b7 |
 | | TK-01-1-3 Multipart 엔드포인트 | ✓ | 6af607b |
-| | TK-01-1-4 30 회귀 + ≥99% 정확도 | 🔄 | 진행 예정 |
+| | TK-01-1-4 30 회귀 + ≥99% 정확도 | ✓ partial | DS-ORDER-3X 30/30 = 100% ✓ — 보강 deferred (아래) |
 | ST-01-2 (스키마 매핑) | TK-01-2-1·2·3·4 | ⏳ | ST-01-1 종결 후 |
 | ST-01-3 (폴더 watcher) | TK-01-3-1·2·3 | ⏳ | Could |
 
@@ -52,7 +52,15 @@
 
 ## 4. 운영 결정·예외 (Sprint 1 내)
 
-(현재 없음 — Sprint 0 의 DECISION-001 NFR-SEC-007 v1.5 적용 진행 중)
+### TK-01-1-4 부분 완료 — 보강 deferred
+- ✓ **DS-ORDER-3X 30 워크북** 합성 + 정확도 100% (30/30) — `docs/classification_accuracy_v1.md`
+- ⏳ **OrderImportControllerIT @WithMockUser MockMvc** — ST-30-2 (RBAC 활성) 후. 현재는 Controller 단위 테스트(`OrderImportControllerTest` 10 케이스) 로 대체
+- ⏳ **ImportEndToEndIT Testcontainers** (PG + Redis 통합) — Sprint 1 후반, Docker 의존성 ↑
+- ⏳ **k6 부하 테스트** (`perf/scripts/import_load.js`) — Jenkins CI stage 활성 후 (EP-32 ST-32-1 후행)
+- ⏳ **Phase 0 실 데이터 회귀 5~10건** — P1 김정훈 주임 보유 워크북 입수 후 (`docs/classification_accuracy_v1.md` §7)
+
+### 기존 결정
+- DECISION-001 NFR-SEC-007 v1.5 (Sprint 0 commit, 적용 — PROD 배포 시 fresh boot)
 
 ---
 
