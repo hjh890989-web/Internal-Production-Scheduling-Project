@@ -1,0 +1,95 @@
+// =============================================================================
+// Jenkinsfile.template — 표준 declarative pipeline
+// =============================================================================
+// Sprint 1+ 모든 Epic 이 본 템플릿 복사/재사용. 각 stage 의 상세 step 은:
+//   - Build / Test / Build Image / Push : TK-32-1-2 (Jenkinsfile 단계 정의)
+//   - SonarQube                          : ST-32-2 TK-32-2-2
+//   - Security Scan (Trivy)              : ST-32-2 TK-32-2-1
+//   - Deploy (Blue-Green NGINX 토글)     : TK-32-1-3 → TK-33-1-2
+//
+// Shared Library 사용 시: 5줄로 압축 가능 (vars/stdPipeline.groovy 참조)
+// =============================================================================
+
+pipeline {
+    agent any
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+        ansiColor('xterm')
+        buildDiscarder(logRotator(numToKeepStr: '50'))
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        HARBOR_REGISTRY = 'harbor.internal/scheduling'
+        APP_VERSION     = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    env.GIT_AUTHOR = sh(returnStdout: true,
+                        script: 'git log -1 --pretty=%an').trim()
+                }
+            }
+        }
+
+        // ↓↓↓ 아래 stage 들 — TK-32-1-2 / ST-32-2 에서 step 채움 ↓↓↓
+        stage('Build') {
+            steps {
+                echo "TK-32-1-2 에서 채움 — Backend: ./gradlew build  /  Frontend: npm ci && npm run build"
+            }
+        }
+        stage('Test') {
+            steps {
+                echo "TK-32-1-2 에서 채움 — JUnit + Testcontainers + ArchUnit + Vitest"
+            }
+        }
+        stage('SonarQube') {
+            steps {
+                echo "ST-32-2 TK-32-2-2 에서 채움 — SonarQube quality gate"
+            }
+        }
+        stage('Security Scan') {
+            steps {
+                echo "ST-32-2 TK-32-2-1 에서 채움 — Trivy CVE 스캔"
+            }
+        }
+        stage('Build Image') {
+            steps {
+                echo "TK-32-1-2 에서 채움 — docker build + tag"
+            }
+        }
+        stage('Push to Harbor') {
+            steps {
+                echo "TK-32-1-2 에서 채움 — docker login + push (harbor.internal)"
+            }
+        }
+        stage('Deploy (Blue-Green)') {
+            when { branch 'main' }
+            steps {
+                echo "TK-32-1-3 / TK-33-1-2 에서 채움 — NGINX upstream toggle"
+            }
+        }
+    }
+
+    post {
+        success {
+            // Sprint 1+ Slack webhook 설정 후 활성
+            // slackSend(channel: '#deploys', color: 'good',
+            //           message: "✅ ${env.JOB_NAME} #${env.BUILD_NUMBER} 성공 — ${env.GIT_AUTHOR}")
+            echo "✅ Build SUCCESS — Slack 알림은 EP-44 통합 후 활성"
+        }
+        failure {
+            // slackSend(channel: '#deploys', color: 'danger',
+            //           message: "❌ ${env.JOB_NAME} #${env.BUILD_NUMBER} 실패 — ${env.GIT_AUTHOR}")
+            echo "❌ Build FAILURE"
+        }
+        always {
+            cleanWs()
+        }
+    }
+}

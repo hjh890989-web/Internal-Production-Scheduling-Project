@@ -1,0 +1,41 @@
+# Pipeline 핵심
+configuration-as-code
+workflow-aggregator
+pipeline-stage-view
+pipeline-utility-steps
+
+# Git / SCM
+git
+github
+
+# Credentials
+credentials-binding
+plain-credentials
+
+# 빌드 도구
+gradle
+nodejs
+
+# 코드 품질·정적 분석
+sonar
+htmlpublisher
+
+# Docker
+docker-workflow
+
+# 알림
+slack
+email-ext
+
+# 인증·SSO (Keycloak 페더레이션은 EP-30 활성 후 별도 추가)
+ldap
+matrix-auth
+
+# 빌드 안정성
+build-timeout
+ws-cleanup
+ansicolor
+timestamper
+
+# ※ 의존성 충돌 가능 UI/Other 는 Sprint 1+ 별도 추가:
+#   blueocean, dashboard-view, docker-plugin, keycloak, job-dsl, warnings-ng, github-branch-source

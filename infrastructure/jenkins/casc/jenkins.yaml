@@ -1,0 +1,55 @@
+# =============================================================================
+# Jenkins Configuration as Code (CASC) — Sprint 0 ST-32-1
+# =============================================================================
+# 본 파일이 Jenkins 설정의 GitOps 원천 — 모든 변경이 git 추적 가능.
+# 적용: docker compose up 시 자동 (CASC_JENKINS_CONFIG 환경 변수)
+#
+# DEV 단계 — securityRealm=local (admin 단일 계정).
+# Keycloak 페더레이션은 EP-30 ST-30-1 활성 후 별도 patch (운영 가이드 §Keycloak-활성).
+# =============================================================================
+
+jenkins:
+  systemMessage: "사내 공정 스케줄링 시스템 — CI/CD (Jenkins LTS)"
+  numExecutors: 4
+  mode: NORMAL
+  scmCheckoutRetryCount: 3
+  labelString: "linux docker"
+
+  # DEV: local security realm (admin 단일). PROD 활성 시 keycloak realm.
+  # ※ password 평문 — DEV PC 한정 (secrets/jenkins_admin_password.txt 동일 값).
+  #   PROD 는 keycloak realm 으로 전환 — Jenkins local user 미사용.
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: "Dev_Jenkins_Admin_#2026"
+
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+  # CSRF protection 은 Jenkins 기본 (DefaultCrumbIssuer) — CASC 명시 시 속성 호환성 이슈로 생략
+
+  remotingSecurity:
+    enabled: true
+
+unclassified:
+  location:
+    url: "http://localhost:8090/"
+    adminAddress: "admin@scheduling.internal"
+
+  # Slack — Sprint 1+ EP-44 통합 후 webhook URL 설정
+  # slackNotifier:
+  #   teamDomain: "${SLACK_WORKSPACE}"
+  #   tokenCredentialId: "slack-token"
+
+  # SonarQube — ST-32-2 TK-32-2-2 에서 사내 SonarQube CE 활성
+  # sonarGlobalConfiguration:
+  #   installations:
+  #     - name: "SonarQube"
+  #       serverUrl: "http://sonarqube:9000"
+  #       credentialsId: "sonarqube-token"
+
+# DEV 단계 — 사내 vault 미사용. PROD 활성 시 ${VAR} 변수가 docker secrets 또는 vault 에서 주입.
+# credentials 섹션은 EP-30 ST-30-1 활성 후 별도 patch (운영 가이드 §Credentials-등록).

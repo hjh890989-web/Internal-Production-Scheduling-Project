@@ -1,0 +1,57 @@
+# =============================================================================
+# Jenkins LTS — CI/CD (Sprint 0 ST-32-1 TK-32-1-1)
+# =============================================================================
+# 별 docker-compose 파일 — SAD §3 line 175 "Jenkins는 별 서버 권장".
+# DEV 는 같은 호스트, PROD 는 별 서버 + Harbor·SonarQube 사내 인프라.
+#
+# 부팅: cd infrastructure/jenkins && docker compose -f docker-compose.jenkins.yml up -d
+# 접근: http://localhost:8090 (DEV — admin / secrets/jenkins_admin_password.txt)
+# =============================================================================
+
+name: scheduling-ci
+
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
+    container_name: scheduling-jenkins
+    ports:
+      - "127.0.0.1:8090:8080"      # DEV: localhost 8090 (main Web UI)
+      - "127.0.0.1:50000:50000"    # JNLP agent
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false -Dcasc.jenkins.config=/var/jenkins_home/casc/jenkins.yaml"
+      CASC_JENKINS_CONFIG: "/var/jenkins_home/casc/jenkins.yaml"
+      JENKINS_ADMIN_ID: "admin"
+      JENKINS_ADMIN_PASSWORD_FILE: "/run/secrets/jenkins_admin_password"
+      TZ: Asia/Seoul              # BR-X04
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - ./casc:/var/jenkins_home/casc:ro
+      # ※ Docker-in-Docker — PROD 보안 우려 시 별 agent 컨테이너 권장 (명세 §SAD-RSK)
+      - /var/run/docker.sock:/var/run/docker.sock
+    secrets:
+      - jenkins_admin_password
+    healthcheck:
+      # /login 엔드포인트 응답 확인 — setupWizard skip 후 직접 로그인 화면 응답
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/login"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 120s          # 첫 부팅 시 플러그인 초기화 ~90s
+    restart: unless-stopped
+    networks:
+      - scheduling-ci-net
+
+volumes:
+  jenkins-data:
+    driver: local
+
+networks:
+  scheduling-ci-net:
+    driver: bridge
+    name: scheduling-ci-net
+
+secrets:
+  jenkins_admin_password:
+    file: ./secrets/jenkins_admin_password.txt
