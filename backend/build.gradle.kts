@@ -12,8 +12,20 @@
 
 plugins {
     java
+    jacoco                                                    // TK-32-2-2 커버리지 측정
+    id("org.sonarqube") version "5.1.0.4882"                  // TK-32-2-2 SonarQube 분석
     alias(libs.plugins.spring.deps) apply false
     alias(libs.plugins.spring.boot) apply false
+}
+
+// SonarQube 글로벌 설정 — Jenkinsfile 가 SONAR_HOST_URL + SONAR_TOKEN 주입
+sonar {
+    properties {
+        property("sonar.projectKey", "scheduling-backend")
+        property("sonar.projectName", "Scheduling Backend")
+        property("sonar.host.url", System.getenv("SONAR_HOST_URL") ?: "http://localhost:9001")
+        property("sonar.qualitygate.wait", "true")
+    }
 }
 
 // subprojects { } 컨텍스트는 type-safe `libs` accessor에 접근 못함 →
@@ -34,6 +46,7 @@ allprojects {
 
 subprojects {
     apply(plugin = "java")
+    apply(plugin = "jacoco")
     apply(plugin = "io.spring.dependency-management")
 
     extensions.configure<JavaPluginExtension> {
@@ -70,5 +83,18 @@ subprojects {
         }
         // KST 통일 (BR-X04)
         systemProperty("user.timezone", "Asia/Seoul")
+        finalizedBy(tasks.named("jacocoTestReport"))
     }
+
+    // Jacoco — XML 리포트 (SonarQube + CI archive 둘 다 사용)
+    tasks.withType<JacocoReport> {
+        dependsOn(tasks.withType<Test>())
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+        }
+    }
+
+    // 신규 코드 80% 커버리지 게이트 (SonarQube Quality Gate 가 PR 단위로 검증).
+    // 로컬 빌드 게이트는 별도 — Sprint 1+ 도메인 코드 추가 후 활성 검토.
 }

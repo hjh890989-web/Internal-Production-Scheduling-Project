@@ -1,0 +1,78 @@
+# =============================================================================
+# SonarQube Community Edition — TK-32-2-2 (코드 품질 게이트)
+# =============================================================================
+# 별도 compose — 메인 stack 12 서비스에 무거운 Sonar (ES + JVM) 추가 회피.
+# Jenkins agent 가 CI 시작 시 'docker compose -f docker-compose.sonar.yml up -d' 실행.
+# DEV: 수동 실행 — 'docker compose -f infrastructure/sonarqube/docker-compose.sonar.yml up -d'
+# PROD: 별 서버 또는 CI host 항상 실행.
+# =============================================================================
+
+name: scheduling-sonarqube
+
+services:
+  sonarqube-db:
+    image: postgres:16-alpine
+    container_name: scheduling-sonarqube-db
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: ${SONAR_DB_PASSWORD:-Dev_Sonar_Db_2026}
+      POSTGRES_DB: sonarqube
+      TZ: Asia/Seoul
+    volumes:
+      - sonar-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar -d sonarqube"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - sonar-net
+
+  sonarqube:
+    image: sonarqube:10.6-community
+    container_name: scheduling-sonarqube
+    environment:
+      SONAR_JDBC_URL: "jdbc:postgresql://sonarqube-db:5432/sonarqube"
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: ${SONAR_DB_PASSWORD:-Dev_Sonar_Db_2026}
+      SONAR_WEB_CONTEXT: /
+      # admin 초기 비밀번호 (첫 부팅 후 강제 변경)
+      SONAR_FORCEAUTHENTICATION: "true"
+      TZ: Asia/Seoul
+    ports:
+      - "127.0.0.1:9001:9000"             # 메인 stack Prometheus 9090 과 격리, +1 회피
+    volumes:
+      - sonar-data:/opt/sonarqube/data
+      - sonar-extensions:/opt/sonarqube/extensions
+      - sonar-logs:/opt/sonarqube/logs
+    ulimits:
+      nofile: { soft: 65536, hard: 65536 }
+    depends_on:
+      sonarqube-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9000/api/system/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s              # ES + JVM 부팅 여유
+    restart: unless-stopped
+    networks:
+      - sonar-net
+
+volumes:
+  sonar-db-data:
+    driver: local
+  sonar-data:
+    driver: local
+  sonar-extensions:
+    driver: local
+  sonar-logs:
+    driver: local
+
+networks:
+  sonar-net:
+    driver: bridge
+    name: sonar-net
