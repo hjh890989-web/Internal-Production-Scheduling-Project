@@ -272,7 +272,81 @@ services:
       - scheduling-net
 
   # ---------------------------------------------------------------------------
-  # 9. Grafana 10.4 (TK-31-1-3) — 17 KPI 대시보드 + datasource provisioning
+  # 9. Loki 3.0 (TK-31-2-1) — 로그 집계 + 90일 retention (NFR-OPS-001)
+  # ---------------------------------------------------------------------------
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: scheduling-loki
+    user: "10001:10001"                 # loki uid
+    command: -config.file=/etc/loki/local-config.yml
+    expose:
+      - "3100"
+    volumes:
+      - ./observability/loki-config.yml:/etc/loki/local-config.yml:ro
+      - loki-data:/loki
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3100/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - scheduling-net
+
+  # ---------------------------------------------------------------------------
+  # 10. Promtail 3.0 (TK-31-2-1) — Docker socket 자동 발견 → Loki push
+  # ---------------------------------------------------------------------------
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: scheduling-promtail
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./observability/promtail-config.yml:/etc/promtail/config.yml:ro
+      - promtail-data:/tmp
+    depends_on:
+      loki:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - scheduling-net
+
+  # ---------------------------------------------------------------------------
+  # 11. AlertManager 0.27 (TK-31-2-3) — Prometheus alert → Slack webhook
+  # ---------------------------------------------------------------------------
+  # Critical 60초 SLA (OPS-003): group_wait=0s + repeat 15m
+  # DEV 에서는 SLACK_WEBHOOK_URL 빈값 — alert 발화 정상이지만 Slack 발송은 NOOP.
+  # ---------------------------------------------------------------------------
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: scheduling-alertmanager
+    user: "65534:65534"
+    environment:
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+      TZ: Asia/Seoul
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    ports:
+      - "127.0.0.1:9093:9093"
+    volumes:
+      - ./observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9093/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - scheduling-net
+
+  # ---------------------------------------------------------------------------
+  # 12. Grafana 10.4 (TK-31-1-3) — 17 KPI 대시보드 + datasource provisioning
   # ---------------------------------------------------------------------------
   # DEV 인증: admin / admin (변경 안 함 — first login 강제 비활성).
   # Keycloak SSO 통합은 ST-30-2 (Sprint 1) Keycloak client 추가 후 활성.
@@ -299,6 +373,8 @@ services:
     depends_on:
       prometheus:
         condition: service_healthy
+      loki:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health | grep -q '\"database\": \"ok\"'"]
       interval: 15s
@@ -310,7 +386,7 @@ services:
       - scheduling-net
 
   # ---------------------------------------------------------------------------
-  # 10. NGINX 1.25 (TK-00-1-3) — TLS + reverse proxy + WebSocket + 정적 서빙
+  # 13. NGINX 1.25 (TK-00-1-3) — TLS + reverse proxy + WebSocket + 정적 서빙
   # ---------------------------------------------------------------------------
   nginx:
     image: nginx:1.25-alpine
@@ -353,6 +429,12 @@ volumes:
   prometheus-data:
     driver: local
   grafana-data:
+    driver: local
+  loki-data:
+    driver: local
+  promtail-data:
+    driver: local
+  alertmanager-data:
     driver: local
 
 networks:

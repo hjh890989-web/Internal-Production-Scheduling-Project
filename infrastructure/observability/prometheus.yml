@@ -73,8 +73,7 @@ scrape_configs:
 rule_files:
   - 'rules/*.yml'
 
-# AlertManager 통합은 ST-31-2 TK-31-2-3 에서 활성
-# alerting:
-#   alertmanagers:
-#     - static_configs:
-#         - targets: ['alertmanager:9093']
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']

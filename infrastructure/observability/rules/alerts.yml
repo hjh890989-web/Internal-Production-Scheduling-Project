@@ -1,0 +1,42 @@
+# =============================================================================
+# Prometheus alerting rules (TK-31-2-3) — 첫 alert rule (probe failure)
+# =============================================================================
+# 추가 alert 는 EP-44 ST-44-3 (Sprint 1+) 에서 본격 정의.
+# 본 파일 = Sprint 0 게이트 검증용 — backend·postgres·keycloak down 감지.
+# =============================================================================
+
+groups:
+  - name: scheduling-availability
+    interval: 30s
+    rules:
+      # ---------- Backend (Spring Boot) DOWN ----------
+      - alert: BackendDown
+        expr: up{job="scheduling-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: backend
+        annotations:
+          summary: 'scheduling-backend 다운 (1분 지속)'
+          runbook: 'https://docs.internal/runbook/backend-down'
+
+      # ---------- PostgreSQL DOWN ----------
+      - alert: PostgresDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: postgres
+        annotations:
+          summary: 'PostgreSQL 다운 (1분 지속)'
+          runbook: 'https://docs.internal/runbook/postgres-down'
+
+      # ---------- Keycloak DOWN ----------
+      - alert: KeycloakDown
+        expr: up{job="keycloak"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: keycloak
+        annotations:
+          summary: 'Keycloak 다운 (2분 지속) — IdP 폴백 모드 작동 중'
