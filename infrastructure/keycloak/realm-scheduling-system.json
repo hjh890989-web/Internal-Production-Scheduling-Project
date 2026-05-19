@@ -4,7 +4,10 @@
   "enabled": true,
   "sslRequired": "external",
   "registrationAllowed": false,
-  "loginWithEmailAllowed": false,
+  "registrationEmailAsUsername": true,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
@@ -136,6 +139,57 @@
         "email",
         "roles"
       ]
+    }
+  ],
+
+  "users": [
+    {
+      "username": "emergency-planner-1",
+      "email": "emergency-planner-1@scheduling.internal",
+      "firstName": "Emergency",
+      "lastName": "Planner-1",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Emergency_Plan1_#2026",
+          "temporary": true
+        }
+      ],
+      "realmRoles": ["PLANNER"]
+    },
+    {
+      "username": "emergency-planner-2",
+      "email": "emergency-planner-2@scheduling.internal",
+      "firstName": "Emergency",
+      "lastName": "Planner-2",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Emergency_Plan2_#2026",
+          "temporary": true
+        }
+      ],
+      "realmRoles": ["PLANNER"]
+    },
+    {
+      "username": "emergency-itops",
+      "email": "emergency-itops@scheduling.internal",
+      "firstName": "Emergency",
+      "lastName": "IT-Ops",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Emergency_ITOps_#2026",
+          "temporary": true
+        }
+      ],
+      "realmRoles": ["IT_OPS"]
     }
   ]
 }
