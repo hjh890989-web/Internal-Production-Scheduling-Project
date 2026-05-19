@@ -26,4 +26,4 @@ REPORT-002 (skills/ 백엔드 적합성 감사) §6 권고에 따라 외부 samp
 ---
 
 **Maintainer**: 본 프로젝트
-**참조**: [REPORT-002](../../REPORT-002_Skills_Backend_Audit_v1.0.md)
+**참조**: [REPORT-002](../harness/REPORT-002_Skills_Backend_Audit_v1.0.md)

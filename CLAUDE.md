@@ -167,7 +167,8 @@
 - 요구사항 — `Phase 1/`
 - 설계 — `Phase 2/` (SRS v1.4 [2.SRS] · PDD-MASTER **v1.7** [1.PDD] · SAD v1.0 [3.SAD] · WBS v1.2 · 20 ADR)
 - 진입 계획 — [PLAN-001_Sprint0_Entry_Plan_v1.0.md](Phase%202/4.Tasks/PLAN-001_Sprint0_Entry_Plan_v1.0.md)
-- Harness 재정립 — [PLAN-002](PLAN-002_AI_Harness_Reset_v1.0.md) · [REPORT-001](REPORT-001_Harness_Reset_Decisions_v1.0.md) · [REPORT-002](REPORT-002_Skills_Backend_Audit_v1.0.md)
+- 또한 — SRS **v1.5** (2026-05-19, NFR-SEC-007 사번+PIN 정책 재정의) `Phase 2/2.SRS/SRS-001_Production_Scheduling_System_v1.5.md`
+- Harness 재정립 — [PLAN-002](docs/harness/PLAN-002_AI_Harness_Reset_v1.0.md) · [REPORT-001](docs/harness/REPORT-001_Harness_Reset_Decisions_v1.0.md) · [REPORT-002](docs/harness/REPORT-002_Skills_Backend_Audit_v1.0.md) · [REPORT-003](docs/harness/REPORT-003_Harness_Phase2_Alignment_v1.0.md)
 
 ---
 

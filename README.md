@@ -4,17 +4,17 @@
 
 | 항목 | 값 |
 |---|---|
-| **Status** | Phase 3 (개발) 진입 준비 — Sprint 0 대기 |
-| **Phase 2 산출** | 465 파일 · 253 SP · ~177 PD · 17 ADR |
-| **언어·런타임** | Java 21 LTS · Spring Boot 3.3 · React 18 |
+| **Status** | Phase 3 (개발) — Sprint 0 완료 / Sprint 1 진행 중 |
+| **Phase 2 산출** | 465 파일 · 253 SP · ~177 PD · 20 ADR · SRS v1.5 |
+| **언어·런타임** | Java 21 LTS · Spring Boot 3.5 · Spring Modulith 1.4 · React 18 |
 | **운영 규모** | 47품번 · LP 4대 + IC 1대 + 압출 (1주 horizon · 1500 row) |
-| **사용자** | ~10명 (사내 한정) |
+| **사용자** | ~10명 (사내 한정, 사번 8자리 + PIN 4자리 NFR-SEC-007 v1.5) |
 
 ---
 
 ## 빠른 시작
 
-본 저장소는 현재 **설계 산출물 + Harness 설정만** 포함합니다. Sprint 0 진입 시 실제 코드가 생성됩니다.
+Phase 3 Sprint 0 완료 (인프라·인증·관측·CI/CD·백업·KST·마스터). Sprint 1 EP-01 (수주통합) 진행 중.
 
 ### Phase 2 산출물 탐색
 - 요구사항 — [Phase 1/](Phase%201/)
@@ -30,10 +30,11 @@
 | 가이드 | [docs/harness/](docs/harness/) |
 | 외부 sample archive | [docs/harness-samples/](docs/harness-samples/) |
 
-### Harness 재정립 보고
-- [PLAN-002](PLAN-002_AI_Harness_Reset_v1.0.md) — 3 Stage 계획
-- [REPORT-001](REPORT-001_Harness_Reset_Decisions_v1.0.md) — Q1~Q6 의사결정 (결재 A 승인)
-- [REPORT-002](REPORT-002_Skills_Backend_Audit_v1.0.md) — skills/ 백엔드 적합성 감사 (결재 A 승인)
+### Harness 재정립 보고 (docs/harness/)
+- [PLAN-002](docs/harness/PLAN-002_AI_Harness_Reset_v1.0.md) — 3 Stage 계획
+- [REPORT-001](docs/harness/REPORT-001_Harness_Reset_Decisions_v1.0.md) — Q1~Q6 의사결정 (결재 A 승인)
+- [REPORT-002](docs/harness/REPORT-002_Skills_Backend_Audit_v1.0.md) — skills/ 백엔드 적합성 감사
+- [REPORT-003](docs/harness/REPORT-003_Harness_Phase2_Alignment_v1.0.md) — Phase 2 정합성 점검
 
 ---
 

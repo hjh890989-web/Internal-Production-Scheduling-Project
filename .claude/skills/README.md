@@ -44,4 +44,4 @@
 - postgresql-index-explain (EXPLAIN ANALYZE 패턴)
 - docker-compose-orchestration (STG/PROD + Blue/Green)
 
-상세 — [REPORT-002](../../REPORT-002_Skills_Backend_Audit_v1.0.md) §6.
+상세 — [REPORT-002](../../docs/harness/REPORT-002_Skills_Backend_Audit_v1.0.md) §6.
