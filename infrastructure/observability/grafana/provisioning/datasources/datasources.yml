@@ -1,0 +1,29 @@
+# =============================================================================
+# Grafana datasource provisioning (TK-31-1-3)
+# =============================================================================
+# Prometheus = 활성 (TK-31-1-2). Loki = 자리 (TK-31-2-1 에서 활성). Tempo = Phase 2+.
+# =============================================================================
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    uid: prometheus
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: 15s
+      httpMethod: POST
+
+  - name: Loki
+    type: loki
+    access: proxy
+    uid: loki
+    url: http://loki:3100
+    editable: true
+    # 본 datasource 는 TK-31-2-1 Loki 컨테이너 활성 전에는 'no data' 표시 — 정상
+    jsonData:
+      maxLines: 1000

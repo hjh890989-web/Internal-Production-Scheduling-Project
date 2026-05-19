@@ -1,0 +1,185 @@
+{
+  "uid": "scheduling-17-kpi",
+  "title": "17 KPI Overview — Phase 2/3 진척도",
+  "tags": ["scheduling", "kpi", "skeleton"],
+  "timezone": "Asia/Seoul",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1h",
+  "time": { "from": "now-7d", "to": "now" },
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "panels": [
+    {
+      "id": 100,
+      "type": "row",
+      "title": "공통 NS KPI (SRS NS-S05~09, NS-04)",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "NS-S05 납기 D-Day 준수율",
+      "description": "실 metric = EP-47 KPI 인프라 (Sprint 5)에서 채움",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_ns_s05_due_compliance", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 0.95 }] } }
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "NS-S06 D-2 준수율",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_ns_s06_d2_compliance", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 0.98 }] } } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "NS-S07 D-1 준수율",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_ns_s07_d1_compliance", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 0.98 }] } } }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "NS-S08 셋업 0건",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_ns_s08_zero_setup", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "NS-S09 신규 라인 사용률",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_ns_s09_new_line_usage", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 0.90 }] } } }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "NS-04 알림 도달률",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_ns_04_notify_delivery", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 0.95 }] } } }
+    },
+
+    {
+      "id": 200,
+      "type": "row",
+      "title": "성형 KPI (K-V01~05)",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "K-V01 LP 슬롯 가동률",
+      "gridPos": { "h": 4, "w": 5, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_k_v01_lp_slot_utilization", "refId": "A" }]
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "K-V02 회전수 충족률",
+      "gridPos": { "h": 4, "w": 5, "x": 5, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_k_v02_rotation_fill", "refId": "A" }]
+    },
+    {
+      "id": 13,
+      "type": "stat",
+      "title": "K-V03 셋팅그룹 위반",
+      "gridPos": { "h": 4, "w": 5, "x": 10, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_k_v03_setting_violation", "refId": "A" }]
+    },
+    {
+      "id": 14,
+      "type": "stat",
+      "title": "K-V04 합금형 충돌",
+      "gridPos": { "h": 4, "w": 5, "x": 15, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_k_v04_composite_clash", "refId": "A" }]
+    },
+    {
+      "id": 15,
+      "type": "stat",
+      "title": "K-V05 IC 가류기 가동률",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_k_v05_ic_utilization", "refId": "A" }]
+    },
+
+    {
+      "id": 300,
+      "type": "row",
+      "title": "압출 KPI (K-E01~06)",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 10 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 21,
+      "type": "stat",
+      "title": "K-E01 4-shift 75% 가동률",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 11 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_k_e01_shift_utilization", "refId": "A" }]
+    },
+    {
+      "id": 22,
+      "type": "stat",
+      "title": "K-E02 압출 셋업 횟수",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 11 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_k_e02_setup_count", "refId": "A" }]
+    },
+    {
+      "id": 23,
+      "type": "stat",
+      "title": "K-E03 수율 (BR-E05 ref 2531)",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 11 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_k_e03_yield", "refId": "A" }]
+    },
+    {
+      "id": 24,
+      "type": "stat",
+      "title": "K-E04 가공 손실률",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 11 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_k_e04_loss_rate", "refId": "A" }]
+    },
+    {
+      "id": 25,
+      "type": "stat",
+      "title": "K-E05 재공 일수",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 11 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_k_e05_wip_days", "refId": "A" }]
+    },
+    {
+      "id": 26,
+      "type": "stat",
+      "title": "K-E06 압출 라인 전환 손실",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 11 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_kpi_k_e06_transition_loss", "refId": "A" }]
+    }
+  ]
+}

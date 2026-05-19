@@ -272,7 +272,45 @@ services:
       - scheduling-net
 
   # ---------------------------------------------------------------------------
-  # 9. NGINX 1.25 (TK-00-1-3) — TLS + reverse proxy + WebSocket + 정적 서빙
+  # 9. Grafana 10.4 (TK-31-1-3) — 17 KPI 대시보드 + datasource provisioning
+  # ---------------------------------------------------------------------------
+  # DEV 인증: admin / admin (변경 안 함 — first login 강제 비활성).
+  # Keycloak SSO 통합은 ST-30-2 (Sprint 1) Keycloak client 추가 후 활성.
+  # provisioning 으로 Prometheus datasource + 3 대시보드 자동 import.
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: scheduling-grafana
+    user: "472:0"                       # grafana uid + root group (volume 권한)
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_LOG_LEVEL: warn
+      GF_FEATURE_TOGGLES_ENABLE: nestedFolders
+      TZ: Asia/Seoul                    # BR-X04
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health | grep -q '\"database\": \"ok\"'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - scheduling-net
+
+  # ---------------------------------------------------------------------------
+  # 10. NGINX 1.25 (TK-00-1-3) — TLS + reverse proxy + WebSocket + 정적 서빙
   # ---------------------------------------------------------------------------
   nginx:
     image: nginx:1.25-alpine
@@ -313,6 +351,8 @@ volumes:
   keycloak-db-data:
     driver: local
   prometheus-data:
+    driver: local
+  grafana-data:
     driver: local
 
 networks:

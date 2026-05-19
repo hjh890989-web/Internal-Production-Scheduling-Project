@@ -1,0 +1,91 @@
+{
+  "uid": "scheduling-system-overview",
+  "title": "System Overview — Infra Health",
+  "tags": ["scheduling", "system", "infra"],
+  "timezone": "Asia/Seoul",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Backend UP",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "up{job=\"scheduling-backend\"}", "refId": "A" }],
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }] } }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "PostgreSQL UP",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "pg_up", "refId": "A" }],
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }] } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Keycloak UP",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "up{job=\"keycloak\"}", "refId": "A" }],
+      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }] } }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Prometheus targets UP",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(up)", "refId": "A" }]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "JVM heap usage (backend)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "jvm_memory_used_bytes{service=\"backend\", area=\"heap\"}", "refId": "A", "legendFormat": "{{id}} used" },
+        { "expr": "jvm_memory_max_bytes{service=\"backend\", area=\"heap\"}", "refId": "B", "legendFormat": "{{id}} max" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes" } }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "PostgreSQL connections (active / max)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "pg_stat_activity_count", "refId": "A", "legendFormat": "{{state}}" },
+        { "expr": "pg_settings_max_connections", "refId": "B", "legendFormat": "max" }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "HikariCP pool — active vs idle",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "hikaricp_connections_active{service=\"backend\"}", "refId": "A", "legendFormat": "active" },
+        { "expr": "hikaricp_connections_idle{service=\"backend\"}", "refId": "B", "legendFormat": "idle" }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Container CPU + memory (cAdvisor — TK-44 후행)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "vector(0)", "refId": "A", "legendFormat": "TK-44-5-1 cAdvisor 필요" }]
+    }
+  ]
+}
