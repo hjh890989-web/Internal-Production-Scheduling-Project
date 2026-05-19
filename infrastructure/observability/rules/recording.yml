@@ -1,0 +1,26 @@
+# =============================================================================
+# Prometheus recording rules — TK-31-1-2 (golden signals 집계)
+# =============================================================================
+# EP-44 ST-44-2-3 KPI 대시보드 + EP-40 PER 메트릭에서 활용.
+# 본 파일 = Sprint 0 골격. Story 1+ 실 KPI 추가.
+# =============================================================================
+
+groups:
+  - name: scheduling_golden_signals
+    interval: 30s
+    rules:
+      # ---------- HTTP rate (req/s) — RED 메트릭 R ----------
+      - record: scheduling:http_requests:rate5m
+        expr: sum by (method, uri, status) (rate(http_server_requests_seconds_count{service="backend"}[5m]))
+
+      # ---------- HTTP error rate (5xx) — RED 메트릭 E ----------
+      - record: scheduling:http_errors:rate5m
+        expr: sum by (uri) (rate(http_server_requests_seconds_count{service="backend",status=~"5.."}[5m]))
+
+      # ---------- HTTP p95 latency — RED 메트릭 D ----------
+      - record: scheduling:http_latency_p95:5m
+        expr: histogram_quantile(0.95, sum by (le, uri) (rate(http_server_requests_seconds_bucket{service="backend"}[5m])))
+
+      # ---------- JVM heap utilization ----------
+      - record: scheduling:jvm_heap_used_ratio
+        expr: jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}

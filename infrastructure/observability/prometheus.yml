@@ -1,0 +1,80 @@
+# =============================================================================
+# Prometheus 2.52 scrape config (TK-31-1-2)
+# =============================================================================
+# scrape interval 15s — SAD ADR-014 / SRS OPS-001
+# retention 30d — compose --storage.tsdb.retention.time=30d
+# 장기 보존은 Loki (90일 로그) + 향후 external object storage 검토
+# =============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: scheduling-dev
+    environment: dev
+
+scrape_configs:
+  # ---------------------------------------------------------------------------
+  # 1. Backend (Spring Actuator + Micrometer Prometheus) — TK-31-1-1
+  # ---------------------------------------------------------------------------
+  - job_name: 'scheduling-backend'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['backend:8080']
+        labels:
+          service: backend
+          module: spring-boot
+
+  # ---------------------------------------------------------------------------
+  # 2. Prometheus self-scrape
+  # ---------------------------------------------------------------------------
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ---------------------------------------------------------------------------
+  # 3. PostgreSQL exporter — DB connection·query·replication metric
+  # ---------------------------------------------------------------------------
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: postgres
+
+  # ---------------------------------------------------------------------------
+  # 4. Keycloak (KC_METRICS_ENABLED=true → /metrics on 8080)
+  # ---------------------------------------------------------------------------
+  - job_name: 'keycloak'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['keycloak:8080']
+        labels:
+          service: keycloak
+
+  # ---------------------------------------------------------------------------
+  # 5. (TK-41-1-1 추가) Blackbox Exporter — /health probe
+  # ---------------------------------------------------------------------------
+  # - job_name: 'blackbox'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]
+  #   static_configs:
+  #     - targets:
+  #         - http://backend:8080/actuator/health
+  #         - http://nginx/health
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: blackbox-exporter:9115
+
+rule_files:
+  - 'rules/*.yml'
+
+# AlertManager 통합은 ST-31-2 TK-31-2-3 에서 활성
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
