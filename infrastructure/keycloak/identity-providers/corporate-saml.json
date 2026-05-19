@@ -1,0 +1,31 @@
+{
+  "_comment": "사내 SAML IdP (AD FS / Entra ID / Okta) 페더레이션 — Keycloak Admin REST API 또는 Admin Console 에서 import. PROD 배포 전에 사내 IT부서로부터 metadata XML 받아서 singleSignOnServiceUrl·signingCertificate 등 채울 것.",
+  "alias": "corporate-saml",
+  "displayName": "사내 SSO (SAML)",
+  "providerId": "saml",
+  "enabled": true,
+  "trustEmail": true,
+  "storeToken": false,
+  "addReadTokenRoleOnCreate": false,
+  "authenticateByDefault": false,
+  "linkOnly": false,
+  "firstBrokerLoginFlowAlias": "first broker login",
+  "syncMode": "FORCE",
+  "config": {
+    "singleSignOnServiceUrl": "https://idp.company.local/adfs/ls/",
+    "singleLogoutServiceUrl": "https://idp.company.local/adfs/ls/?wa=wsignout1.0",
+    "entityId": "https://scheduling.internal/realms/scheduling-system",
+    "nameIDPolicyFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+    "principalType": "ATTRIBUTE",
+    "principalAttribute": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+    "wantAssertionsSigned": "true",
+    "wantAssertionsEncrypted": "false",
+    "validateSignature": "true",
+    "signingCertificate": "REPLACE_WITH_IDP_X509_CERTIFICATE_BASE64",
+    "postBindingResponse": "true",
+    "postBindingAuthnRequest": "true",
+    "forceAuthn": "false",
+    "syncMode": "FORCE",
+    "allowedClockSkew": "30"
+  }
+}

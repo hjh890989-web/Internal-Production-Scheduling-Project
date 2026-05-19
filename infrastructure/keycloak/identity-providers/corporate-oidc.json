@@ -1,0 +1,33 @@
+{
+  "_comment": "사내 OIDC IdP (Microsoft Entra ID / Okta 등) 페더레이션 — SAML 미지원 IdP 또는 백업 경로. PROD 배포 전 issuer·clientId·clientSecret 채울 것.",
+  "alias": "corporate-oidc",
+  "displayName": "사내 SSO (OIDC)",
+  "providerId": "oidc",
+  "enabled": true,
+  "trustEmail": true,
+  "storeToken": false,
+  "addReadTokenRoleOnCreate": false,
+  "authenticateByDefault": false,
+  "linkOnly": false,
+  "firstBrokerLoginFlowAlias": "first broker login",
+  "syncMode": "FORCE",
+  "config": {
+    "issuer": "https://login.microsoftonline.com/TENANT_ID/v2.0",
+    "authorizationUrl": "https://login.microsoftonline.com/TENANT_ID/oauth2/v2.0/authorize",
+    "tokenUrl": "https://login.microsoftonline.com/TENANT_ID/oauth2/v2.0/token",
+    "userInfoUrl": "https://graph.microsoft.com/oidc/userinfo",
+    "logoutUrl": "https://login.microsoftonline.com/TENANT_ID/oauth2/v2.0/logout",
+    "jwksUrl": "https://login.microsoftonline.com/TENANT_ID/discovery/v2.0/keys",
+    "useJwksUrl": "true",
+    "validateSignature": "true",
+    "clientId": "REPLACE_WITH_AZURE_APP_REGISTRATION_CLIENT_ID",
+    "clientSecret": "REPLACE_WITH_AZURE_CLIENT_SECRET",
+    "clientAuthMethod": "client_secret_post",
+    "defaultScope": "openid profile email groups",
+    "pkceEnabled": "true",
+    "pkceMethod": "S256",
+    "syncMode": "FORCE",
+    "backchannelSupported": "false",
+    "loginHint": "true"
+  }
+}

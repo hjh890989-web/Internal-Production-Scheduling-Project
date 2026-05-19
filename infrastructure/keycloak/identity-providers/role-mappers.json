@@ -1,0 +1,61 @@
+{
+  "_comment": "AD group / Azure group → realm role 자동 매핑. SAML/OIDC IdP 등록 후 Keycloak Admin Console → Identity Providers → <alias> → Mappers 에서 import. CLAUDE.md RBAC 매트릭스 정합 (PLANNER·STK_USER·IT_OPS·READ_ONLY).",
+  "mappers": [
+    {
+      "name": "AD Group → PLANNER",
+      "identityProviderAlias": "corporate-saml",
+      "identityProviderMapper": "saml-role-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT",
+        "attribute.name": "memberOf",
+        "attribute.value.regex": "CN=Scheduling-Planner,.*",
+        "role": "PLANNER"
+      }
+    },
+    {
+      "name": "AD Group → STK_USER",
+      "identityProviderAlias": "corporate-saml",
+      "identityProviderMapper": "saml-role-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT",
+        "attribute.name": "memberOf",
+        "attribute.value.regex": "CN=Scheduling-STK,.*",
+        "role": "STK_USER"
+      }
+    },
+    {
+      "name": "AD Group → IT_OPS",
+      "identityProviderAlias": "corporate-saml",
+      "identityProviderMapper": "saml-role-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT",
+        "attribute.name": "memberOf",
+        "attribute.value.regex": "CN=IT-Operations,.*",
+        "role": "IT_OPS"
+      }
+    },
+    {
+      "name": "AD Group → READ_ONLY",
+      "identityProviderAlias": "corporate-saml",
+      "identityProviderMapper": "saml-role-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT",
+        "attribute.name": "memberOf",
+        "attribute.value.regex": "CN=Scheduling-(Auditor|Executive),.*",
+        "role": "READ_ONLY"
+      }
+    },
+    {
+      "_comment": "OIDC (Entra ID) 의 group claim 매핑 — Azure AD security group ID 사용. SAML 와 동일 4 role 매핑.",
+      "name": "Entra Group → PLANNER",
+      "identityProviderAlias": "corporate-oidc",
+      "identityProviderMapper": "oidc-role-idp-mapper",
+      "config": {
+        "syncMode": "INHERIT",
+        "claim": "groups",
+        "claim.value": "REPLACE_WITH_PLANNER_GROUP_OBJECT_ID",
+        "role": "PLANNER"
+      }
+    }
+  ]
+}
