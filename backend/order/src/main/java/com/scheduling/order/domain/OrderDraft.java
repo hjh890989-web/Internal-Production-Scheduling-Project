@@ -40,4 +40,16 @@ public record OrderDraft(
             customer = "내수";
         }
     }
+
+    /** 기존 마스터 Order → OrderDraft 변환 (TK-02-2-1 PrecedenceResolver 가 동질 비교). */
+    public static OrderDraft fromExisting(Order order) {
+        return new OrderDraft(
+            order.getOrderId(),
+            order.getHoseId(),
+            order.getDeliveryDate(),
+            order.getQty(),
+            order.getOrderType(),
+            order.getCustomer()
+        );
+    }
 }
