@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 class OrderImportControllerTest {
 
     private ImportOrchestratorService orchestrator;
+    private com.scheduling.order.import_.ImportRetryService retryService;
     private ImportTrackingService tracking;
     private Clock clock;
     private OrderImportController controller;
@@ -42,9 +43,10 @@ class OrderImportControllerTest {
     @BeforeEach
     void setUp() {
         orchestrator = mock(ImportOrchestratorService.class);
+        retryService = mock(com.scheduling.order.import_.ImportRetryService.class);
         tracking = mock(ImportTrackingService.class);
         clock = Clock.fixed(Instant.parse("2026-05-19T05:00:00Z"), ZoneId.of("Asia/Seoul"));
-        controller = new OrderImportController(orchestrator, tracking, clock);
+        controller = new OrderImportController(orchestrator, retryService, tracking, clock);
         doNothing().when(orchestrator).processAsync(any(UUID.class), anyList());
     }
 
@@ -177,5 +179,37 @@ class OrderImportControllerTest {
         }
         verify(orchestrator, never()).processAsync(any(), anyList());
         verify(tracking, never()).markStarted(any(), any());
+    }
+
+    @Test
+    @DisplayName("TK-01-2-3 retry — 캐시 hit → 202 + retryAsync 호출")
+    void retry_cache_hit_triggers_async() {
+        UUID id = UUID.randomUUID();
+        when(tracking.loadParsedWorkbooks(id))
+            .thenReturn(java.util.List.of(new com.scheduling.order.parser.ParsedWorkbook("a.xlsx", java.util.List.of())));
+
+        RetryResponse response = controller.retry(id);
+
+        assertThat(response.trackingId()).isEqualTo(id);
+        assertThat(response.status()).isEqualTo(ImportStatus.QUEUED);
+        assertThat(response.statusUrl()).isEqualTo("/api/v1/orders/import/" + id);
+        verify(retryService).retryAsync(id);
+    }
+
+    @Test
+    @DisplayName("TK-01-2-3 retry — 캐시 만료 → HTTP 410 Gone")
+    void retry_cache_miss_returns_410() {
+        UUID id = UUID.randomUUID();
+        when(tracking.loadParsedWorkbooks(id))
+            .thenThrow(new NoSuchElementException("ParsedWorkbook 캐시 만료: " + id));
+
+        assertThatThrownBy(() -> controller.retry(id))
+            .isInstanceOf(ResponseStatusException.class)
+            .satisfies(e -> {
+                ResponseStatusException rse = (ResponseStatusException) e;
+                assertThat(rse.getStatusCode().value()).isEqualTo(410);
+                assertThat(rse.getReason()).contains("캐시 만료");
+            });
+        verify(retryService, never()).retryAsync(any());
     }
 }

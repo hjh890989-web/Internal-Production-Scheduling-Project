@@ -1,7 +1,11 @@
 package com.scheduling.order.import_;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scheduling.order.api.ImportStatusResponse;
+import com.scheduling.order.mapping.MappingResult;
 import com.scheduling.order.parser.ClassificationResult;
+import com.scheduling.order.parser.ParsedWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -35,11 +39,16 @@ public class ImportTrackingService {
     private static final Duration TTL = Duration.ofHours(24);
     private static final String KEY_PREFIX = "scheduling:import:";
 
+    private static final String PARSED_KEY_PREFIX = "scheduling:import:parsed:";
+    private static final String MAPPING_KEY_PREFIX = "scheduling:import:mapping:";
+
     private final StringRedisTemplate redis;
+    private final ObjectMapper objectMapper;
     private final Clock clock;
 
-    public ImportTrackingService(StringRedisTemplate redis, Clock clock) {
+    public ImportTrackingService(StringRedisTemplate redis, ObjectMapper objectMapper, Clock clock) {
         this.redis = redis;
+        this.objectMapper = objectMapper;
         this.clock = clock;
     }
 
@@ -124,5 +133,66 @@ public class ImportTrackingService {
 
     private String key(UUID trackingId) {
         return KEY_PREFIX + trackingId;
+    }
+
+    // -----------------------------------------------------------------------
+    // TK-01-2-3 — ParsedWorkbook 캐시 (라운드트립 재매핑)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Parse 결과 캐시 — 사용자 룰 수정 후 retry 시 재업로드 회피 (REQ-FUNC-OC-004).
+     * TTL 24h.
+     */
+    public void cacheParsedWorkbooks(UUID trackingId, List<ParsedWorkbook> workbooks) {
+        String key = PARSED_KEY_PREFIX + trackingId;
+        try {
+            String payload = objectMapper.writeValueAsString(workbooks);
+            redis.opsForValue().set(key, payload, TTL);
+            log.info("Cached {} parsed workbooks for trackingId={} ({}KB)",
+                workbooks.size(), trackingId, payload.length() / 1024);
+        } catch (Exception e) {
+            throw new IllegalStateException("ParsedWorkbook 직렬화 실패: " + trackingId, e);
+        }
+    }
+
+    /**
+     * 캐시된 ParsedWorkbook 로드. TTL 만료 시 {@link NoSuchElementException}.
+     */
+    public List<ParsedWorkbook> loadParsedWorkbooks(UUID trackingId) {
+        String key = PARSED_KEY_PREFIX + trackingId;
+        String payload = redis.opsForValue().get(key);
+        if (payload == null) {
+            throw new NoSuchElementException("ParsedWorkbook 캐시 만료 또는 미존재: " + trackingId);
+        }
+        try {
+            return objectMapper.readValue(payload, new TypeReference<List<ParsedWorkbook>>() {});
+        } catch (Exception e) {
+            throw new IllegalStateException("ParsedWorkbook 역직렬화 실패: " + trackingId, e);
+        }
+    }
+
+    /**
+     * 매핑 결과 캐시 — UI 가 즉시 조회 (실패 row 보정 모달 입력).
+     */
+    public void cacheMappingResult(UUID trackingId, MappingResult result) {
+        String key = MAPPING_KEY_PREFIX + trackingId;
+        try {
+            redis.opsForValue().set(key, objectMapper.writeValueAsString(result), TTL);
+        } catch (Exception e) {
+            throw new IllegalStateException("MappingResult 직렬화 실패: " + trackingId, e);
+        }
+    }
+
+    public MappingResult loadMappingResult(UUID trackingId) {
+        String key = MAPPING_KEY_PREFIX + trackingId;
+        String payload = redis.opsForValue().get(key);
+        if (payload == null) {
+            throw new NoSuchElementException("MappingResult 캐시 없음: " + trackingId);
+        }
+        try {
+            return objectMapper.readValue(payload, MappingResult.class);
+        } catch (Exception e) {
+            throw new IllegalStateException("MappingResult 역직렬화 실패: " + trackingId, e);
+        }
     }
 }

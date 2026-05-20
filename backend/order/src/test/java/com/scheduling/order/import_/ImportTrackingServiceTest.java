@@ -82,7 +82,7 @@ class ImportTrackingServiceTest {
             return result;
         }).when(hashOps).entries(anyString());
 
-        service = new ImportTrackingService(redis, clock);
+        service = new ImportTrackingService(redis, new com.fasterxml.jackson.databind.ObjectMapper(), clock);
     }
 
     @Test

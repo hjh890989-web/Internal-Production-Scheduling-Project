@@ -1,6 +1,7 @@
 package com.scheduling.order.api;
 
 import com.scheduling.order.import_.ImportOrchestratorService;
+import com.scheduling.order.import_.ImportRetryService;
 import com.scheduling.order.import_.ImportStatus;
 import com.scheduling.order.import_.ImportTrackingService;
 import org.slf4j.Logger;
@@ -41,15 +42,18 @@ public class OrderImportController {
     private static final int MAX_FILES = 3;
 
     private final ImportOrchestratorService orchestrator;
+    private final ImportRetryService retryService;
     private final ImportTrackingService tracking;
     private final Clock clock;
 
     public OrderImportController(
         ImportOrchestratorService orchestrator,
+        ImportRetryService retryService,
         ImportTrackingService tracking,
         Clock clock
     ) {
         this.orchestrator = orchestrator;
+        this.retryService = retryService;
         this.tracking = tracking;
         this.clock = clock;
     }
@@ -79,6 +83,32 @@ public class OrderImportController {
     @GetMapping("/import/{trackingId}")
     public ImportStatusResponse status(@PathVariable UUID trackingId) {
         return tracking.get(trackingId);
+    }
+
+    /**
+     * TK-01-2-3 — 라운드트립 재매핑. 룰셋 변경 후 원본 파일 재업로드 없이 매핑만 재실행.
+     * 캐시 TTL 24h 만료 시 HTTP 410 (Gone) — 원본 재업로드 안내.
+     */
+    @PostMapping("/import/{trackingId}/retry")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public RetryResponse retry(@PathVariable UUID trackingId) {
+        // early fail — 캐시 존재 확인 후 비동기 트리거 (race 회피)
+        try {
+            tracking.loadParsedWorkbooks(trackingId);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.GONE,
+                "캐시 만료 (24h) — 원본 파일을 다시 업로드해 주세요.");
+        }
+
+        retryService.retryAsync(trackingId);
+        log.info("Accepted retry {}", trackingId);
+
+        return new RetryResponse(
+            trackingId,
+            ImportStatus.QUEUED,
+            "/api/v1/orders/import/" + trackingId,
+            Instant.now(clock)
+        );
     }
 
     private void validateFiles(List<MultipartFile> files) {

@@ -1,5 +1,8 @@
 package com.scheduling.order.parser;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,14 +22,26 @@ public final class ParsedSheet {
         this.rows = new ArrayList<>();
     }
 
+    /** Jackson 역직렬화용 (TK-01-2-3 Redis 캐시 라운드트립). */
+    @JsonCreator
+    public ParsedSheet(
+        @JsonProperty("name") String name,
+        @JsonProperty("rows") List<ParsedRow> rows
+    ) {
+        this.name = name;
+        this.rows = rows == null ? new ArrayList<>() : new ArrayList<>(rows);
+    }
+
     public void addRow(ParsedRow row) {
         rows.add(row);
     }
 
+    @JsonProperty("name")
     public String name() {
         return name;
     }
 
+    @JsonProperty("rows")
     public List<ParsedRow> rows() {
         return Collections.unmodifiableList(rows);
     }
