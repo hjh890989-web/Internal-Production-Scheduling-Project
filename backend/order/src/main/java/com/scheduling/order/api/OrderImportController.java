@@ -89,6 +89,22 @@ public class OrderImportController {
     }
 
     /**
+     * TK-01-2-2 매핑 보정 UI 데이터 소스 — MappingResult 직접 조회.
+     * UI ({@code MappingReviewModal}) 가 successes·failures·sourceType 을 표시.
+     * 캐시 TTL 24h 만료 시 HTTP 410.
+     */
+    @GetMapping("/import/{trackingId}/mapping-result")
+    @PreAuthorize("hasAnyRole('PLANNER', 'STK_USER', 'IT_OPS', 'READ_ONLY')")
+    public com.scheduling.order.mapping.MappingResult mappingResult(@PathVariable UUID trackingId) {
+        try {
+            return tracking.loadMappingResult(trackingId);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.GONE,
+                "매핑 결과 캐시 만료 또는 미존재: " + trackingId);
+        }
+    }
+
+    /**
      * TK-01-2-3 — 라운드트립 재매핑. 룰셋 변경 후 원본 파일 재업로드 없이 매핑만 재실행.
      * 캐시 TTL 24h 만료 시 HTTP 410 (Gone) — 원본 재업로드 안내.
      */
