@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.bundles.spring.web)
     implementation(libs.bundles.spring.data)
     implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.boot.starter.oauth2.resource.server)   // TK-30-2-1 JWT
     implementation(libs.spring.boot.starter.websocket)
     implementation(libs.spring.modulith.starter.core)
     implementation(libs.springdoc.openapi)
@@ -28,4 +29,6 @@ dependencies {
 
     // ArchUnit 빌드 타임 강제 (TK-00-2-3) — Sprint 0 DoD 항목 2 달성
     testImplementation(libs.bundles.test.arch)
+    // Spring Security 6 테스트 헬퍼 (@WithMockUser 등) — TK-30-2-1·2
+    testImplementation(libs.spring.security.test)
 }
