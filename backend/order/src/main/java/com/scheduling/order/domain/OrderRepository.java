@@ -43,4 +43,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     List<Order> findActiveByHoseDeliveryPairs(
         @Param("hoseIds") List<String> hoseIds,
         @Param("deliveryDates") List<LocalDate> deliveryDates);
+
+    /** 특정 master_version 의 ACTIVE row — TK-03-1-1 Diff 입력. */
+    @Query("SELECT o FROM Order o WHERE o.masterVersion = :version AND o.status = 'ACTIVE'")
+    List<Order> findByMasterVersion(@Param("version") int version);
 }
