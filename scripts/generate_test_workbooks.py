@@ -38,24 +38,27 @@ OUT_DIR = Path(__file__).resolve().parent.parent / \
 # SourceType 별 변형 정의 (filename, sheetname, headers)
 # ---------------------------------------------------------------------------
 
+# 각 SourceType 별 워크북: 헤더는 hose_id·qty·delivery_date 3 필수 + (선택) 비고 컬럼.
+# 분류기·매핑기 양쪽에서 다양한 어휘 변형을 검증하도록 SourceType 키워드 1개 이상 포함.
+
 MONTHLY = [
     ("2026년 1월 월별 예상 발주.xlsx", "월간 예상",   ["품번", "수량", "예상 납기", "Σ월간"]),
-    ("2026년 2월 월별 발주 예측.xlsx", "월별 예상",   ["품번", "수량", "예측", "비고"]),
-    ("monthly_forecast_jan.xlsx",      "Forecast",    ["Part", "Qty", "Forecast"]),
+    ("2026년 2월 월별 발주 예측.xlsx", "월별 예상",   ["품번", "수량", "납기", "비고"]),
+    ("monthly_forecast_jan.xlsx",      "Forecast",    ["Part", "Qty", "Date"]),
     ("FORECAST_FEB_2026.xlsx",         "FORECAST",    ["Hose", "Quantity", "DueDate"]),
     ("월간 발주 예상_3월.xlsx",        "월간 예상",   ["품번", "예상 수량", "납기"]),
-    ("예상 발주 4월.xlsx",             "월별 예상",   ["품번", "수량", "비고"]),
+    ("예상 발주 4월.xlsx",             "월별 예상",   ["품번", "수량", "납품일"]),
     ("MONTHLY-FORECAST-MAY.xlsx",      "FORECAST",    ["Item", "Qty", "Date"]),
 ]
 
 WEEKLY = [
-    ("실리콘 02월 1주차 주간 계획.xlsx", "주간 계획", ["품번", "Mon", "Tue", "Wed", "Thu", "Fri"]),
-    ("주간 발주 2026-W05.xlsx",         "주간 발주", ["품번", "주차", "수량"]),
-    ("weekly_plan_w05.xlsx",            "WEEKLY",    ["Hose", "Mon", "Tue", "Wed"]),
-    ("WEEKLY_PLAN_W06.xlsx",            "WEEKLY",    ["Part", "Week", "Qty"]),
-    ("주별 발주 W07.xlsx",              "주별 계획", ["품번", "주차", "수량"]),
-    ("주차별 계획 W08.xlsx",            "주간 계획", ["품번", "주차", "수량", "비고"]),
-    ("weekly-w09.xlsx",                 "Weekly",    ["Hose", "Week", "Qty"]),
+    ("실리콘 02월 1주차 주간 계획.xlsx", "주간 계획", ["품번", "수량", "납기", "주차"]),
+    ("주간 발주 2026-W05.xlsx",         "주간 발주", ["품번", "수량", "납기"]),
+    ("weekly_plan_w05.xlsx",            "WEEKLY",    ["Hose", "Qty", "Date"]),
+    ("WEEKLY_PLAN_W06.xlsx",            "WEEKLY",    ["Part", "Qty", "DueDate"]),
+    ("주별 발주 W07.xlsx",              "주별 계획", ["품번", "수량", "납기"]),
+    ("주차별 계획 W08.xlsx",            "주간 계획", ["품번", "수량", "납기", "비고"]),
+    ("weekly-w09.xlsx",                 "Weekly",    ["Hose", "Qty", "Date"]),
 ]
 
 CONFIRMED = [
@@ -64,19 +67,19 @@ CONFIRMED = [
     ("CONFIRMED_ORDER_JAN.xlsx",        "CONFIRMED",  ["Part", "Qty", "Date"]),
     ("confirmed_feb_2026.xlsx",         "Confirmed",  ["Hose", "Quantity", "Delivery"]),
     ("정식 발주 1주.xlsx",              "정식 발주",  ["품번", "수량", "납기"]),
-    ("발주 확정_3월.xlsx",              "확정",       ["품번", "수량"]),
-    ("FINAL_ORDER_W10.xlsx",            "CONFIRMED",  ["Item", "Qty", "Week"]),
+    ("발주 확정_3월.xlsx",              "확정",       ["품번", "수량", "납기"]),
+    ("FINAL_ORDER_W10.xlsx",            "CONFIRMED",  ["Item", "Qty", "DueDate"]),
     ("확정_W4_2026.xlsx",               "확정 발주",  ["품번", "수량", "납기"]),
 ]
 
 KD = [
     ("저압 이중관 KD 발주및 납품현황 26년01월.xlsx", "KD 발주", ["품번", "KD 수량", "납품"]),
-    ("KD 발주 2026-02.xlsx",                          "KD",      ["품번", "KD 수량", "재고"]),
-    ("knockdown_jan.xlsx",                            "KD",      ["Part", "KD Qty", "Stock"]),
-    ("KD-Order-W05.xlsx",                             "KD 발주", ["품번", "수량"]),
-    ("Knock-Down_2026.xlsx",                          "KnockDown", ["Hose", "Qty"]),
+    ("KD 발주 2026-02.xlsx",                          "KD",      ["품번", "KD 수량", "납기", "재고"]),
+    ("knockdown_jan.xlsx",                            "KD",      ["Part", "KD Qty", "Date"]),
+    ("KD-Order-W05.xlsx",                             "KD 발주", ["품번", "수량", "납기"]),
+    ("Knock-Down_2026.xlsx",                          "KnockDown", ["Hose", "Qty", "Date"]),
     ("이중관 KD 현황.xlsx",                           "KD 현황", ["품번", "수량", "납품"]),
-    ("KD_INVENTORY_W08.xlsx",                         "KD",      ["Part", "Qty", "Stock"]),
+    ("KD_INVENTORY_W08.xlsx",                         "KD",      ["Part", "Qty", "Date"]),
     ("KD_FEB_W2.xlsx",                                "KD",      ["품번", "수량", "납기"]),
 ]
 

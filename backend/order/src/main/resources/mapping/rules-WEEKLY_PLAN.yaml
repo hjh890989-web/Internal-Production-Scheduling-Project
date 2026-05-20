@@ -18,7 +18,7 @@ fields:
     required: true
 
   delivery_date:
-    aliases: ["주차", "Week", "납기", "납기일", "Mon", "Tue", "Wed", "Thu", "Fri"]
+    aliases: ["주차", "Week", "납기", "납기일", "Mon", "Tue", "Wed", "Thu", "Fri", "Date", "DueDate", "Due Date", "납품", "납품일", "Delivery"]
     dateFormatHints:
       - "yyyy-MM-dd"
       - "yyyy/MM/dd"
