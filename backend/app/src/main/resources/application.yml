@@ -57,6 +57,18 @@ scheduling:
     new-always-critical: true
     deleted-always-critical: true
 
+  # TK-03-3-1 알림 발송 (REQ-FUNC-OC-009)
+  notification:
+    app-url: ${APP_URL:https://schedule.intranet}
+    default-target-role: PLANNER
+    kakao:
+      enabled: ${KAKAO_ENABLED:false}                 # Sprint 1 baseline 기본 비활성 (stub)
+      webhook-url: ${KAKAO_WEBHOOK_URL:}
+      bot-token: ${KAKAO_BOT_TOKEN:}
+      timeout-seconds: 5
+    in-app:
+      topic-prefix: /topic/notifications
+
 management:
   endpoints:
     web:
