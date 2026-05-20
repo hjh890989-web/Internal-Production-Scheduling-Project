@@ -1,0 +1,120 @@
+{
+  "uid": "scheduling-order-duplicate",
+  "title": "Order — Duplicate Detection (K-O03)",
+  "tags": ["scheduling", "order", "kpi", "duplicate"],
+  "timezone": "Asia/Seoul",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Master ORDER row 수 (현재)",
+      "description": "app.order 테이블의 ACTIVE row 카운트. JPA bean 직접 노출 (Sprint 2 EP-40 메트릭 확장).",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_events_total{module=\"order_commit\",operation=\"success\"}", "refId": "A", "legendFormat": "commit success" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green" }] }, "unit": "short" } }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "중복 감지 누적 (배치)",
+      "description": "ORM 사전 검증 (DuplicateDetectionService) 가 batch 단위로 감지한 누적 수.",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_events_total{module=\"order_duplicate\",operation=\"detected_batch\"}", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue" }] }, "unit": "short" } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "DB UNIQUE 위반 누적",
+      "description": "ORM 사전 검증을 우회한 동시성 race 가 PG UNIQUE 제약에서 차단된 횟수. >0 이면 race 가능성 + Slack 알림.",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_events_total{module=\"order_commit\",operation=\"unique_violation\"}", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 100 }] },
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Commit 오류 누적 (UNIQUE 외)",
+      "description": "UNIQUE 외 DB 무결성 오류 — schema·NOT NULL·FK 위반.",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "scheduling_events_total{module=\"order_commit\",operation=\"error\"}", "refId": "A" }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "중복 감지 rate (per minute) — 5m moving",
+      "description": "OrderDuplicateSurge alert (TK-02-1-2 alerts.yml) 임계 = 10/min. 영업·관리 부서 양식 분화 의심 시.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "sum(rate(scheduling_events_total{module=\"order_duplicate\",operation=\"detected_batch\"}[5m])) * 60", "refId": "A", "legendFormat": "batch detected /min" },
+        { "expr": "sum(rate(scheduling_events_total{module=\"order_duplicate\",operation=\"vs_master\"}[5m])) * 60", "refId": "B", "legendFormat": "vs master /min" },
+        { "expr": "sum(rate(scheduling_events_total{module=\"order_duplicate\",operation=\"within_batch\"}[5m])) * 60", "refId": "C", "legendFormat": "within batch /min" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 10 }] }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "UNIQUE 위반 rate (per minute) — DB level",
+      "description": "OrderUniqueViolationSurge alert 임계 = 5/min. ORM 우회 race + 동시성 결함 신호.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "sum(rate(scheduling_events_total{module=\"order_commit\",operation=\"unique_violation\"}[5m])) * 60", "refId": "A", "legendFormat": "unique_violation /min" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 5 }] }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Commit 성공/실패 비율 (5m)",
+      "description": "성공/실패 시계열. 비정상 비율 변화 (정상=99%+) 추적.",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "expr": "sum(rate(scheduling_events_total{module=\"order_commit\",operation=\"success\"}[5m])) * 60", "refId": "A", "legendFormat": "success /min" },
+        { "expr": "sum(rate(scheduling_events_total{module=\"order_commit\",operation=\"unique_violation\"}[5m])) * 60", "refId": "B", "legendFormat": "duplicate /min" },
+        { "expr": "sum(rate(scheduling_events_total{module=\"order_commit\",operation=\"error\"}[5m])) * 60", "refId": "C", "legendFormat": "error /min" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    }
+  ]
+}

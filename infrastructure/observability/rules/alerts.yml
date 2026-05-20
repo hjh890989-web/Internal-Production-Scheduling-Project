@@ -40,3 +40,50 @@ groups:
           service: keycloak
         annotations:
           summary: 'Keycloak 다운 (2분 지속) — IdP 폴백 모드 작동 중'
+
+  # ===========================================================================
+  # EP-02 ST-02-1 — 중복 감지 KPI (K-O03 부속) — TK-02-1-2
+  # ===========================================================================
+  - name: order-duplicate-detection
+    interval: 30s
+    rules:
+      # ---------- 중복 시도 급증 (영업·관리 부서 양식 분화 가능성) ----------
+      - alert: OrderDuplicateSurge
+        expr: |
+          sum(rate(scheduling_events_total{module="order_duplicate", operation="detected_batch"}[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: order
+        annotations:
+          summary: '5분 평균 중복 시도 ≥10 건/분 — 부서 양식 분화·중복 입력 의심'
+          description: 'order_duplicate.detected_batch rate 가 5분간 임계 (10/min) 를 초과. 영업·관리 부서 엑셀 양식 점검 필요.'
+          slack_channel: '#ops-scheduling'
+          runbook: 'https://docs.internal/runbook/order-duplicate-surge'
+
+      # ---------- DB UNIQUE 위반 급증 (ORM 사전 검증 우회 신호) ----------
+      - alert: OrderUniqueViolationSurge
+        expr: |
+          sum(rate(scheduling_events_total{module="order_commit", operation="unique_violation"}[5m])) > 5
+        for: 5m
+        labels:
+          severity: critical
+          service: order
+        annotations:
+          summary: 'DB UNIQUE 위반 ≥5건/분 — DuplicateDetectionService 사전 차단 우회 신호'
+          description: 'order_commit.unique_violation rate 가 5분간 임계 (5/min) 를 초과. ORM 사전 검증 (TK-02-1-3) 점검 + 동시성 race 분석 필요.'
+          slack_channel: '#ops-scheduling'
+          runbook: 'https://docs.internal/runbook/order-unique-violation'
+
+      # ---------- commit 오류 (UNIQUE 외 DB 오류) ----------
+      - alert: OrderCommitErrorSpike
+        expr: |
+          sum(rate(scheduling_events_total{module="order_commit", operation="error"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: critical
+          service: order
+        annotations:
+          summary: 'Order commit 오류 ≥1건/분 — UNIQUE 외 DB 무결성 오류'
+          description: 'order_commit.error rate 가 5분간 임계 (1/min) 를 초과. PG 로그·schema 마이그레이션 상태 점검.'
+          slack_channel: '#ops-scheduling'
