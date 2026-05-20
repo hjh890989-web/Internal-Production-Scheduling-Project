@@ -1,5 +1,6 @@
 package com.scheduling.order.domain;
 
+import com.scheduling.common.metrics.SchedulingMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -30,16 +31,21 @@ public class OrderCommitService {
     private static final String UNIQUE_CONSTRAINT_NAME = "uq_order_hose_delivery_version";
 
     private final OrderRepository repository;
+    private final SchedulingMetrics metrics;
     private final Clock clock;
 
-    public OrderCommitService(OrderRepository repository, Clock clock) {
+    public OrderCommitService(OrderRepository repository, SchedulingMetrics metrics, Clock clock) {
         this.repository = repository;
+        this.metrics = metrics;
         this.clock = clock;
     }
 
     @Transactional
     public Order commit(OrderDraft draft, int masterVersion) {
-        UUID orderId = draft.orderId() != null ? draft.orderId() : UUID.randomUUID();
+        // commit = 항상 신규 row INSERT 시도 — draft.orderId() 는 in-memory 추적용 placeholder.
+        // 동일 entity id 로 save() 가 MERGE 처리되어 UNIQUE 제약을 우회하는 것 차단.
+        // 동일 (hose, delivery, version) 재시도는 UNIQUE 제약이 거부 → DuplicateOrderException.
+        UUID orderId = UUID.randomUUID();
         Order entity = Order.fromDraft(
             new OrderDraft(orderId, draft.hoseId(), draft.deliveryDate(),
                 draft.qty(), draft.orderType(), draft.customer()),
@@ -47,14 +53,21 @@ public class OrderCommitService {
             Instant.now(clock)
         );
         try {
-            return repository.save(entity);
+            // saveAndFlush — Hibernate 가 INSERT 를 즉시 실행 → UNIQUE 위반을 try/catch 가 포착.
+            // save() 는 INSERT 를 transaction commit 까지 지연 → catch block 우회.
+            Order saved = repository.saveAndFlush(entity);
+            if (metrics != null) metrics.increment("order_commit", "success");
+            return saved;
         } catch (DataIntegrityViolationException e) {
             if (isUniqueViolation(e)) {
                 log.warn("Duplicate commit blocked by DB: hose={} delivery={} version={}",
                     draft.hoseId(), draft.deliveryDate(), masterVersion);
+                // K-O03 — TK-02-1-2 DB UNIQUE 위반 카운터 (Grafana / Alertmanager 핫스팟)
+                if (metrics != null) metrics.increment("order_commit", "unique_violation");
                 throw new DuplicateOrderException(
                     draft.hoseId(), draft.deliveryDate(), masterVersion, e);
             }
+            if (metrics != null) metrics.increment("order_commit", "error");
             throw e;
         }
     }

@@ -31,13 +31,15 @@ import static org.mockito.Mockito.when;
 class OrderCommitServiceTest {
 
     private OrderRepository repository;
+    private com.scheduling.common.metrics.SchedulingMetrics metrics;
     private OrderCommitService service;
 
     @BeforeEach
     void setUp() {
         repository = mock(OrderRepository.class);
+        metrics = mock(com.scheduling.common.metrics.SchedulingMetrics.class);
         Clock clock = Clock.fixed(Instant.parse("2026-05-20T05:00:00Z"), ZoneId.of("Asia/Seoul"));
-        service = new OrderCommitService(repository, clock);
+        service = new OrderCommitService(repository, metrics, clock);
     }
 
     private OrderDraft draft() {
@@ -54,7 +56,7 @@ class OrderCommitServiceTest {
     @Test
     @DisplayName("정상 commit — repository.save 호출 + Order 반환")
     void normal_commit() {
-        when(repository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(repository.saveAndFlush(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Order result = service.commit(draft(), 1);
 
@@ -67,7 +69,7 @@ class OrderCommitServiceTest {
     @Test
     @DisplayName("UNIQUE 제약 위반 (constraint name 매칭) → DuplicateOrderException")
     void unique_violation_constraint_name() {
-        when(repository.save(any(Order.class))).thenThrow(
+        when(repository.saveAndFlush(any(Order.class))).thenThrow(
             new DataIntegrityViolationException(
                 "could not execute statement [duplicate key value violates unique constraint \"uq_order_hose_delivery_version\"]"));
 
@@ -86,7 +88,7 @@ class OrderCommitServiceTest {
     @DisplayName("UNIQUE 제약 (root cause 메시지) → DuplicateOrderException")
     void unique_violation_root_cause() {
         Throwable rootCause = new SQLException("ERROR: duplicate key value violates unique constraint \"uq_order_hose_delivery_version\"");
-        when(repository.save(any(Order.class))).thenThrow(
+        when(repository.saveAndFlush(any(Order.class))).thenThrow(
             new DataIntegrityViolationException("wrapper message", rootCause));
 
         assertThatThrownBy(() -> service.commit(draft(), 1))
@@ -96,7 +98,7 @@ class OrderCommitServiceTest {
     @Test
     @DisplayName("기타 DataIntegrityViolation — 원본 예외 전파")
     void other_data_integrity_violation_rethrown() {
-        when(repository.save(any(Order.class))).thenThrow(
+        when(repository.saveAndFlush(any(Order.class))).thenThrow(
             new DataIntegrityViolationException("null value in column foo"));
 
         assertThatThrownBy(() -> service.commit(draft(), 1))
@@ -109,7 +111,7 @@ class OrderCommitServiceTest {
     void null_order_id_generates_uuid() {
         OrderDraft d = new OrderDraft(null, "X", LocalDate.of(2026, 2, 15), 1,
             OrderType.WEEKLY, "내수");
-        when(repository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(repository.saveAndFlush(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Order result = service.commit(d, 2);
         assertThat(result.getOrderId()).isNotNull();
