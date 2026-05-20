@@ -31,5 +31,27 @@
     "save_success": "저장이 완료되었습니다.",
     "save_failure": "저장에 실패했습니다.",
     "session_expired": "세션이 만료되었습니다. 다시 로그인해 주세요."
+  },
+  "import": {
+    "title": "수주 데이터 매핑 검토",
+    "upload_title": "수주 통합 — Excel Import",
+    "upload_drag": "드래그하거나 클릭하여 업로드",
+    "upload_hint": ".xlsx · 최대 3 파일 · 각 20MB 이하",
+    "success_rate": "매핑 성공률",
+    "retry": "재시도",
+    "retry_after_fix": "룰 보정 후 재시도",
+    "next": "다음: 변경 검토",
+    "open_review": "매핑 검토 열기",
+    "alias_add": "별칭 추가",
+    "alias_remove": "별칭 삭제",
+    "rule_save": "룰 저장",
+    "rule_saved": "룰 저장 완료. 재시도하면 적용됩니다.",
+    "fail": {
+      "hose_id": "품번 매핑 실패",
+      "delivery_date": "납기일 매핑 실패",
+      "qty": "수량 매핑 실패",
+      "customer": "거래처 매핑 실패",
+      "header": "헤더 행을 찾을 수 없음"
+    }
   }
 }

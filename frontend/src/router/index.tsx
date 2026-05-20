@@ -5,6 +5,7 @@ import MainLayout from '@/pages/layouts/MainLayout'
 
 const HomePage = lazy(() => import('@/pages/HomePage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
+const OrderImportPage = lazy(() => import('@/pages/OrderImportPage'))
 
 const fallback = (
   <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
@@ -33,6 +34,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={fallback}>
             <HomePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'orders/import',
+        element: (
+          <Suspense fallback={fallback}>
+            <OrderImportPage />
           </Suspense>
         ),
       },
