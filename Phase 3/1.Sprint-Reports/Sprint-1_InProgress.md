@@ -34,9 +34,16 @@
 | ST-30-1 (Keycloak SSO 완성 — Sprint 0 baseline) | TK-30-1-2·3 | ⏳ IdP 사전 통합 대기 |
 
 ### EP-02 중복 감지
-| Story | 상태 |
-|---|---|
-| ST-02-1 | ⏳ EP-01 ST-01-1 종결 후 |
+| Story | Task | 상태 | Commit |
+|---|---|---|---|
+| ST-02-1 | TK-02-1-1 PG UNIQUE + Exception + Handler | ✓ | (in progress commit) |
+| | TK-02-1-3 ORM 사전 중복 감지 | ✓ | (in progress commit) |
+| | TK-02-1-2 100사이클 + KPI 메트릭 | ⏳ partial | Testcontainers IT 는 Sprint 1 후반 |
+
+### EP-30 RBAC (Sprint 1 — Sprint 1 baseline 완료)
+| Story | Task | 상태 |
+|---|---|---|
+| ST-30-2 (RBAC) | TK-30-2-1·2·3 | ✓ 모두 완료 |
 
 ---
 
