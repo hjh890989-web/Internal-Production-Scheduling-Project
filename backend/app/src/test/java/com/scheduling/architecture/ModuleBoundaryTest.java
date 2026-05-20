@@ -26,9 +26,9 @@ class ModuleBoundaryTest {
     }
 
     @Test
-    @DisplayName("7 모듈이 매니페스트에 등재된다 (order·vc·ex·master·audit·notify·common)")
+    @DisplayName("8 모듈 등재 — 7 도메인 (order·vc·ex·master·audit·notify·common) + 1 인프라 (security)")
     void allModulesRegistered() {
         long count = MODULES.stream().count();
-        assertThat(count).isEqualTo(7);
+        assertThat(count).isEqualTo(8);
     }
 }

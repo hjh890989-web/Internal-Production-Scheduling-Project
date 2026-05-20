@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +60,7 @@ public class OrderImportController {
     }
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('PLANNER', 'IT_OPS')")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ImportResponse importWorkbooks(@RequestParam("files") List<MultipartFile> files) {
         validateFiles(files);
@@ -81,6 +83,7 @@ public class OrderImportController {
     }
 
     @GetMapping("/import/{trackingId}")
+    @PreAuthorize("hasAnyRole('PLANNER', 'STK_USER', 'IT_OPS', 'READ_ONLY')")
     public ImportStatusResponse status(@PathVariable UUID trackingId) {
         return tracking.get(trackingId);
     }
@@ -90,6 +93,7 @@ public class OrderImportController {
      * 캐시 TTL 24h 만료 시 HTTP 410 (Gone) — 원본 재업로드 안내.
      */
     @PostMapping("/import/{trackingId}/retry")
+    @PreAuthorize("hasAnyRole('PLANNER', 'IT_OPS')")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public RetryResponse retry(@PathVariable UUID trackingId) {
         // early fail — 캐시 존재 확인 후 비동기 트리거 (race 회피)

@@ -9,6 +9,7 @@ dependencies {
     implementation(libs.spring.boot.starter.web)            // TK-01-1-3 @RestController
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.data.redis)     // TK-01-1-3 ImportTrackingService
+    implementation(libs.spring.boot.starter.security)       // TK-30-2-2 @PreAuthorize
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.modulith.starter.core)
     // spring-modulith-starter-jpa (EventPublicationRegistry) 는 Sprint 1+ Task에서 활성
