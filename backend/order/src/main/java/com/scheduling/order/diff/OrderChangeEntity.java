@@ -6,6 +6,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -47,6 +49,7 @@ public class OrderChangeEntity {
     @Column(name = "old_order_id")
     private UUID oldOrderId;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "field_diffs", columnDefinition = "jsonb")
     private String fieldDiffsJson;
 
