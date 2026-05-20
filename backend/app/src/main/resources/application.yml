@@ -57,6 +57,17 @@ scheduling:
     new-always-critical: true
     deleted-always-critical: true
 
+  # TK-01-3-1/2/3 folder watcher (Could 우선순위, 기본 OFF)
+  watcher:
+    enabled: ${WATCHER_ENABLED:false}
+    watch-folder: ${WATCHER_FOLDER:/data/inbox}
+    poll-interval: PT60S                          # REQ-FUNC-OC-015
+    file-pattern: "*.xlsx"
+    duplicate-window-hours: 24
+    stability:
+      max-samples: 3
+      sample-interval: PT1S
+
   # TK-03-3-1 알림 발송 (REQ-FUNC-OC-009)
   notification:
     app-url: ${APP_URL:https://schedule.intranet}
