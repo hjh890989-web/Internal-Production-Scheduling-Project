@@ -1,0 +1,7 @@
+[
+  { "hose_id": "29673-2F900", "delivery_date": "2026-02-15", "qty_before": 100, "qty_after": 130, "severity": "CRITICAL", "reason": "qty +30% (BR-O02 ±20% 초과)" },
+  { "hose_id": "29673-2R060", "delivery_date": "2026-02-16", "qty_before": 200, "qty_after": 160, "severity": "CRITICAL", "reason": "qty -20% (BR-O02 경계)" },
+  { "hose_id": "29673-2H800", "delivery_date": "2026-02-15", "qty_before": 50,  "qty_after": 50,  "severity": "CRITICAL", "reason": "delivery_date 변경 (BR-O02 always)" },
+  { "hose_id": "29673-2J400", "delivery_date": "2026-02-17", "qty_before": 0,   "qty_after": 100, "severity": "CRITICAL", "reason": "NEW 수주 (BR-O02 always)" },
+  { "hose_id": "29673-2P200", "delivery_date": "2026-02-18", "qty_before": 100, "qty_after": 0,   "severity": "CRITICAL", "reason": "DELETED 수주 (BR-O02 always)" }
+]

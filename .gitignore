@@ -63,6 +63,10 @@ infrastructure/.env.*
 infrastructure/jenkins/secrets/*
 !infrastructure/jenkins/secrets/.gitkeep
 
+# -------- 부하 테스트 결과 (k6 handleSummary) --------
+perf/reports/
+!perf/reports/.gitkeep
+
 # -------- Python --------
 __pycache__/
 *.py[cod]
