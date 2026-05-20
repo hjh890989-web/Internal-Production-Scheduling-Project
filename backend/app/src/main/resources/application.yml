@@ -49,6 +49,14 @@ scheduling:
     buffer-size-bytes: 4096
     timeout-seconds: 60                 # REQ-NF-PER-001
 
+  # TK-03-2-3 Critical 분류 임계치 (BR-O02 / REQ-FUNC-OC-008)
+  severity:
+    qty-change-threshold-pct: 0.20      # BR-O02 ±20%
+    delivery-date-always-critical: true
+    hose-id-always-critical: true
+    new-always-critical: true
+    deleted-always-critical: true
+
 management:
   endpoints:
     web:
