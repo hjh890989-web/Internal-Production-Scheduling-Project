@@ -45,6 +45,7 @@ class NotificationServiceTest {
     private KakaoTalkClient kakaoClient;
     private NotificationConfig config;
     private ObjectProvider<WebSocketNotificationPublisher> publisherProvider;
+    private ObjectProvider<NotificationRepository> repositoryProvider;
     private NotificationService service;
 
     @BeforeEach
@@ -54,9 +55,11 @@ class NotificationServiceTest {
         kakaoClient = mock(KakaoTalkClient.class);
         config = new NotificationConfig();
         publisherProvider = (ObjectProvider<WebSocketNotificationPublisher>) mock(ObjectProvider.class);
+        repositoryProvider = (ObjectProvider<NotificationRepository>) mock(ObjectProvider.class);
         when(publisherProvider.getIfAvailable()).thenReturn(publisher);
+        when(repositoryProvider.getIfAvailable()).thenReturn(null);   // DEV — Repository 부재 default
 
-        service = new NotificationService(publisherProvider, kakaoClient, config, CLOCK);
+        service = new NotificationService(publisherProvider, kakaoClient, config, repositoryProvider, CLOCK);
     }
 
     private OrderDiffPersistedEvent event(ChangeSeverity sev) {
@@ -120,15 +123,15 @@ class NotificationServiceTest {
     // ---------- Fallback / 장애 격리 ----------
 
     @Test
-    @DisplayName("WebSocket publisher 부재 (DEV) → 예외 X, kakao 만 활성")
+    @DisplayName("WebSocket publisher 부재 (DEV) → 예외 X, kakao 만 활성, inAppSent=false")
     void in_app_publisher_absent_falls_back_silently() {
         when(publisherProvider.getIfAvailable()).thenReturn(null);
         when(kakaoClient.send(any())).thenReturn(true);
 
         var summary = service.notify(event(ChangeSeverity.CRITICAL));
 
-        // 라우팅은 시도된 것으로 기록 (fallback 로그)
-        assertThat(summary.inAppSent()).isTrue();
+        // 인앱 fallback (publisher 부재) → inAppSent=false 기록, 카톡은 정상
+        assertThat(summary.inAppSent()).isFalse();
         assertThat(summary.kakaoSent()).isTrue();
         verify(publisher, never()).publish(any());
         verify(kakaoClient, times(1)).send(any());

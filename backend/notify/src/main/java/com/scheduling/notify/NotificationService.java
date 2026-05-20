@@ -40,50 +40,92 @@ public class NotificationService {
     private final ObjectProvider<WebSocketNotificationPublisher> wsPublisherProvider;
     private final KakaoTalkClient kakaoClient;
     private final NotificationConfig config;
+    private final ObjectProvider<NotificationRepository> repositoryProvider;
     private final Clock clock;
 
     public NotificationService(
         ObjectProvider<WebSocketNotificationPublisher> wsPublisherProvider,
         KakaoTalkClient kakaoClient,
         NotificationConfig config,
+        ObjectProvider<NotificationRepository> repositoryProvider,
         Clock clock
     ) {
         this.wsPublisherProvider = wsPublisherProvider;
         this.kakaoClient = kakaoClient;
         this.config = config;
+        this.repositoryProvider = repositoryProvider;
         this.clock = clock;
     }
 
     /**
-     * OrderDiffPersistedEvent → 채널별 알림 발송.
+     * OrderDiffPersistedEvent → 채널별 알림 발송 + NOTIFICATION row 영속 (TK-03-3-2).
+     *
+     * <p>DEV 컨텍스트 (Repository 부재) — 영속 skip, 라우팅만 수행.
      */
     public DispatchSummary notify(OrderDiffPersistedEvent event) {
         Instant at = Instant.now(clock);
+        NotificationRepository repo = repositoryProvider.getIfAvailable();
         boolean criticalSent = false;
 
         // 1. 인앱 알림 — 모든 변경
         Notification inApp = build(event, NotificationChannel.IN_APP, at);
-        dispatchInApp(inApp);
+        NotificationEntity inAppEntity = persist(repo, event, inApp);
+        boolean inAppPushed = dispatchInApp(inApp);
+        markChannelOutcome(repo, inAppEntity, inAppPushed, "WebSocket publisher 미연동", at);
 
         // 2. Critical 만 카카오톡 백업
         if (event.severity() == ChangeSeverity.CRITICAL) {
             Notification kakao = build(event, NotificationChannel.KAKAOTALK, at);
+            NotificationEntity kakaoEntity = persist(repo, event, kakao);
             criticalSent = kakaoClient.send(kakao);
+            markChannelOutcome(repo, kakaoEntity, criticalSent, "KakaoTalk send failed", at);
         }
 
-        log.info("Notify dispatched changeId={} severity={} inApp=true kakao={}",
-            event.changeId(), event.severity(), criticalSent);
-        return new DispatchSummary(event.changeId(), true, criticalSent);
+        log.info("Notify dispatched changeId={} severity={} inApp={} kakao={}",
+            event.changeId(), event.severity(), inAppPushed, criticalSent);
+        return new DispatchSummary(event.changeId(), inAppPushed, criticalSent);
     }
 
-    private void dispatchInApp(Notification notification) {
+    private boolean dispatchInApp(Notification notification) {
         WebSocketNotificationPublisher publisher = wsPublisherProvider.getIfAvailable();
         if (publisher == null) {
             log.warn("[InApp-FALLBACK] WebSocket publisher 미연동 (DEV context) — notificationId={} target={}",
                 notification.notificationId(), notification.targetRole());
-            return;
+            return false;
         }
         publisher.publish(notification);
+        return true;
+    }
+
+    private NotificationEntity persist(NotificationRepository repo, OrderDiffPersistedEvent event, Notification n) {
+        if (repo == null) {
+            return null;
+        }
+        NotificationEntity entity = new NotificationEntity(
+            n.notificationId(),
+            event.changeId(),
+            n.channel(),
+            n.severity(),
+            n.targetRole(),
+            n.hoseId(),
+            n.deliveryDate(),
+            n.changeSummary(),
+            n.dispatchedAt()
+        );
+        return repo.save(entity);
+    }
+
+    private void markChannelOutcome(NotificationRepository repo, NotificationEntity entity,
+                                    boolean dispatched, String failReason, Instant at) {
+        if (repo == null || entity == null) {
+            return;
+        }
+        if (dispatched) {
+            entity.markSent(at);
+        } else {
+            entity.markFailed(at, failReason);
+        }
+        repo.save(entity);
     }
 
     private Notification build(OrderDiffPersistedEvent event, NotificationChannel channel, Instant at) {
