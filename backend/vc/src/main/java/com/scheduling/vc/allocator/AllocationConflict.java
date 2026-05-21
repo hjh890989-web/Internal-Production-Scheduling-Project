@@ -32,7 +32,8 @@ public record AllocationConflict(
         UNSCHEDULABLE,
         INSUFFICIENT_CAPACITY,
         ANGLE_VIOLATION,
-        DEADLINE_EXCEEDED
+        DEADLINE_EXCEEDED,
+        LEFT_RIGHT_VIOLATION
     }
 
     public static AllocationConflict unschedulable(String hose, int target) {
@@ -55,6 +56,13 @@ public record AllocationConflict(
     public static AllocationConflict deadlineExceeded(String hose, int target, int placed, LocalDate deadline) {
         return new AllocationConflict(hose, Category.DEADLINE_EXCEEDED,
             "납기 D-2 deadline %s 이내 %d 필요량 중 %d 만 배치 (BR-X07)".formatted(deadline, target, placed),
+            target, placed);
+    }
+
+    /** BR-V15·V16 — LP 좌/우 셋팅 미충족 (TK-21-1-2). */
+    public static AllocationConflict leftRightViolation(String hose, int target, int placed) {
+        return new AllocationConflict(hose, Category.LEFT_RIGHT_VIOLATION,
+            "LP 좌/우 셋팅 미충족 — %d 필요량 중 %d 만 배치 (BR-V15·V16)".formatted(target, placed),
             target, placed);
     }
 }

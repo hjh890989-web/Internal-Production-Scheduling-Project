@@ -9,6 +9,7 @@ import com.scheduling.vc.deadline.DeadlineMap;
 import com.scheduling.vc.domain.RotationSlot;
 import com.scheduling.vc.domain.VcSchedule;
 import com.scheduling.vc.required.OrderInput;
+import com.scheduling.vc.rule.LeftRightRule;
 import com.scheduling.vc.routing.LpFirstThenIcRoutingPolicy;
 import com.scheduling.vc.routing.RoutingAuditLogger;
 import com.scheduling.vc.routing.RoutingPolicyResolver;
@@ -54,6 +55,7 @@ class GreedyRotationAllocatorTest {
     private RoutingPolicyResolver policyResolver;
     private RoutingAuditLogger auditLogger;
     private BackwardDeadlineCalculator deadlineCalc;
+    private LeftRightRule leftRightRule;
     private SchedulingMetrics metrics;
     private GreedyRotationAllocator allocator;
 
@@ -65,10 +67,11 @@ class GreedyRotationAllocatorTest {
         policyResolver = mock(RoutingPolicyResolver.class);
         auditLogger = mock(RoutingAuditLogger.class);
         deadlineCalc = mock(BackwardDeadlineCalculator.class);
+        leftRightRule = mock(LeftRightRule.class);
         metrics = mock(SchedulingMetrics.class);
         allocator = new GreedyRotationAllocator(
             compatQuery, yieldCalc, angleValidator,
-            policyResolver, auditLogger, deadlineCalc, metrics, CLOCK);
+            policyResolver, auditLogger, deadlineCalc, leftRightRule, metrics, CLOCK);
 
         // 기본: 모든 슬롯 eligible, 앵글 capa 무한, validator 후 위반 0
         lenient().when(compatQuery.isEligible(anyString(), anyString())).thenReturn(true);
@@ -80,6 +83,8 @@ class GreedyRotationAllocatorTest {
         // 기본 deadline — 비어있음 (단위 테스트는 deadline 제약 비활성)
         lenient().when(deadlineCalc.compute(org.mockito.ArgumentMatchers.anyMap()))
             .thenReturn(new DeadlineMap(Map.of()));
+        // 기본 LP 좌/우 — 항상 pass (단위 테스트는 좌/우 rule 비활성)
+        lenient().when(leftRightRule.validate(anyString(), anyString())).thenReturn(true);
     }
 
     /** LP 4대 × 18 회전 × 4 슬롯 (TOP/UPMID/LOWMID/BOT) AVAILABLE 격자 — 단순 합성. */

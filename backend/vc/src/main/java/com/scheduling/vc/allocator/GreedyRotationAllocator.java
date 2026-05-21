@@ -9,6 +9,7 @@ import com.scheduling.vc.domain.RotationSlot;
 import com.scheduling.vc.domain.VcSchedule;
 import com.scheduling.vc.domain.VcScheduleStatus;
 import com.scheduling.vc.required.OrderInput;
+import com.scheduling.vc.rule.LeftRightRule;
 import com.scheduling.vc.routing.DecisionType;
 import com.scheduling.vc.routing.MachineType;
 import com.scheduling.vc.routing.MachineTypeRoutingPolicy;
@@ -72,6 +73,7 @@ public class GreedyRotationAllocator {
     private final RoutingPolicyResolver policyResolver;
     private final RoutingAuditLogger auditLogger;
     private final BackwardDeadlineCalculator deadlineCalc;
+    private final LeftRightRule leftRightRule;
     private final SchedulingMetrics metrics;
     private final Clock clock;
 
@@ -82,6 +84,7 @@ public class GreedyRotationAllocator {
         RoutingPolicyResolver policyResolver,
         RoutingAuditLogger auditLogger,
         BackwardDeadlineCalculator deadlineCalc,
+        LeftRightRule leftRightRule,
         SchedulingMetrics metrics,
         Clock clock
     ) {
@@ -91,6 +94,7 @@ public class GreedyRotationAllocator {
         this.policyResolver = policyResolver;
         this.auditLogger = auditLogger;
         this.deadlineCalc = deadlineCalc;
+        this.leftRightRule = leftRightRule;
         this.metrics = metrics;
         this.clock = clock;
     }
@@ -168,6 +172,9 @@ public class GreedyRotationAllocator {
 
                         // a) Slot O/X 검증
                         if (!compatQuery.isEligible(hose, toSlotPositionName(slot, machineType))) continue;
+
+                        // a.5) LP 좌/우 셋팅 (BR-V15·V16) — TK-21-1-2
+                        if (!leftRightRule.validate(hose, slot.machineId())) continue;
 
                         // b) 앵글 capa 사전 — 동일 (machine, date, rotation) 의 같은 hose 점유 슬롯 수 + 1
                         if (!fitsAngleCapacity(hose, machineType, slot, schedules)) continue;
