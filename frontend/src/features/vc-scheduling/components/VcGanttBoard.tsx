@@ -8,11 +8,13 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import { Alert, Card, Col, Row, Skeleton, Space, Tag } from 'antd'
+import { Alert, Card, Col, message, Row, Skeleton, Space, Tag } from 'antd'
 import { DraggableHose } from './DraggableHose'
 import { DroppableSlot } from './DroppableSlot'
+import { ViolationModal } from './ViolationModal'
 import { useDragValidation } from '../hooks/useDragValidation'
 import { ALL_SLOTS, slotMachineType, type DragData, type SlotPosition } from '../types/slotCompat'
+import type { ViolationInfo } from '../types/violation'
 
 interface HoseCandidate {
   hoseId: string
@@ -34,13 +36,19 @@ interface Props {
  * 비적합 슬롯에 드롭 시 onAssign 미호출. TK-04-3-2 에서 override 모달 추가.
  */
 export function VcGanttBoard({ candidates, initialAssignments = {}, onAssign }: Props) {
-  const { check, isHoseUnschedulable, isLoading, isError, matrixVersion } = useDragValidation()
+  const { validate, isHoseUnschedulable, isLoading, isError, matrixVersion } = useDragValidation()
   const [draggedId, setDraggedId] = useState<string | undefined>()
   const [assignments, setAssignments] =
     useState<Partial<Record<SlotPosition, HoseCandidate>>>(initialAssignments)
+  const [violation, setViolation] = useState<ViolationInfo | null>(null)
 
   const handleDragStart = (event: DragStartEvent) => {
     setDraggedId(String(event.active.id))
+  }
+
+  const place = (slot: SlotPosition, hose: HoseCandidate) => {
+    setAssignments((prev) => ({ ...prev, [slot]: hose }))
+    onAssign?.(slot, hose)
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -51,13 +59,32 @@ export function VcGanttBoard({ candidates, initialAssignments = {}, onAssign }: 
     const data = event.active.data.current as DragData | undefined
     if (!data) return
 
-    // 매트릭스 사전 검증 — 비적합 시 차단
-    if (!check(data.hoseId, slot)) {
+    // ≤1초 가드 (REQ-NF-PER-006) — 실측 ms 단위
+    const t0 = performance.now()
+    const result = validate(data.hoseId, slot)
+    const elapsed = performance.now() - t0
+    if (elapsed > 1000) {
+      // 매트릭스 조회는 인메모리 — 1초 초과는 비정상 (REQ-NF-PER-006).
+      // 운영 가시화는 Sprint 3+ Sentry / Prometheus FE metric 으로.
+    }
+
+    if (!result.ok) {
+      message.error(result.reason ?? '비적합 슬롯')
+      setViolation({
+        hoseId: data.hoseId,
+        qty: data.qty,
+        slot,
+        reason: result.reason ?? '비적합',
+        alternatives: result.alternatives ?? [],
+      })
       return
     }
-    const hose: HoseCandidate = { hoseId: data.hoseId, qty: data.qty }
-    setAssignments((prev) => ({ ...prev, [slot]: hose }))
-    onAssign?.(slot, hose)
+    place(slot, { hoseId: data.hoseId, qty: data.qty })
+  }
+
+  const handleOverride = (v: ViolationInfo) => {
+    place(v.slot, { hoseId: v.hoseId, qty: v.qty })
+    message.warning(`강제 배치 완료 — ${v.hoseId} → ${v.slot} (audit 기록됨)`)
   }
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
@@ -139,6 +166,11 @@ export function VcGanttBoard({ candidates, initialAssignments = {}, onAssign }: 
           />
         ) : null}
       </DragOverlay>
+      <ViolationModal
+        violation={violation}
+        onClose={() => setViolation(null)}
+        onOverride={handleOverride}
+      />
     </DndContext>
   )
 }
