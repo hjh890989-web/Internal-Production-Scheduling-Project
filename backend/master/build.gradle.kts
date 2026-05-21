@@ -14,6 +14,7 @@ dependencies {
     implementation(libs.postgresql)   // TK-04-1-2 PGConnection LISTEN/NOTIFY
     implementation(libs.spring.boot.starter.web)        // TK-04-1-3 MasterCompatController
     implementation(libs.spring.boot.starter.security)   // TK-04-1-3 @PreAuthorize
+    implementation(libs.caffeine)                       // TK-21-2-1 HoseRuleLookup 캐시
 
     testImplementation(libs.spring.boot.starter.test)
 }
