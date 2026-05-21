@@ -44,5 +44,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test-setup.ts',
+    // TK-04-3-3 — Playwright e2e/ 디렉터리는 별도 runner (npx playwright test) 로 실행
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
   },
 })
