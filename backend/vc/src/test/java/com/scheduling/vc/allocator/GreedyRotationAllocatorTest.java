@@ -7,6 +7,9 @@ import com.scheduling.vc.capacity.SlotAvailability;
 import com.scheduling.vc.domain.RotationSlot;
 import com.scheduling.vc.domain.VcSchedule;
 import com.scheduling.vc.required.OrderInput;
+import com.scheduling.vc.routing.LpFirstThenIcRoutingPolicy;
+import com.scheduling.vc.routing.RoutingAuditLogger;
+import com.scheduling.vc.routing.RoutingPolicyResolver;
 import com.scheduling.vc.yield.AngleCapacityValidator;
 import com.scheduling.vc.yield.VcYieldCalculator;
 import com.scheduling.vc.yield.YieldMatrix;
@@ -46,6 +49,8 @@ class GreedyRotationAllocatorTest {
     private SlotCompatibilityQuery compatQuery;
     private VcYieldCalculator yieldCalc;
     private AngleCapacityValidator angleValidator;
+    private RoutingPolicyResolver policyResolver;
+    private RoutingAuditLogger auditLogger;
     private SchedulingMetrics metrics;
     private GreedyRotationAllocator allocator;
 
@@ -54,15 +59,20 @@ class GreedyRotationAllocatorTest {
         compatQuery = mock(SlotCompatibilityQuery.class);
         yieldCalc = mock(VcYieldCalculator.class);
         angleValidator = mock(AngleCapacityValidator.class);
+        policyResolver = mock(RoutingPolicyResolver.class);
+        auditLogger = mock(RoutingAuditLogger.class);
         metrics = mock(SchedulingMetrics.class);
         allocator = new GreedyRotationAllocator(
-            compatQuery, yieldCalc, angleValidator, metrics, CLOCK);
+            compatQuery, yieldCalc, angleValidator,
+            policyResolver, auditLogger, metrics, CLOCK);
 
         // 기본: 모든 슬롯 eligible, 앵글 capa 무한, validator 후 위반 0
         lenient().when(compatQuery.isEligible(anyString(), anyString())).thenReturn(true);
         lenient().when(compatQuery.unschedulableHoseIds()).thenReturn(Set.of());
         lenient().when(angleValidator.isWithinCapacity(anyString(), anyString(), anyInt())).thenReturn(true);
         lenient().when(angleValidator.validate(org.mockito.ArgumentMatchers.anyMap())).thenReturn(List.of());
+        // 기본 정책 — LP_FIRST (BR-V08)
+        lenient().when(policyResolver.resolve()).thenReturn(new LpFirstThenIcRoutingPolicy());
     }
 
     /** LP 4대 × 18 회전 × 4 슬롯 (TOP/UPMID/LOWMID/BOT) AVAILABLE 격자 — 단순 합성. */

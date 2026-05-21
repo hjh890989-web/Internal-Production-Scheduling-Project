@@ -7,6 +7,12 @@ import com.scheduling.vc.domain.RotationSlot;
 import com.scheduling.vc.domain.VcSchedule;
 import com.scheduling.vc.domain.VcScheduleStatus;
 import com.scheduling.vc.required.OrderInput;
+import com.scheduling.vc.routing.DecisionType;
+import com.scheduling.vc.routing.MachineType;
+import com.scheduling.vc.routing.MachineTypeRoutingPolicy;
+import com.scheduling.vc.routing.RoutingAuditLogger;
+import com.scheduling.vc.routing.RoutingContext;
+import com.scheduling.vc.routing.RoutingPolicyResolver;
 import com.scheduling.vc.yield.AngleCapacityValidator;
 import com.scheduling.vc.yield.AngleCapacityViolation;
 import com.scheduling.vc.yield.VcYieldCalculator;
@@ -57,11 +63,12 @@ import java.util.stream.Collectors;
 public class GreedyRotationAllocator {
 
     private static final Logger log = LoggerFactory.getLogger(GreedyRotationAllocator.class);
-    private static final List<String> MACHINE_TYPE_ORDER = List.of("LP", "IC");
 
     private final SlotCompatibilityQuery compatQuery;
     private final VcYieldCalculator yieldCalc;
     private final AngleCapacityValidator angleValidator;
+    private final RoutingPolicyResolver policyResolver;
+    private final RoutingAuditLogger auditLogger;
     private final SchedulingMetrics metrics;
     private final Clock clock;
 
@@ -69,12 +76,16 @@ public class GreedyRotationAllocator {
         SlotCompatibilityQuery compatQuery,
         VcYieldCalculator yieldCalc,
         AngleCapacityValidator angleValidator,
+        RoutingPolicyResolver policyResolver,
+        RoutingAuditLogger auditLogger,
         SchedulingMetrics metrics,
         Clock clock
     ) {
         this.compatQuery = compatQuery;
         this.yieldCalc = yieldCalc;
         this.angleValidator = angleValidator;
+        this.policyResolver = policyResolver;
+        this.auditLogger = auditLogger;
         this.metrics = metrics;
         this.clock = clock;
     }
@@ -83,6 +94,8 @@ public class GreedyRotationAllocator {
         long startNanos = System.nanoTime();
         Set<String> unschedulable = compatQuery.unschedulableHoseIds();
         YieldMatrix yieldMatrix = yieldCalc.currentMatrix();
+        MachineTypeRoutingPolicy policy = policyResolver.resolve();
+        String policyId = policy.policyId();
 
         // 슬롯 점유 추적 (in-memory mutable copy)
         Map<RotationSlot, SlotAvailability> mutableCells = new HashMap<>(ctx.ledger().cells());
@@ -109,16 +122,23 @@ public class GreedyRotationAllocator {
 
             int cumulativeYield = 0;
             int slotsUsed = 0;
+            // 라우팅 정책 — TK-05-4-1: BR-V08 LP 우선 default, ConfigProperties 로 IC_FIRST 등 외부화
+            List<MachineType> machineTypeOrder = policy.prioritize(hose, RoutingContext.initial(ctx.workingDays().isEmpty() ? null : ctx.workingDays().get(0)));
 
             // 호라이즌 영업일 → 머신 유형 → 회전·슬롯 순회
             for (LocalDate date : ctx.workingDays()) {
                 if (cumulativeYield >= target) break;
 
-                for (String machineType : MACHINE_TYPE_ORDER) {
+                int routingIndex = 0;
+                for (MachineType mt : machineTypeOrder) {
                     if (cumulativeYield >= target) break;
+                    String machineType = mt.name();
 
                     int yieldPerRot = yieldMatrix.lookup(hose, machineType).orElse(0);
-                    if (yieldPerRot <= 0) continue;
+                    if (yieldPerRot <= 0) {
+                        routingIndex++;
+                        continue;
+                    }
 
                     // 해당 머신 유형의 AVAILABLE 슬롯 정렬
                     List<RotationSlot> candidates = mutableCells.entrySet().stream()
@@ -158,7 +178,15 @@ public class GreedyRotationAllocator {
                         mutableCells.put(slot, SlotAvailability.RESERVED);
                         cumulativeYield += yieldPerRot;
                         slotsUsed++;
+
+                        // BR-X02 — 라우팅 결정 audit
+                        DecisionType decisionType = classifyDecision(machineType, routingIndex);
+                        auditLogger.logDecision(
+                            hose, slot.date(), slot.machineId(), machineType,
+                            decisionType, policyId,
+                            "Greedy 배치 (cumulative=" + cumulativeYield + "/" + target + ")");
                     }
+                    routingIndex++;
                 }
             }
 
@@ -204,6 +232,18 @@ public class GreedyRotationAllocator {
             .count();
         int requested = (int) sameRotation + 1;
         return angleValidator.isWithinCapacity(hose, machineType, requested);
+    }
+
+    /**
+     * 라우팅 결정 분류 — TK-05-4-2.
+     *
+     * <p>{@code routingIndex} = policy.prioritize() 결과 내의 시도 순서 (0 = primary, 1+ = fallback).
+     */
+    private DecisionType classifyDecision(String machineType, int routingIndex) {
+        if ("LP".equals(machineType)) {
+            return routingIndex == 0 ? DecisionType.LP_PRIMARY : DecisionType.LP_FALLBACK;
+        }
+        return routingIndex == 0 ? DecisionType.IC_PRIMARY : DecisionType.IC_FALLBACK;
     }
 
     private boolean isMachineTypeOf(String machineId, String machineType) {
