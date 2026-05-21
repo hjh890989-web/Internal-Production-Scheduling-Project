@@ -2,14 +2,17 @@ package com.scheduling.vc.allocator;
 
 import com.scheduling.vc.yield.AngleCapacityViolation;
 
+import java.time.LocalDate;
+
 /**
- * Greedy 배치 실패 사유 — TK-05-3-2.
+ * Greedy 배치 실패 사유 — TK-05-3-2 / TK-06-1-2.
  *
- * <p>3 카테고리:
+ * <p>4 카테고리:
  * <ul>
  *   <li>UNSCHEDULABLE — matrix.unschedulableHoseIds 포함 (BR-V11)</li>
  *   <li>INSUFFICIENT_CAPACITY — 호라이즌 내 가용 슬롯 부족 (Q_required 미달)</li>
  *   <li>ANGLE_VIOLATION — 사후 검증에서 발견된 BR-V06 위반</li>
+ *   <li>DEADLINE_EXCEEDED — D-2 deadline 내 capa 부족 (BR-X07)</li>
  * </ul>
  *
  * @param hoseId       품번
@@ -28,7 +31,8 @@ public record AllocationConflict(
     public enum Category {
         UNSCHEDULABLE,
         INSUFFICIENT_CAPACITY,
-        ANGLE_VIOLATION
+        ANGLE_VIOLATION,
+        DEADLINE_EXCEEDED
     }
 
     public static AllocationConflict unschedulable(String hose, int target) {
@@ -45,5 +49,12 @@ public record AllocationConflict(
     public static AllocationConflict fromAngleViolation(AngleCapacityViolation v) {
         return new AllocationConflict(v.hoseId(), Category.ANGLE_VIOLATION,
             v.userMessage(), 0, 0);
+    }
+
+    /** BR-X07 — D-2 deadline 내 capa 부족 (TK-06-1-2). */
+    public static AllocationConflict deadlineExceeded(String hose, int target, int placed, LocalDate deadline) {
+        return new AllocationConflict(hose, Category.DEADLINE_EXCEEDED,
+            "납기 D-2 deadline %s 이내 %d 필요량 중 %d 만 배치 (BR-X07)".formatted(deadline, target, placed),
+            target, placed);
     }
 }

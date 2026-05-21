@@ -77,6 +77,8 @@ class LpFirstFallbackIT {
     @Autowired private MachineDecisionRepository auditRepo;
 
     private static final LocalDate MON = LocalDate.of(2026, 2, 16);
+    /** 납기일 — horizon 끝(2/20) 이후, deadline ≥ horizon 끝 보장 (TK-06-1-2 deadline filter 통과). */
+    private static final LocalDate DELIVERY = LocalDate.of(2026, 3, 2);
 
     @BeforeEach
     void rebuildCaches() {
@@ -100,7 +102,7 @@ class LpFirstFallbackIT {
     private AllocationContext context(Map<String, Integer> qRequired, List<LocalDate> days) {
         Map<String, List<OrderInput>> orders = new HashMap<>();
         qRequired.forEach((h, q) ->
-            orders.put(h, List.of(new OrderInput(UUID.randomUUID(), h, MON, q))));
+            orders.put(h, List.of(new OrderInput(UUID.randomUUID(), h, DELIVERY, q))));
         CapacityLedger ledger = ledgerBuilder.build(days.get(0), days.get(days.size() - 1));
         return new AllocationContext(qRequired, orders, ledger, days);
     }

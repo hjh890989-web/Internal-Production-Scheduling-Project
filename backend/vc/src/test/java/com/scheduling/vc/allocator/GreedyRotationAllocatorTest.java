@@ -4,6 +4,8 @@ import com.scheduling.common.metrics.SchedulingMetrics;
 import com.scheduling.master.api.SlotCompatibilityQuery;
 import com.scheduling.vc.capacity.CapacityLedger;
 import com.scheduling.vc.capacity.SlotAvailability;
+import com.scheduling.vc.deadline.BackwardDeadlineCalculator;
+import com.scheduling.vc.deadline.DeadlineMap;
 import com.scheduling.vc.domain.RotationSlot;
 import com.scheduling.vc.domain.VcSchedule;
 import com.scheduling.vc.required.OrderInput;
@@ -51,6 +53,7 @@ class GreedyRotationAllocatorTest {
     private AngleCapacityValidator angleValidator;
     private RoutingPolicyResolver policyResolver;
     private RoutingAuditLogger auditLogger;
+    private BackwardDeadlineCalculator deadlineCalc;
     private SchedulingMetrics metrics;
     private GreedyRotationAllocator allocator;
 
@@ -61,10 +64,11 @@ class GreedyRotationAllocatorTest {
         angleValidator = mock(AngleCapacityValidator.class);
         policyResolver = mock(RoutingPolicyResolver.class);
         auditLogger = mock(RoutingAuditLogger.class);
+        deadlineCalc = mock(BackwardDeadlineCalculator.class);
         metrics = mock(SchedulingMetrics.class);
         allocator = new GreedyRotationAllocator(
             compatQuery, yieldCalc, angleValidator,
-            policyResolver, auditLogger, metrics, CLOCK);
+            policyResolver, auditLogger, deadlineCalc, metrics, CLOCK);
 
         // 기본: 모든 슬롯 eligible, 앵글 capa 무한, validator 후 위반 0
         lenient().when(compatQuery.isEligible(anyString(), anyString())).thenReturn(true);
@@ -73,6 +77,9 @@ class GreedyRotationAllocatorTest {
         lenient().when(angleValidator.validate(org.mockito.ArgumentMatchers.anyMap())).thenReturn(List.of());
         // 기본 정책 — LP_FIRST (BR-V08)
         lenient().when(policyResolver.resolve()).thenReturn(new LpFirstThenIcRoutingPolicy());
+        // 기본 deadline — 비어있음 (단위 테스트는 deadline 제약 비활성)
+        lenient().when(deadlineCalc.compute(org.mockito.ArgumentMatchers.anyMap()))
+            .thenReturn(new DeadlineMap(Map.of()));
     }
 
     /** LP 4대 × 18 회전 × 4 슬롯 (TOP/UPMID/LOWMID/BOT) AVAILABLE 격자 — 단순 합성. */
@@ -295,6 +302,63 @@ class GreedyRotationAllocatorTest {
 
         assertThat(r.schedules()).isEmpty();
         assertThat(r.conflicts()).isEmpty();
+    }
+
+    // ---------- D-2 deadline (BR-X07, TK-06-1-2) ----------
+
+    @Test
+    @DisplayName("BR-X07 — production_date > deadline 슬롯은 사용 0건")
+    void deadline_filters_out_late_slots() {
+        yields("A", 1, 0);
+        LocalDate d1 = D;
+        LocalDate d2 = D.plusDays(1);
+        LocalDate d3 = D.plusDays(2);
+        // 3일 호라이즌, deadline = D+1 → D+2 사용 금지
+        when(deadlineCalc.compute(org.mockito.ArgumentMatchers.anyMap()))
+            .thenReturn(new DeadlineMap(Map.of("A", d2)));
+
+        Map<RotationSlot, SlotAvailability> cells = new HashMap<>();
+        for (LocalDate d : List.of(d1, d2, d3)) {
+            for (int rot = 1; rot <= 18; rot++) {
+                for (int slot = 1; slot <= 4; slot++) {
+                    cells.put(new RotationSlot(d, "LP-01", rot, slot), SlotAvailability.AVAILABLE);
+                }
+            }
+        }
+        CapacityLedger ledger = new CapacityLedger(d1, d3, cells);
+        AllocationContext context = new AllocationContext(
+            Map.of("A", 200),
+            Map.of("A", List.of(new OrderInput(UUID.randomUUID(), "A", d3, 200))),
+            ledger,
+            List.of(d1, d2, d3));
+
+        AllocationResult r = allocator.allocate(context);
+
+        // D+2 사용 row 0건 — deadline=D+1 강제
+        assertThat(r.schedules()).noneSatisfy(s ->
+            assertThat(s.getProductionDate()).isEqualTo(d3));
+    }
+
+    @Test
+    @DisplayName("BR-X07 — deadline 내 capa 부족 → DEADLINE_EXCEEDED conflict")
+    void deadline_exceeded_capacity_creates_conflict() {
+        yields("A", 1, 0);
+        // 격자 4 슬롯 (D, LP-01, rotation 1~4, slot 1) — 4 schedule 만 가능
+        Map<RotationSlot, SlotAvailability> cells = new HashMap<>();
+        for (int rot = 1; rot <= 4; rot++) {
+            cells.put(new RotationSlot(D, "LP-01", rot, 1), SlotAvailability.AVAILABLE);
+        }
+        CapacityLedger small = new CapacityLedger(D, D, cells);
+        when(deadlineCalc.compute(org.mockito.ArgumentMatchers.anyMap()))
+            .thenReturn(new DeadlineMap(Map.of("A", D)));   // deadline 적용
+
+        AllocationResult r = allocator.allocate(ctx(Map.of("A", 100), small));
+
+        assertThat(r.scheduleCount()).isEqualTo(4);
+        assertThat(r.conflicts()).hasSize(1);
+        AllocationConflict c = r.conflicts().get(0);
+        assertThat(c.category()).isEqualTo(AllocationConflict.Category.DEADLINE_EXCEEDED);
+        assertThat(c.reason()).contains("BR-X07").contains(D.toString());
     }
 
     // ---------- 메트릭 ----------

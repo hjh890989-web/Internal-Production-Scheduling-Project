@@ -84,6 +84,8 @@ class AllocationRegressionIT {
     @Autowired private ObjectMapper objectMapper;
 
     private static final LocalDate MON = LocalDate.of(2026, 2, 16);
+    /** 납기일 — horizon 끝(2/20) 이후, deadline ≥ horizon 끝 보장 (TK-06-1-2 deadline filter 통과). */
+    private static final LocalDate DELIVERY = LocalDate.of(2026, 3, 2);
 
     @BeforeEach
     void rebuildCaches() {
@@ -104,7 +106,7 @@ class AllocationRegressionIT {
         for (HoseEntry h : s.hoses()) {
             qRequired.put(h.hoseId(), h.qRequired());
             ordersByHose.put(h.hoseId(),
-                List.of(new OrderInput(UUID.randomUUID(), h.hoseId(), MON, h.qRequired())));
+                List.of(new OrderInput(UUID.randomUUID(), h.hoseId(), DELIVERY, h.qRequired())));
         }
         CapacityLedger ledger = ledgerBuilder.build(workingDays.get(0), workingDays.get(workingDays.size() - 1));
         return new AllocationContext(qRequired, ordersByHose, ledger, workingDays);
@@ -224,7 +226,7 @@ class AllocationRegressionIT {
 
         Map<String, List<OrderInput>> ordersByHose = new HashMap<>();
         qRequired.keySet().forEach(h ->
-            ordersByHose.put(h, List.of(new OrderInput(UUID.randomUUID(), h, MON, 1))));
+            ordersByHose.put(h, List.of(new OrderInput(UUID.randomUUID(), h, DELIVERY, 1))));
 
         CapacityLedger ledger = ledgerBuilder.build(workingDays.get(0), workingDays.get(workingDays.size() - 1));
         AllocationContext ctx = new AllocationContext(qRequired, ordersByHose, ledger, workingDays);

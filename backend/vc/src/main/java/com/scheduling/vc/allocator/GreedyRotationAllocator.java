@@ -3,6 +3,8 @@ package com.scheduling.vc.allocator;
 import com.scheduling.common.metrics.SchedulingMetrics;
 import com.scheduling.master.api.SlotCompatibilityQuery;
 import com.scheduling.vc.capacity.SlotAvailability;
+import com.scheduling.vc.deadline.BackwardDeadlineCalculator;
+import com.scheduling.vc.deadline.DeadlineMap;
 import com.scheduling.vc.domain.RotationSlot;
 import com.scheduling.vc.domain.VcSchedule;
 import com.scheduling.vc.domain.VcScheduleStatus;
@@ -69,6 +71,7 @@ public class GreedyRotationAllocator {
     private final AngleCapacityValidator angleValidator;
     private final RoutingPolicyResolver policyResolver;
     private final RoutingAuditLogger auditLogger;
+    private final BackwardDeadlineCalculator deadlineCalc;
     private final SchedulingMetrics metrics;
     private final Clock clock;
 
@@ -78,6 +81,7 @@ public class GreedyRotationAllocator {
         AngleCapacityValidator angleValidator,
         RoutingPolicyResolver policyResolver,
         RoutingAuditLogger auditLogger,
+        BackwardDeadlineCalculator deadlineCalc,
         SchedulingMetrics metrics,
         Clock clock
     ) {
@@ -86,6 +90,7 @@ public class GreedyRotationAllocator {
         this.angleValidator = angleValidator;
         this.policyResolver = policyResolver;
         this.auditLogger = auditLogger;
+        this.deadlineCalc = deadlineCalc;
         this.metrics = metrics;
         this.clock = clock;
     }
@@ -96,6 +101,9 @@ public class GreedyRotationAllocator {
         YieldMatrix yieldMatrix = yieldCalc.currentMatrix();
         MachineTypeRoutingPolicy policy = policyResolver.resolve();
         String policyId = policy.policyId();
+
+        // BR-X07 — D-2 deadline 계산 (TK-06-1-2). 같은 hose 다중 수주 = 가장 이른 납기 기준.
+        DeadlineMap deadlines = deadlineCalc.compute(ctx.ordersByHose());
 
         // 슬롯 점유 추적 (in-memory mutable copy)
         Map<RotationSlot, SlotAvailability> mutableCells = new HashMap<>(ctx.ledger().cells());
@@ -125,9 +133,13 @@ public class GreedyRotationAllocator {
             // 라우팅 정책 — TK-05-4-1: BR-V08 LP 우선 default, ConfigProperties 로 IC_FIRST 등 외부화
             List<MachineType> machineTypeOrder = policy.prioritize(hose, RoutingContext.initial(ctx.workingDays().isEmpty() ? null : ctx.workingDays().get(0)));
 
+            // BR-X07 — 본 hose 의 D-2 deadline (없으면 무제한)
+            LocalDate deadline = deadlines.get(hose).orElse(null);
+
             // 호라이즌 영업일 → 머신 유형 → 회전·슬롯 순회
             for (LocalDate date : ctx.workingDays()) {
                 if (cumulativeYield >= target) break;
+                if (deadline != null && date.isAfter(deadline)) break;  // BR-X07 hard 제약
 
                 int routingIndex = 0;
                 for (MachineType mt : machineTypeOrder) {
@@ -191,8 +203,14 @@ public class GreedyRotationAllocator {
             }
 
             if (cumulativeYield < target) {
-                conflicts.add(AllocationConflict.insufficientCapacity(
-                    hose, target, cumulativeYield, slotsUsed));
+                // deadline 내 capa 부족 → BR-X07 별도 카테고리, 그 외 일반 capa
+                if (deadline != null) {
+                    conflicts.add(AllocationConflict.deadlineExceeded(
+                        hose, target, cumulativeYield, deadline));
+                } else {
+                    conflicts.add(AllocationConflict.insufficientCapacity(
+                        hose, target, cumulativeYield, slotsUsed));
+                }
             }
         }
 
