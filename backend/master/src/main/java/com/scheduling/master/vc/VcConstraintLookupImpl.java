@@ -43,7 +43,9 @@ class VcConstraintLookupImpl implements VcConstraintLookup {
             c.getLpMoldsPerAngle(),
             c.getLpAngleQty(),
             c.getIcMoldsPerAngle(),
-            c.getIcAngleQty()
+            c.getIcAngleQty(),
+            c.getLpLeftSetting(),
+            c.getLpRightSetting()
         );
     }
 }

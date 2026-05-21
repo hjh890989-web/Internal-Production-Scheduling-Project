@@ -142,4 +142,71 @@ class VcConstraintTest {
         assertThat(SlotPosition.IC_TOP.machineType()).isEqualTo(MachineType.IC);
         assertThat(SlotPosition.IC_BOT.machineType()).isEqualTo(MachineType.IC);
     }
+
+    // ---------- BR-V15·V16 좌/우 셋팅 (TK-21-1-1) ----------
+
+    @Test
+    @DisplayName("기본 생성자 — K/L 'X' default (보수적, v1.3 backward compat)")
+    void default_left_right_setting_is_x() {
+        VcConstraint c = vc(true, true, true, true, true, true, true, (short) 1, (short) 1, (short) 1);
+        assertThat(c.getLpLeftSetting()).isEqualTo("X");
+        assertThat(c.getLpRightSetting()).isEqualTo("X");
+        assertThat(c.allowsLeft()).isFalse();
+        assertThat(c.allowsRight()).isFalse();
+    }
+
+    @Test
+    @DisplayName("명시적 K='O', L='X' — 좌측만 (28421-2M800 패턴, BR-V15)")
+    void explicit_left_only() {
+        VcConstraint c = new VcConstraint(
+            "28421-2M800", 180, (short) 2, (short) 7, (short) 25,
+            true, true, false, false, (short) 3, (short) 20, true, true, false,
+            "O", "X", T0, "test");
+        assertThat(c.allowsLeft()).isTrue();
+        assertThat(c.allowsRight()).isFalse();
+    }
+
+    @Test
+    @DisplayName("명시적 K='X', L='O' — 우측만 (28422-2M800 패턴, BR-V16)")
+    void explicit_right_only() {
+        VcConstraint c = new VcConstraint(
+            "28422-2M800", 180, (short) 2, (short) 5, (short) 25,
+            true, true, false, false, (short) 2, (short) 20, true, true, false,
+            "X", "O", T0, "test");
+        assertThat(c.allowsLeft()).isFalse();
+        assertThat(c.allowsRight()).isTrue();
+    }
+
+    @Test
+    @DisplayName("K/L 양쪽 'O' — 28422-08HA0 패턴")
+    void both_sides_allowed() {
+        VcConstraint c = new VcConstraint(
+            "28422-08HA0", 60, (short) 1, (short) 6, (short) 20,
+            false, false, false, true, null, (short) 0, false, false, false,
+            "O", "O", T0, "test");
+        assertThat(c.allowsLeft()).isTrue();
+        assertThat(c.allowsRight()).isTrue();
+    }
+
+    @Test
+    @DisplayName("K/L 도메인 외 (예: 'A') → IllegalArgumentException (CHECK 정합)")
+    void invalid_side_throws() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> new VcConstraint(
+            "X", 1, (short) 1, null, null,
+            true, false, false, false, null, null, false, false, false,
+            "A", "X", T0, "test"
+        )).isInstanceOf(IllegalArgumentException.class)
+          .hasMessageContaining("lpLeftSetting");
+    }
+
+    @Test
+    @DisplayName("K/L null → 'X' 정규화 (defensive)")
+    void null_normalizes_to_x() {
+        VcConstraint c = new VcConstraint(
+            "X", 1, (short) 1, null, null,
+            true, false, false, false, null, null, false, false, false,
+            null, null, T0, "test");
+        assertThat(c.getLpLeftSetting()).isEqualTo("X");
+        assertThat(c.getLpRightSetting()).isEqualTo("X");
+    }
 }

@@ -65,6 +65,13 @@ public class VcConstraint {
     @Column(name = "ic_slot_bot", nullable = false)
     private boolean icSlotBot;
 
+    // v1.4 BR-V15·V16 좌/우 셋팅 (REF-09 K/L열) — TK-21-1-1
+    @Column(name = "lp_left_setting", nullable = false, length = 1)
+    private String lpLeftSetting = "X";
+
+    @Column(name = "lp_right_setting", nullable = false, length = 1)
+    private String lpRightSetting = "X";
+
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
@@ -73,11 +80,26 @@ public class VcConstraint {
 
     protected VcConstraint() {}
 
+    /** v1.3 backward compat — K/L 미지정 시 default 'X'. */
     public VcConstraint(String hoseId, int moldQty, short compositeCount,
                         Short lpMoldsPerAngle, Short lpAngleQty,
                         boolean lpSlotTop, boolean lpSlotUpmid, boolean lpSlotLowmid, boolean lpSlotBot,
                         Short icMoldsPerAngle, Short icAngleQty,
                         boolean icSlotTop, boolean icSlotMid, boolean icSlotBot,
+                        Instant updatedAt, String updatedBy) {
+        this(hoseId, moldQty, compositeCount, lpMoldsPerAngle, lpAngleQty,
+            lpSlotTop, lpSlotUpmid, lpSlotLowmid, lpSlotBot,
+            icMoldsPerAngle, icAngleQty, icSlotTop, icSlotMid, icSlotBot,
+            "X", "X", updatedAt, updatedBy);
+    }
+
+    /** v1.4 — BR-V15·V16 K/L 셋팅 명시 생성자. */
+    public VcConstraint(String hoseId, int moldQty, short compositeCount,
+                        Short lpMoldsPerAngle, Short lpAngleQty,
+                        boolean lpSlotTop, boolean lpSlotUpmid, boolean lpSlotLowmid, boolean lpSlotBot,
+                        Short icMoldsPerAngle, Short icAngleQty,
+                        boolean icSlotTop, boolean icSlotMid, boolean icSlotBot,
+                        String lpLeftSetting, String lpRightSetting,
                         Instant updatedAt, String updatedBy) {
         if (updatedAt == null) {
             // BR-X04 — Clock 주입 강제
@@ -101,8 +123,19 @@ public class VcConstraint {
         this.icSlotTop = icSlotTop;
         this.icSlotMid = icSlotMid;
         this.icSlotBot = icSlotBot;
+        this.lpLeftSetting = validateSide(lpLeftSetting, "lpLeftSetting");
+        this.lpRightSetting = validateSide(lpRightSetting, "lpRightSetting");
         this.updatedAt = updatedAt;
         this.updatedBy = updatedBy == null ? "system:seed" : updatedBy;
+    }
+
+    /** CHECK ('O','X') 정합 — application 레벨 빠른 거부 (BR-V15·V16). */
+    private static String validateSide(String value, String field) {
+        String v = value == null ? "X" : value;
+        if (!"O".equals(v) && !"X".equals(v)) {
+            throw new IllegalArgumentException(field + " 는 'O' 또는 'X' 만 허용: " + v);
+        }
+        return v;
     }
 
     /** 슬롯 위치별 O/X 조회. */
@@ -146,6 +179,15 @@ public class VcConstraint {
     public boolean isIcSlotTop() { return icSlotTop; }
     public boolean isIcSlotMid() { return icSlotMid; }
     public boolean isIcSlotBot() { return icSlotBot; }
+    public String getLpLeftSetting() { return lpLeftSetting; }
+    public String getLpRightSetting() { return lpRightSetting; }
+
+    /** BR-V15 — 좌측 셋팅 슬롯 사용 가능 여부. */
+    public boolean allowsLeft() { return "O".equals(lpLeftSetting); }
+
+    /** BR-V16 — 우측 셋팅 슬롯 사용 가능 여부. */
+    public boolean allowsRight() { return "O".equals(lpRightSetting); }
+
     public Instant getUpdatedAt() { return updatedAt; }
     public String getUpdatedBy() { return updatedBy; }
 }

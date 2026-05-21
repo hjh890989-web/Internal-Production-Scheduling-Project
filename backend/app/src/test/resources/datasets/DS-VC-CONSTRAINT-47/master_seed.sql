@@ -56,3 +56,18 @@ INSERT INTO master.vc_constraint
   ('25412-2R500', 40, 1, NULL, 0, false, false, false, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
   ('254E0-CJ700', 75, 1, 3, 25, true, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
   ('25450-CJ700', 75, 1, 5, 25, true, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47');
+
+-- ============================================================================
+-- v1.4 BR-V15·V16 좌/우 셋팅 (REF-09 K/L열) — TK-21-1-1
+-- DEFAULT 'X' 후 명시적 'O' UPDATE — 본 시드의 INSERT 는 K/L 미지정.
+-- ============================================================================
+UPDATE master.vc_constraint SET lp_left_setting='O', lp_right_setting='X'
+ WHERE hose_id='28421-2M800';
+UPDATE master.vc_constraint SET lp_left_setting='X', lp_right_setting='O'
+ WHERE hose_id='28422-2M800';
+UPDATE master.vc_constraint SET lp_left_setting='O', lp_right_setting='O'
+ WHERE hose_id='28422-08HA0';
+-- 그 외 LP 가용 품번 — 기본 양쪽 가능 (구체 분석 전 회귀 안정성)
+UPDATE master.vc_constraint SET lp_left_setting='O', lp_right_setting='O'
+ WHERE hose_id NOT IN ('28421-2M800','28422-2M800','28422-08HA0')
+   AND (lp_slot_top OR lp_slot_upmid OR lp_slot_lowmid OR lp_slot_bot);
