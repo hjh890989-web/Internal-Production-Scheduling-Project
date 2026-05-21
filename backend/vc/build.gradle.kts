@@ -10,6 +10,8 @@ dependencies {
 
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter.web)        // TK-VC16-1-1 ScheduleValidateController
+    implementation(libs.spring.boot.starter.security)   // TK-VC16-1-1 @PreAuthorize
     implementation(libs.spring.modulith.starter.core)
     implementation(libs.spring.modulith.events.api)
     // spring-modulith-starter-jpa 는 Sprint 1+ Task에서 활성
