@@ -12,6 +12,8 @@ dependencies {
     // spring-modulith-starter-jpa 는 Sprint 1+ Task에서 활성
     implementation(libs.apache.poi)
     implementation(libs.postgresql)   // TK-04-1-2 PGConnection LISTEN/NOTIFY
+    implementation(libs.spring.boot.starter.web)        // TK-04-1-3 MasterCompatController
+    implementation(libs.spring.boot.starter.security)   // TK-04-1-3 @PreAuthorize
 
     testImplementation(libs.spring.boot.starter.test)
 }
