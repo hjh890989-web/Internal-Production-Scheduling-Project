@@ -1,0 +1,58 @@
+-- =============================================================================
+-- DS-VC-CONSTRAINT-47 master_seed.sql — TK-04-1-4 (46 hose_ids from REF-09)
+-- =============================================================================
+-- 자동 생성 — 수정 금지. 재생성: scripts/generate_slot_test_dataset.py
+
+DELETE FROM master.vc_constraint;
+
+INSERT INTO master.vc_constraint
+  (hose_id, mold_qty, composite_count,
+   lp_molds_per_angle, lp_angle_qty, lp_slot_top, lp_slot_upmid, lp_slot_lowmid, lp_slot_bot,
+   ic_molds_per_angle, ic_angle_qty, ic_slot_top, ic_slot_mid, ic_slot_bot,
+   updated_at, updated_by) VALUES
+  ('29673-2F900', 45, 1, 1, 20, false, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('29673-2F910', 45, 1, 1, 25, false, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('29693-2U000', 45, 1, 1, 25, false, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('29695-2U000', 45, 1, 1, 20, false, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('29689-2U000', 20, 2, NULL, 0, false, false, false, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('29673-2R060', 45, 1, 1, 25, false, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('29673-2F920', 45, 1, 2, 25, false, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('29696-2U000', 45, 1, 1, 20, false, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('A6722030900', 30, 2, 1, 30, true, true, true, true, NULL, 0, false, false, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('A6722031002', 20, 3, NULL, 0, false, false, false, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('A6722031502', 30, 2, 1, 30, true, true, true, true, NULL, 0, false, false, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28421-2M100', 60, 2, 2, 20, true, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28422-2M100', 59, 2, 1, 25, true, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28422-2M110', 59, 2, 2, 20, true, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25490-03HA0', 20, 2, 1, 20, false, true, true, true, 1, 0, false, false, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28422-04900', 40, 1, NULL, 0, false, false, false, false, 1, 20, false, false, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28674-L5500', 40, 1, 1, 20, false, true, true, false, 1, 20, false, true, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28673-L5000', 20, 1, 1, 20, true, true, true, true, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('7X375-H0020', 20, 1, NULL, 5, false, false, false, false, NULL, 0, false, false, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28422-08HA0', 60, 1, 6, 20, false, false, false, true, NULL, 0, false, false, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28673-AT100', 60, 1, 1, 20, true, true, true, false, 1, 20, true, true, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28674-G5300-1', 40, 2, NULL, 0, false, false, false, false, 1, 20, false, true, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28421-2M800', 180, 2, 7, 25, true, true, false, false, 3, 20, true, true, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28422-2M800', 180, 2, 5, 25, true, true, false, false, 2, 20, true, true, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('29673-2R030-1', 45, 1, 1, 20, false, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('37863-8EXJ0', 20, 1, NULL, 5, false, false, false, false, NULL, 0, false, false, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25450-P7200', 90, 1, 2, 25, true, true, false, false, 2, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25451-P7200', 90, 1, 3, 25, true, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25450-P4150', 90, 1, 1, 25, true, true, true, false, 2, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25451-P4200', 90, 1, 1, 25, true, true, true, false, 2, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25450-N9210', 45, 1, 1, 25, true, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25450-L2000', 45, 1, 1, 25, true, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25474-2S000/2S010', 180, 1, 7, 25, true, true, true, true, 4, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('28415-08400', 15, 6, NULL, 5, false, false, false, false, NULL, 0, false, false, false, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25450-DR200', 40, 1, NULL, 0, false, false, false, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25451-DR200', 40, 1, NULL, 0, false, false, false, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('A 672 203 17 02', 20, 1, NULL, 0, false, false, false, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('A 672 203 18 02', 20, 1, NULL, 0, false, false, false, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('A 672 203 19 02', 20, 2, NULL, 0, false, false, false, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('A 672 203 20 02', 20, 2, NULL, 0, false, false, false, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25475-07201-1', 160, 1, NULL, 0, false, false, false, false, 2, 80, false, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25482-07TA0', 120, 1, 3, 25, true, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25420-2R500', 40, 1, NULL, 0, false, false, false, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25412-2R500', 40, 1, NULL, 0, false, false, false, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('254E0-CJ700', 75, 1, 3, 25, true, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47'),
+  ('25450-CJ700', 75, 1, 5, 25, true, true, true, false, 1, 20, true, true, true, TIMESTAMPTZ '2026-05-21T01:19:41+00', 'DS-VC-CONSTRAINT-47');

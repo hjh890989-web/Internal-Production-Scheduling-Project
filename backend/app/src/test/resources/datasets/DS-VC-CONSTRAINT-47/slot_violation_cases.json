@@ -1,0 +1,602 @@
+[
+  {
+    "case_id": "SV-001",
+    "hose_id": "29693-2U000",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-002",
+    "hose_id": "28422-2M110",
+    "slot_position": "LP_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-003",
+    "hose_id": "25450-N9210",
+    "slot_position": "IC_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-004",
+    "hose_id": "28422-2M100",
+    "slot_position": "IC_BOT",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-005",
+    "hose_id": "28674-G5300-1",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-006",
+    "hose_id": "25450-CJ700",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-007",
+    "hose_id": "29695-2U000",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-008",
+    "hose_id": "28415-08400",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-009",
+    "hose_id": "28673-L5000",
+    "slot_position": "IC_BOT",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-010",
+    "hose_id": "28674-L5500",
+    "slot_position": "IC_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-011",
+    "hose_id": "25450-CJ700",
+    "slot_position": "LP_LOWMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-012",
+    "hose_id": "A 672 203 19 02",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-013",
+    "hose_id": "25474-2S000/2S010",
+    "slot_position": "IC_MID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-014",
+    "hose_id": "25450-P7200",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-015",
+    "hose_id": "25490-03HA0",
+    "slot_position": "IC_MID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-016",
+    "hose_id": "7X375-H0020",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-017",
+    "hose_id": "37863-8EXJ0",
+    "slot_position": "LP_LOWMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-018",
+    "hose_id": "28674-G5300-1",
+    "slot_position": "IC_TOP",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-019",
+    "hose_id": "A 672 203 20 02",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-020",
+    "hose_id": "29673-2F920",
+    "slot_position": "IC_BOT",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-021",
+    "hose_id": "A 672 203 17 02",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-022",
+    "hose_id": "29693-2U000",
+    "slot_position": "IC_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-023",
+    "hose_id": "7X375-H0020",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-024",
+    "hose_id": "28422-04900",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-025",
+    "hose_id": "A 672 203 19 02",
+    "slot_position": "LP_LOWMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-026",
+    "hose_id": "25450-N9210",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-027",
+    "hose_id": "28415-08400",
+    "slot_position": "IC_TOP",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-028",
+    "hose_id": "A6722031002",
+    "slot_position": "LP_LOWMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-029",
+    "hose_id": "254E0-CJ700",
+    "slot_position": "LP_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-030",
+    "hose_id": "A6722031502",
+    "slot_position": "IC_MID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-031",
+    "hose_id": "25450-CJ700",
+    "slot_position": "LP_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-032",
+    "hose_id": "28422-2M110",
+    "slot_position": "IC_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-033",
+    "hose_id": "28421-2M100",
+    "slot_position": "IC_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-034",
+    "hose_id": "A6722030900",
+    "slot_position": "IC_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-035",
+    "hose_id": "A6722031002",
+    "slot_position": "IC_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-036",
+    "hose_id": "29673-2F900",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-037",
+    "hose_id": "A 672 203 20 02",
+    "slot_position": "IC_BOT",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-038",
+    "hose_id": "29673-2F900",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-039",
+    "hose_id": "25490-03HA0",
+    "slot_position": "LP_BOT",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-040",
+    "hose_id": "A6722031002",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-041",
+    "hose_id": "28422-04900",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-042",
+    "hose_id": "254E0-CJ700",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-043",
+    "hose_id": "29695-2U000",
+    "slot_position": "LP_LOWMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-044",
+    "hose_id": "25474-2S000/2S010",
+    "slot_position": "LP_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-045",
+    "hose_id": "25450-L2000",
+    "slot_position": "LP_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-046",
+    "hose_id": "29673-2F900",
+    "slot_position": "IC_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-047",
+    "hose_id": "25450-P7200",
+    "slot_position": "LP_LOWMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-048",
+    "hose_id": "28422-2M800",
+    "slot_position": "IC_MID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-049",
+    "hose_id": "25451-P4200",
+    "slot_position": "LP_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-050",
+    "hose_id": "28673-L5000",
+    "slot_position": "LP_LOWMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-051",
+    "hose_id": "28422-2M800",
+    "slot_position": "IC_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-052",
+    "hose_id": "25451-P4200",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-053",
+    "hose_id": "29673-2F900",
+    "slot_position": "IC_MID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-054",
+    "hose_id": "A 672 203 20 02",
+    "slot_position": "LP_TOP",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-055",
+    "hose_id": "29673-2F910",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-056",
+    "hose_id": "25475-07201-1",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-057",
+    "hose_id": "A 672 203 17 02",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-058",
+    "hose_id": "25412-2R500",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-059",
+    "hose_id": "29673-2R030-1",
+    "slot_position": "IC_MID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-060",
+    "hose_id": "A6722030900",
+    "slot_position": "IC_MID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-061",
+    "hose_id": "29695-2U000",
+    "slot_position": "IC_BOT",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-062",
+    "hose_id": "25475-07201-1",
+    "slot_position": "LP_TOP",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-063",
+    "hose_id": "28674-L5500",
+    "slot_position": "LP_TOP",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-064",
+    "hose_id": "25475-07201-1",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-065",
+    "hose_id": "29696-2U000",
+    "slot_position": "IC_BOT",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-066",
+    "hose_id": "25450-DR200",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-067",
+    "hose_id": "A 672 203 18 02",
+    "slot_position": "IC_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-068",
+    "hose_id": "A6722031002",
+    "slot_position": "LP_TOP",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-069",
+    "hose_id": "28422-2M110",
+    "slot_position": "IC_BOT",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-070",
+    "hose_id": "29693-2U000",
+    "slot_position": "IC_MID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-071",
+    "hose_id": "7X375-H0020",
+    "slot_position": "IC_MID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-072",
+    "hose_id": "28422-04900",
+    "slot_position": "IC_MID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-073",
+    "hose_id": "28673-L5000",
+    "slot_position": "IC_MID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-074",
+    "hose_id": "25451-DR200",
+    "slot_position": "IC_BOT",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-075",
+    "hose_id": "29673-2R030-1",
+    "slot_position": "LP_TOP",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-076",
+    "hose_id": "25450-P4150",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-077",
+    "hose_id": "25451-DR200",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-078",
+    "hose_id": "A 672 203 19 02",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-079",
+    "hose_id": "25450-P7200",
+    "slot_position": "IC_MID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-080",
+    "hose_id": "25450-L2000",
+    "slot_position": "IC_MID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-081",
+    "hose_id": "A 672 203 19 02",
+    "slot_position": "IC_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-082",
+    "hose_id": "A6722030900",
+    "slot_position": "IC_TOP",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-083",
+    "hose_id": "29689-2U000",
+    "slot_position": "LP_LOWMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-084",
+    "hose_id": "37863-8EXJ0",
+    "slot_position": "IC_MID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-085",
+    "hose_id": "37863-8EXJ0",
+    "slot_position": "IC_TOP",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-086",
+    "hose_id": "A 672 203 19 02",
+    "slot_position": "IC_BOT",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-087",
+    "hose_id": "28422-08HA0",
+    "slot_position": "LP_UPMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-088",
+    "hose_id": "29696-2U000",
+    "slot_position": "IC_MID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-089",
+    "hose_id": "29673-2F910",
+    "slot_position": "LP_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-090",
+    "hose_id": "28422-04900",
+    "slot_position": "LP_LOWMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-091",
+    "hose_id": "25482-07TA0",
+    "slot_position": "LP_LOWMID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-092",
+    "hose_id": "28422-2M800",
+    "slot_position": "IC_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-093",
+    "hose_id": "A6722031002",
+    "slot_position": "IC_BOT",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-094",
+    "hose_id": "7X375-H0020",
+    "slot_position": "IC_TOP",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-095",
+    "hose_id": "25450-P7200",
+    "slot_position": "IC_TOP",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-096",
+    "hose_id": "25412-2R500",
+    "slot_position": "LP_LOWMID",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-097",
+    "hose_id": "28421-2M800",
+    "slot_position": "IC_BOT",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-098",
+    "hose_id": "29673-2F920",
+    "slot_position": "LP_TOP",
+    "expected_eligible": false
+  },
+  {
+    "case_id": "SV-099",
+    "hose_id": "28421-2M100",
+    "slot_position": "IC_MID",
+    "expected_eligible": true
+  },
+  {
+    "case_id": "SV-100",
+    "hose_id": "29673-2F920",
+    "slot_position": "IC_TOP",
+    "expected_eligible": true
+  }
+]
