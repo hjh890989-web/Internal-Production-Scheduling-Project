@@ -31,4 +31,6 @@ dependencies {
     testImplementation(libs.bundles.test.arch)
     // Spring Security 6 테스트 헬퍼 (@WithMockUser 등) — TK-30-2-1·2
     testImplementation(libs.spring.security.test)
+    // TK-04-2-3 UnschedulableFilterIT — POI XSSF 재읽기 검증
+    testImplementation(libs.apache.poi)
 }
