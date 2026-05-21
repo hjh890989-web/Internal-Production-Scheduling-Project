@@ -64,8 +64,9 @@ class CapacityLedgerIT {
     @Autowired private CapacityLedgerBuilder builder;
     @Autowired private VcScheduleRepository scheduleRepo;
 
-    private static final LocalDate MON = LocalDate.of(2026, 2, 16);  // 월
-    private static final LocalDate SAT = LocalDate.of(2026, 2, 14);  // 토
+    // TK-06-1-1 master.holiday seed 후 — 설날 연휴(2/16~18)·삼일절(3/1) 회피, 2026-02-23(월) ~ 27(금) 사용
+    private static final LocalDate MON = LocalDate.of(2026, 2, 23);  // 월 (설날 직후 평일 주)
+    private static final LocalDate SAT = LocalDate.of(2026, 2, 28);  // 토
     private static final Instant T0 = Instant.parse("2026-05-21T00:00:00Z");
 
     @BeforeEach

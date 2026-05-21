@@ -2,7 +2,7 @@ package com.scheduling.vc.capacity;
 
 import com.scheduling.master.api.VcMachineQuery;
 import com.scheduling.master.api.VcMachineSummary;
-import com.scheduling.vc.calendar.WorkingCalendarService;
+import com.scheduling.master.api.WorkingCalendar;
 import com.scheduling.vc.domain.RotationSlot;
 import com.scheduling.vc.domain.VcSchedule;
 import com.scheduling.vc.domain.VcScheduleRepository;
@@ -35,12 +35,12 @@ public class CapacityLedgerBuilder {
 
     private final VcMachineQuery machineQuery;
     private final VcScheduleRepository scheduleRepo;
-    private final WorkingCalendarService calendar;
+    private final WorkingCalendar calendar;
 
     public CapacityLedgerBuilder(
         VcMachineQuery machineQuery,
         VcScheduleRepository scheduleRepo,
-        WorkingCalendarService calendar
+        WorkingCalendar calendar
     ) {
         this.machineQuery = machineQuery;
         this.scheduleRepo = scheduleRepo;
