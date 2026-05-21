@@ -1,0 +1,2172 @@
+[
+  {
+    "scenario_id": "ALLOC-001",
+    "description": "2 hose, unschedulable_included=['7X375-H0020', '37863-8EXJ0', '28415-08400']",
+    "hoses": [
+      {
+        "hose_id": "28673-L5000",
+        "q_required": 8,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "7X375-H0020",
+        "q_required": 5,
+        "expected_unschedulable": true
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-002",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 3,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-003",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29673-2F910",
+        "q_required": 20,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2R060",
+        "q_required": 1,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M110",
+        "q_required": 18,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25490-03HA0",
+        "q_required": 7,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-DR200",
+        "q_required": 23,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-004",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-N9210",
+        "q_required": 23,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25475-07201-1",
+        "q_required": 14,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-L5000",
+        "q_required": 11,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F900",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722031502",
+        "q_required": 5,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-005",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28421-2M800",
+        "q_required": 3,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F920",
+        "q_required": 13,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-006",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-2M800",
+        "q_required": 20,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-007",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 30,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 13,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29696-2U000",
+        "q_required": 3,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-008",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25412-2R500",
+        "q_required": 23,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25420-2R500",
+        "q_required": 3,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2R030-1",
+        "q_required": 2,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 20 02",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M100",
+        "q_required": 8,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-009",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25490-03HA0",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F920",
+        "q_required": 15,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-P7200",
+        "q_required": 21,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-010",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-2M800",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M110",
+        "q_required": 23,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-CJ700",
+        "q_required": 30,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-011",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A6722031502",
+        "q_required": 18,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-012",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-P7200",
+        "q_required": 30,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-L5000",
+        "q_required": 21,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-013",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28674-G5300-1",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29695-2U000",
+        "q_required": 3,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25490-03HA0",
+        "q_required": 7,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29693-2U000",
+        "q_required": 30,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P7200",
+        "q_required": 19,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-014",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-DR200",
+        "q_required": 15,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P7200",
+        "q_required": 5,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "254E0-CJ700",
+        "q_required": 9,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-015",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A 672 203 19 02",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 24,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-016",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25475-07201-1",
+        "q_required": 17,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P7200",
+        "q_required": 16,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2R030-1",
+        "q_required": 3,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25490-03HA0",
+        "q_required": 25,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722030900",
+        "q_required": 2,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-017",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A6722031502",
+        "q_required": 26,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-018",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-P7200",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25482-07TA0",
+        "q_required": 18,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 28,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 17 02",
+        "q_required": 1,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-019",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 25,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-020",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28421-2M800",
+        "q_required": 14,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29696-2U000",
+        "q_required": 6,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-08HA0",
+        "q_required": 15,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-021",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28674-L5500",
+        "q_required": 17,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-022",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29673-2F920",
+        "q_required": 10,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25412-2R500",
+        "q_required": 27,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-023",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A6722031002",
+        "q_required": 30,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2R030-1",
+        "q_required": 1,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722031502",
+        "q_required": 20,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 11,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 17 02",
+        "q_required": 16,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-024",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29673-2R030-1",
+        "q_required": 29,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-025",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-04900",
+        "q_required": 3,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 20 02",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2R060",
+        "q_required": 16,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-026",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 25,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-027",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25474-2S000/2S010",
+        "q_required": 6,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 19 02",
+        "q_required": 9,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-028",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25451-P4200",
+        "q_required": 13,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M110",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 21,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M100",
+        "q_required": 12,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-AT100",
+        "q_required": 15,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-029",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-04900",
+        "q_required": 19,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25490-03HA0",
+        "q_required": 18,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 8,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28421-2M800",
+        "q_required": 19,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F910",
+        "q_required": 8,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-030",
+    "description": "2 hose, unschedulable_included=['7X375-H0020', '37863-8EXJ0', '28415-08400']",
+    "hoses": [
+      {
+        "hose_id": "25412-2R500",
+        "q_required": 8,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "7X375-H0020",
+        "q_required": 3,
+        "expected_unschedulable": true
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-031",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 17,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-032",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-DR200",
+        "q_required": 18,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M110",
+        "q_required": 5,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-033",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-04900",
+        "q_required": 4,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25474-2S000/2S010",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-P4150",
+        "q_required": 14,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M100",
+        "q_required": 12,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F920",
+        "q_required": 14,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-034",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29695-2U000",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "254E0-CJ700",
+        "q_required": 11,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F920",
+        "q_required": 26,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P7200",
+        "q_required": 28,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-035",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-2M100",
+        "q_required": 18,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-036",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28421-2M100",
+        "q_required": 28,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-L5000",
+        "q_required": 30,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 3,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-04900",
+        "q_required": 15,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-037",
+    "description": "6 hose, unschedulable_included=['7X375-H0020', '37863-8EXJ0', '28415-08400']",
+    "hoses": [
+      {
+        "hose_id": "254E0-CJ700",
+        "q_required": 14,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 16,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F900",
+        "q_required": 16,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2R060",
+        "q_required": 7,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-04900",
+        "q_required": 28,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "7X375-H0020",
+        "q_required": 13,
+        "expected_unschedulable": true
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-038",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29673-2F900",
+        "q_required": 13,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-039",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 23,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-08HA0",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P4200",
+        "q_required": 26,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-040",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-DR200",
+        "q_required": 2,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722031002",
+        "q_required": 19,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M100",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-08HA0",
+        "q_required": 18,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M110",
+        "q_required": 2,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-041",
+    "description": "4 hose, unschedulable_included=['7X375-H0020', '37863-8EXJ0', '28415-08400']",
+    "hoses": [
+      {
+        "hose_id": "25475-07201-1",
+        "q_required": 6,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25474-2S000/2S010",
+        "q_required": 2,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-DR200",
+        "q_required": 17,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28415-08400",
+        "q_required": 3,
+        "expected_unschedulable": true
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-042",
+    "description": "3 hose, unschedulable_included=['7X375-H0020', '37863-8EXJ0', '28415-08400']",
+    "hoses": [
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 4,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-04900",
+        "q_required": 29,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "37863-8EXJ0",
+        "q_required": 19,
+        "expected_unschedulable": true
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-043",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29693-2U000",
+        "q_required": 3,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25420-2R500",
+        "q_required": 14,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-044",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28674-G5300-1",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28674-L5500",
+        "q_required": 13,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M110",
+        "q_required": 5,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-CJ700",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-04900",
+        "q_required": 21,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-045",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 20,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F900",
+        "q_required": 19,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 4,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-046",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25451-DR200",
+        "q_required": 9,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-047",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 12,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-04900",
+        "q_required": 10,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-048",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 20,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-AT100",
+        "q_required": 26,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-049",
+    "description": "6 hose, unschedulable_included=['7X375-H0020', '37863-8EXJ0', '28415-08400']",
+    "hoses": [
+      {
+        "hose_id": "A 672 203 19 02",
+        "q_required": 4,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-AT100",
+        "q_required": 29,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-CJ700",
+        "q_required": 4,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F920",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722030900",
+        "q_required": 18,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "37863-8EXJ0",
+        "q_required": 5,
+        "expected_unschedulable": true
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-050",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-2M110",
+        "q_required": 28,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28421-2M800",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25412-2R500",
+        "q_required": 17,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-051",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29695-2U000",
+        "q_required": 27,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2R060",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25412-2R500",
+        "q_required": 2,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P4200",
+        "q_required": 1,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-052",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25412-2R500",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28674-L5500",
+        "q_required": 15,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722031502",
+        "q_required": 18,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-053",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29696-2U000",
+        "q_required": 2,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 27,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722031002",
+        "q_required": 12,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 19,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-054",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A6722030900",
+        "q_required": 7,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29693-2U000",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-AT100",
+        "q_required": 8,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2R030-1",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M800",
+        "q_required": 4,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-055",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-P4150",
+        "q_required": 30,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25420-2R500",
+        "q_required": 30,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722031002",
+        "q_required": 8,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-056",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28421-2M100",
+        "q_required": 1,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-P4150",
+        "q_required": 6,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-057",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-P4150",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-CJ700",
+        "q_required": 6,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-04900",
+        "q_required": 26,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-058",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29693-2U000",
+        "q_required": 28,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-059",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 8,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M800",
+        "q_required": 1,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-AT100",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25490-03HA0",
+        "q_required": 7,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-060",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 17,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-L5000",
+        "q_required": 13,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M800",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "254E0-CJ700",
+        "q_required": 27,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-061",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29673-2F910",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29696-2U000",
+        "q_required": 2,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28674-L5500",
+        "q_required": 4,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28421-2M100",
+        "q_required": 20,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25475-07201-1",
+        "q_required": 14,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-062",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28674-G5300-1",
+        "q_required": 17,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P4200",
+        "q_required": 4,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25482-07TA0",
+        "q_required": 13,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-063",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29693-2U000",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P4200",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F900",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 17 02",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 22,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-064",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 30,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-CJ700",
+        "q_required": 11,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-065",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29696-2U000",
+        "q_required": 11,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-AT100",
+        "q_required": 13,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-DR200",
+        "q_required": 23,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-CJ700",
+        "q_required": 10,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-P4150",
+        "q_required": 18,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-066",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-CJ700",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-P7200",
+        "q_required": 24,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-067",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28673-AT100",
+        "q_required": 18,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P7200",
+        "q_required": 27,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-068",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-2M110",
+        "q_required": 14,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-069",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28674-G5300-1",
+        "q_required": 16,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 26,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-N9210",
+        "q_required": 29,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M110",
+        "q_required": 26,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-DR200",
+        "q_required": 24,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-070",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-08HA0",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-DR200",
+        "q_required": 21,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-071",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-04900",
+        "q_required": 1,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-AT100",
+        "q_required": 2,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25490-03HA0",
+        "q_required": 8,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M100",
+        "q_required": 16,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722031002",
+        "q_required": 20,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-072",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25412-2R500",
+        "q_required": 19,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-073",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-P7200",
+        "q_required": 13,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-DR200",
+        "q_required": 8,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-074",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29673-2F900",
+        "q_required": 25,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F920",
+        "q_required": 14,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-075",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A 672 203 17 02",
+        "q_required": 2,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 18,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-076",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29696-2U000",
+        "q_required": 5,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 26,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-077",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A 672 203 19 02",
+        "q_required": 20,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25482-07TA0",
+        "q_required": 27,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28674-G5300-1",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-N9210",
+        "q_required": 29,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-078",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A 672 203 19 02",
+        "q_required": 25,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-N9210",
+        "q_required": 8,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722031502",
+        "q_required": 27,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25474-2S000/2S010",
+        "q_required": 21,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28674-L5500",
+        "q_required": 9,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-079",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-04900",
+        "q_required": 8,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-L5000",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-N9210",
+        "q_required": 11,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 11,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-08HA0",
+        "q_required": 29,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-080",
+    "description": "6 hose, unschedulable_included=['7X375-H0020', '37863-8EXJ0', '28415-08400']",
+    "hoses": [
+      {
+        "hose_id": "A6722031002",
+        "q_required": 14,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25490-03HA0",
+        "q_required": 11,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-P7200",
+        "q_required": 18,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M110",
+        "q_required": 15,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 14,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "37863-8EXJ0",
+        "q_required": 2,
+        "expected_unschedulable": true
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-081",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-P7200",
+        "q_required": 23,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25475-07201-1",
+        "q_required": 1,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-082",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29673-2F900",
+        "q_required": 18,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M800",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-AT100",
+        "q_required": 24,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-P7200",
+        "q_required": 18,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-P4150",
+        "q_required": 26,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-083",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-DR200",
+        "q_required": 13,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25490-03HA0",
+        "q_required": 11,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-L5000",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P4200",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F910",
+        "q_required": 26,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-084",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 1,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722030900",
+        "q_required": 30,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25420-2R500",
+        "q_required": 13,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 19,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-085",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29673-2R060",
+        "q_required": 6,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "254E0-CJ700",
+        "q_required": 2,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P4200",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722030900",
+        "q_required": 13,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 11,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-086",
+    "description": "2 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28421-2M800",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-P7200",
+        "q_required": 25,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-087",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29673-2R060",
+        "q_required": 2,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25474-2S000/2S010",
+        "q_required": 12,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F910",
+        "q_required": 8,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 18 02",
+        "q_required": 21,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-088",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "254E0-CJ700",
+        "q_required": 2,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-089",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-2M100",
+        "q_required": 27,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-090",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-04900",
+        "q_required": 5,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-091",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "A 672 203 20 02",
+        "q_required": 25,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28422-2M110",
+        "q_required": 12,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 6,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28674-L5500",
+        "q_required": 20,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-092",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29696-2U000",
+        "q_required": 1,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A6722031502",
+        "q_required": 30,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-AT100",
+        "q_required": 10,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29673-2F920",
+        "q_required": 19,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25475-07201-1",
+        "q_required": 22,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-093",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-2M100",
+        "q_required": 8,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 4,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25475-07201-1",
+        "q_required": 23,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25412-2R500",
+        "q_required": 25,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-094",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25482-07TA0",
+        "q_required": 26,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29696-2U000",
+        "q_required": 2,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 20 02",
+        "q_required": 12,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-095",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29673-2R030-1",
+        "q_required": 1,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "29689-2U000",
+        "q_required": 28,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-DR200",
+        "q_required": 14,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "254E0-CJ700",
+        "q_required": 27,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28421-2M800",
+        "q_required": 16,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-096",
+    "description": "1 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "29673-2R030-1",
+        "q_required": 21,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-097",
+    "description": "4 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25451-P4200",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28421-2M100",
+        "q_required": 20,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 17 02",
+        "q_required": 26,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "254E0-CJ700",
+        "q_required": 30,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-098",
+    "description": "5 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 28,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25451-P4200",
+        "q_required": 8,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25475-07201-1",
+        "q_required": 27,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28673-L5000",
+        "q_required": 30,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28674-G5300-1",
+        "q_required": 3,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-099",
+    "description": "3 hose, unschedulable_included=False",
+    "hoses": [
+      {
+        "hose_id": "28422-04900",
+        "q_required": 20,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-L2000",
+        "q_required": 22,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "A 672 203 20 02",
+        "q_required": 13,
+        "expected_unschedulable": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "ALLOC-100",
+    "description": "4 hose, unschedulable_included=['7X375-H0020', '37863-8EXJ0', '28415-08400']",
+    "hoses": [
+      {
+        "hose_id": "28674-G5300-1",
+        "q_required": 12,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "28421-2M100",
+        "q_required": 26,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "25450-DR200",
+        "q_required": 9,
+        "expected_unschedulable": false
+      },
+      {
+        "hose_id": "7X375-H0020",
+        "q_required": 11,
+        "expected_unschedulable": true
+      }
+    ]
+  }
+]
