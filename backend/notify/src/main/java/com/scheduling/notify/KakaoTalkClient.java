@@ -1,6 +1,8 @@
 package com.scheduling.notify;
 
 import com.scheduling.notify.api.Notification;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,6 +40,8 @@ public class KakaoTalkClient {
      *
      * @return {@code true} = 송신 성공 (Sprint 2 실제 활성 시), {@code false} = stub / 비활성 / 실패
      */
+    @CircuitBreaker(name = "kakaotalk", fallbackMethod = "fallbackSend")
+    @Retry(name = "kakaotalk")
     public boolean send(Notification notification) {
         if (!config.getKakao().isEnabled()) {
             log.debug("KakaoTalk disabled (config) — skip notificationId={}", notification.notificationId());
@@ -46,8 +50,20 @@ public class KakaoTalkClient {
         String message = buildBizMessage(notification);
         log.info("[KakaoTalk-STUB] notificationId={} target={} message={}",
             notification.notificationId(), notification.targetRole(), message);
-        // Sprint 2 — 실제 HTTP POST + Resilience4j. 현재는 stub 송신 OK.
+        // Sprint 6 EP-41 — @Retry + @CircuitBreaker 활성, HTTP POST 본격 구현은 Phase 2+
+        // (KakaoTalk Workplace Bot BotToken 확보 후)
         return true;
+    }
+
+    /**
+     * Resilience4j fallback — Circuit OPEN 또는 max retry 도달 시 호출.
+     * 본 메서드 signature 는 원본 send(Notification) + 마지막 Throwable 인자 (R4j 규약).
+     */
+    @SuppressWarnings("unused")
+    private boolean fallbackSend(Notification notification, Throwable t) {
+        log.warn("[KakaoTalk] fallback (Resilience4j) — notificationId={}, cause={}",
+            notification.notificationId(), t.getClass().getSimpleName());
+        return false;
     }
 
     /**

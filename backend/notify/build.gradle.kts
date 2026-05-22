@@ -16,6 +16,10 @@ dependencies {
     implementation(libs.spring.boot.starter.validation)   // @ConfigurationProperties Validation
     implementation(libs.spring.modulith.starter.core)
     implementation(libs.spring.modulith.events.api)
+    implementation(libs.spring.modulith.starter.jpa)      // TK-41-2-1 EventPublicationRegistry 활성
+    implementation(libs.spring.modulith.events.jpa)
+    implementation("org.springframework.boot:spring-boot-starter-aop")    // TK-41-1-1 Resilience4j @Retry AspectJ
+    implementation(libs.resilience4j.spring.boot3)        // TK-41-1-1 @Retry + @CircuitBreaker
 
     testImplementation(libs.spring.boot.starter.test)
 }

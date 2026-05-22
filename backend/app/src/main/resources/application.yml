@@ -29,6 +29,7 @@ spring:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
       - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+      - org.springframework.modulith.events.jpa.JpaEventPublicationAutoConfiguration   # Sprint 6 EP-41 — with-infra profile 에서만 활성
 
   jpa:
     open-in-view: false
@@ -150,3 +151,24 @@ spring:
     enabled: true
     schemas: app,master,audit
     locations: classpath:db/migration
+
+# Resilience4j — Sprint 6 EP-41 (Kakao + Import client 안정성 NFR)
+resilience4j:
+  retry:
+    instances:
+      kakaotalk:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.io.IOException
+          - org.springframework.web.client.RestClientException
+  circuitbreaker:
+    instances:
+      kakaotalk:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
