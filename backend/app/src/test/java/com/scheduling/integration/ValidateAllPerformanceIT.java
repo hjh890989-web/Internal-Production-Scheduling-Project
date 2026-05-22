@@ -83,6 +83,7 @@ class ValidateAllPerformanceIT {
 
         // 1주 호라이즌 (5일) × 4 LP × 18 회전 × 2 slot = 720 row + IC 1주 × 18 × 2 = 180 = 900 row
         // 모두 valid: 29673-2F900 (LP_UPMID, LP_LOWMID, IC 모두 가능)
+        // BR-V07 — 같은 (machine, slot, date) 안 rotation 1~18 동일 angle 강제
         List<VcSchedule> rows = new ArrayList<>();
         LocalDate d = START;
         while (!d.isAfter(END)) {
@@ -90,7 +91,7 @@ class ValidateAllPerformanceIT {
                 for (int rot = 1; rot <= 18; rot++) {
                     for (int slot : new int[]{2, 3}) {   // UPMID, LOWMID — 29673-2F900 가용
                         rows.add(new VcSchedule(UUID.randomUUID(), "29673-2F900", machineId,
-                            (short) slot, d, (short) rot, "ANGLE-29673-" + rot, 10,
+                            (short) slot, d, (short) rot, "ANGLE-29673-S" + slot, 10,
                             VcScheduleStatus.CANDIDATE, "", T0, T0));
                     }
                 }
@@ -98,7 +99,7 @@ class ValidateAllPerformanceIT {
             for (int rot = 1; rot <= 18; rot++) {
                 for (int slot = 1; slot <= 3; slot++) {
                     rows.add(new VcSchedule(UUID.randomUUID(), "29673-2F900", "IC-01",
-                        (short) slot, d, (short) rot, "ANGLE-29673-IC-" + rot, 8,
+                        (short) slot, d, (short) rot, "ANGLE-29673-IC-S" + slot, 8,
                         VcScheduleStatus.CANDIDATE, "", T0, T0));
                 }
             }
