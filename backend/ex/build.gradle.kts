@@ -5,10 +5,14 @@ plugins {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":master"))   // TK-07-2-1 master.api.WorkingCalendar
+    implementation(project(":vc"))       // TK-07-1-1 vc.events.VcConfirmedEvent
 
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.modulith.starter.core)
     implementation(libs.spring.modulith.events.api)
     // spring-modulith-starter-jpa 는 Sprint 1+ Task에서 활성
+
+    testImplementation(libs.spring.boot.starter.test)
 }
