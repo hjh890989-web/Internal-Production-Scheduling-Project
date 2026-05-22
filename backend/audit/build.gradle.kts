@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":common"))
 
     implementation(libs.spring.boot.starter.data.jpa)
+    implementation("org.springframework.boot:spring-boot-starter-aop")    // TK-11-1-2 @Auditable AspectJ
+    implementation(libs.spring.boot.starter.security)    // TK-11-1-2 SecurityContext actor 조회
     implementation(libs.spring.modulith.starter.core)
-    // spring-modulith-starter-jpa + events-jpa 는 Sprint 1+ Task에서 활성
 }
