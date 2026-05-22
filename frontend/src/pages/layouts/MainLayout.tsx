@@ -18,9 +18,9 @@ export default function MainLayout() {
 
   const menuItems = [
     { key: '/home', label: t('menu.home') },
-    { key: '/orders', label: t('menu.orders'), disabled: true },
-    { key: '/vc', label: t('menu.vc'), disabled: true },
-    { key: '/ex', label: t('menu.ex'), disabled: true },
+    { key: '/orders/import', label: t('menu.orders') },
+    { key: '/vc/simview', label: t('menu.vc') },
+    { key: '/extrusion-matrix', label: t('menu.ex') },
     { key: '/master', label: t('menu.master'), disabled: true },
     { key: '/audit', label: t('menu.audit'), disabled: true },
   ]
