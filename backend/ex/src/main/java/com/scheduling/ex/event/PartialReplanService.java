@@ -1,6 +1,7 @@
 package com.scheduling.ex.event;
 
 import com.scheduling.audit.aop.Auditable;
+import com.scheduling.ex.events.ExReplanCompletedEvent;
 import com.scheduling.ex.schedule.CandidateStatus;
 import com.scheduling.ex.schedule.ExScheduleCandidate;
 import com.scheduling.ex.schedule.ExScheduleCandidateRepository;
@@ -8,6 +9,7 @@ import com.scheduling.master.api.WorkingCalendar;
 import com.scheduling.vc.events.VcChangedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,15 +41,18 @@ public class PartialReplanService {
     private final ExScheduleCandidateRepository candidateRepo;
     private final ImpactedRowFinder finder;
     private final WorkingCalendar calendar;
+    private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
 
     public PartialReplanService(ExScheduleCandidateRepository candidateRepo,
                                 ImpactedRowFinder finder,
                                 WorkingCalendar calendar,
+                                ApplicationEventPublisher eventPublisher,
                                 Clock clock) {
         this.candidateRepo = candidateRepo;
         this.finder = finder;
         this.calendar = calendar;
+        this.eventPublisher = eventPublisher;
         this.clock = clock;
     }
 
@@ -79,7 +85,7 @@ public class PartialReplanService {
         }
 
         List<UUID> impactedIds = finder.findImpacted(event);
-        int triggered = 0;
+        List<UUID> triggeredIds = new ArrayList<>();
         for (UUID id : impactedIds) {
             ExScheduleCandidate cand = candidateRepo.findById(id).orElse(null);
             if (cand == null) continue;
@@ -99,12 +105,18 @@ public class PartialReplanService {
                 cand.applyVcChange(change.newQty(), newDeadline, newVcDate, now);
             }
             candidateRepo.save(cand);
-            triggered++;
+            triggeredIds.add(id);
+        }
+
+        if (!triggeredIds.isEmpty()) {
+            // TK-EX14-1-1 — notify 모듈이 STOMP /topic/extrusion-updates 로 전파
+            eventPublisher.publishEvent(new ExReplanCompletedEvent(
+                event.scheduleId(), now, triggeredIds.size(), triggeredIds));
         }
 
         log.info("PartialReplanService cascade — changedRows={}, impacted={}, triggered={}",
-            event.changedRows().size(), impactedIds.size(), triggered);
-        return triggered;
+            event.changedRows().size(), impactedIds.size(), triggeredIds.size());
+        return triggeredIds.size();
     }
 
     /**
