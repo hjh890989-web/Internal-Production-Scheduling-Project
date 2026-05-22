@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.web)        // TK-10-2-1 ExConfirmController
     implementation(libs.spring.boot.starter.security)   // TK-10-2-1 @PreAuthorize
+    implementation(libs.apache.poi)                     // TK-12-2-1 ExtrusionMatrixExporter
     implementation(libs.spring.modulith.starter.core)
     implementation(libs.spring.modulith.events.api)
     // spring-modulith-starter-jpa 는 Sprint 1+ Task에서 활성
