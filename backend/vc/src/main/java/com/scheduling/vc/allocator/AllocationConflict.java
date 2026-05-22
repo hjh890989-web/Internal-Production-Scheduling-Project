@@ -33,7 +33,9 @@ public record AllocationConflict(
         INSUFFICIENT_CAPACITY,
         ANGLE_VIOLATION,
         DEADLINE_EXCEEDED,
-        LEFT_RIGHT_VIOLATION
+        LEFT_RIGHT_VIOLATION,
+        MACHINE_PIN_VIOLATION,
+        HOSE_CAP_VIOLATION
     }
 
     public static AllocationConflict unschedulable(String hose, int target) {
@@ -63,6 +65,23 @@ public record AllocationConflict(
     public static AllocationConflict leftRightViolation(String hose, int target, int placed) {
         return new AllocationConflict(hose, Category.LEFT_RIGHT_VIOLATION,
             "LP 좌/우 셋팅 미충족 — %d 필요량 중 %d 만 배치 (BR-V15·V16)".formatted(target, placed),
+            target, placed);
+    }
+
+    /** BR-V14 — VC_HOSE_RULE machine_pin / lp_only 미충족 (TK-21-3-1). */
+    public static AllocationConflict machinePinViolation(String hose, int target, int placed,
+                                                          String detail) {
+        return new AllocationConflict(hose, Category.MACHINE_PIN_VIOLATION,
+            "%s — %d 필요량 중 %d 만 배치 (BR-V14)".formatted(detail, target, placed),
+            target, placed);
+    }
+
+    /** BR-V14·V15·V16 — 회전당 동시 슬롯 상한 초과 (TK-21-3-2 / TK-21-4-1). */
+    public static AllocationConflict hoseCapViolation(String hose, int target, int placed,
+                                                       int maxConcurrent) {
+        return new AllocationConflict(hose, Category.HOSE_CAP_VIOLATION,
+            "회전당 동시 슬롯 상한 %d 도달 — %d 필요량 중 %d 만 배치 (BR-V14·V15·V16)"
+                .formatted(maxConcurrent, target, placed),
             target, placed);
     }
 }
