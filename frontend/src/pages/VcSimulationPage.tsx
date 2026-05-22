@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Alert, Card, DatePicker, Space, Typography } from 'antd'
+import { Alert, Card, DatePicker, Divider, Space, Typography } from 'antd'
 import dayjs, { type Dayjs } from 'dayjs'
 import { VcRotationGrid } from '@/features/vc-scheduling/components/VcRotationGrid'
+import { SwapProposalPanel } from '@/features/vc-scheduling/components/SwapProposalPanel'
 import { fetchVcSlots, type VcSlotRow } from '@/features/vc-scheduling/api/vcScheduleApi'
 
 const { Title } = Typography
@@ -46,6 +47,9 @@ export default function VcSimulationPage() {
       <Card bodyStyle={{ padding: 0 }}>
         <VcRotationGrid rows={query.data ?? []} loading={query.isLoading} />
       </Card>
+
+      <Divider orientation="left">현장 swap 제안 (Planner 1클릭 수용)</Divider>
+      <SwapProposalPanel />
     </Space>
   )
 }

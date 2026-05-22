@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Alert, Badge, Button, Card, DatePicker, Space, Typography, message } from 'antd'
+import { Alert, Badge, Button, Card, DatePicker, Space, Tabs, Typography, message } from 'antd'
 import { DownloadOutlined, WifiOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import { ExMatrixGrid } from '@/features/ex-scheduling/components/ExMatrixGrid'
+import { CandidateRankingTable } from '@/features/ex-scheduling/components/CandidateRankingTable'
 import { useExMatrix } from '@/features/ex-scheduling/hooks/useExMatrix'
 import { downloadExMatrixXlsx } from '@/features/ex-scheduling/api/exMatrixApi'
 
@@ -74,9 +75,25 @@ export default function ExMatrixPage() {
         <Alert type="error" message="매트릭스 조회 실패" description={String(error)} />
       ) : null}
 
-      <Card bodyStyle={{ padding: 0 }}>
-        <ExMatrixGrid rows={data ?? []} loading={isLoading} />
-      </Card>
+      <Tabs
+        defaultActiveKey="matrix"
+        items={[
+          {
+            key: 'matrix',
+            label: '매트릭스 (EP-17)',
+            children: (
+              <Card bodyStyle={{ padding: 0 }}>
+                <ExMatrixGrid rows={data ?? []} loading={isLoading} />
+              </Card>
+            ),
+          },
+          {
+            key: 'ranking',
+            label: '다중 후보 ranking (EP-18)',
+            children: <CandidateRankingTable from={fromStr} to={toStr} />,
+          },
+        ]}
+      />
     </Space>
   )
 }
