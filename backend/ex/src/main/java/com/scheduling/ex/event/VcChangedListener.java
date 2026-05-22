@@ -7,9 +7,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.UUID;
-
 /**
  * VC 변경 이벤트 구독 — TK-EX13-1-1 (EP-EX13 ST-EX13-1, BR-X03 / BR-E11).
  *
@@ -26,11 +23,9 @@ public class VcChangedListener {
 
     private static final Logger log = LoggerFactory.getLogger(VcChangedListener.class);
 
-    private final ImpactedRowFinder finder;
     private final PartialReplanService replanService;
 
-    public VcChangedListener(ImpactedRowFinder finder, PartialReplanService replanService) {
-        this.finder = finder;
+    public VcChangedListener(PartialReplanService replanService) {
         this.replanService = replanService;
     }
 
@@ -38,14 +33,8 @@ public class VcChangedListener {
     public void onVcChanged(VcChangedEvent event) {
         log.info("VC changed event received: scheduleId={}, changedRows={}",
             event.scheduleId(), event.changedRows().size());
-
-        List<UUID> impacted = finder.findImpacted(event);
-        if (impacted.isEmpty()) {
-            log.info("VC change has no EX impact: scheduleId={}", event.scheduleId());
-            return;
-        }
-        int triggered = replanService.triggerReplan(impacted);
-        log.info("Partial replan triggered: scheduleId={}, impactedCandidates={}, triggered={}",
-            event.scheduleId(), impacted.size(), triggered);
+        int triggered = replanService.replanWithContext(event);
+        log.info("Partial replan cascade — scheduleId={}, triggered={}",
+            event.scheduleId(), triggered);
     }
 }

@@ -107,6 +107,31 @@ public class ExScheduleCandidate {
         this.updatedAt = now;
     }
 
+    /**
+     * BR-E11 partial replan — VC 변경 반영 + status PENDING 재전환.
+     *
+     * <p>TK-EX13-1-3 (EP-EX13) Sprint 4 정식 활성. CONFIRMED 상태는 호출자가 사전 차단.
+     */
+    public void applyVcChange(int newYield, LocalDate newDeadline,
+                              LocalDate newVcDate, Instant now) {
+        if (newYield < 0) {
+            throw new IllegalArgumentException("newYield ≥ 0: " + newYield);
+        }
+        if (newDeadline == null || newVcDate == null) {
+            throw new IllegalArgumentException("newDeadline / newVcDate 필수");
+        }
+        if (newDeadline.isAfter(newVcDate)) {
+            throw new IllegalArgumentException(
+                "newDeadline %s 가 newVcDate %s 보다 늦음 (BR-E01)"
+                    .formatted(newDeadline, newVcDate));
+        }
+        this.vcYield = newYield;
+        this.extrusionDeadline = newDeadline;
+        this.vcProductionDate = newVcDate;
+        this.status = CandidateStatus.PENDING;
+        this.updatedAt = now;
+    }
+
     public Instant getConfirmedAt() { return confirmedAt; }
     public String getConfirmedBy() { return confirmedBy; }
 
