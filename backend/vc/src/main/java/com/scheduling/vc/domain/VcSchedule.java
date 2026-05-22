@@ -60,6 +60,12 @@ public class VcSchedule {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "confirmed_at")
+    private Instant confirmedAt;
+
+    @Column(name = "confirmed_by", length = 40)
+    private String confirmedBy;
+
     protected VcSchedule() {}
 
     public VcSchedule(UUID vcScheduleId, String hoseId, String machineId,
@@ -106,5 +112,27 @@ public class VcSchedule {
 
     public void setStatus(VcScheduleStatus status) {
         this.status = status;
+    }
+
+    public Instant getConfirmedAt() { return confirmedAt; }
+    public String getConfirmedBy() { return confirmedBy; }
+
+    /**
+     * BR-X01 — Planner 확정 (CANDIDATE → CONFIRMED, TK-10-1-2).
+     *
+     * <p>DB trigger 가 audit 필드 누락 시 reject — 본 메서드가 set 후 update.
+     */
+    public void confirm(String plannerId, Instant now) {
+        if (status != VcScheduleStatus.CANDIDATE) {
+            throw new IllegalStateException(
+                "BR-X01 confirm 전이는 CANDIDATE 에서만: 현재 " + status);
+        }
+        if (plannerId == null || plannerId.isBlank()) {
+            throw new IllegalArgumentException("plannerId 필수 (BR-X01 RBAC)");
+        }
+        this.status = VcScheduleStatus.CONFIRMED;
+        this.confirmedAt = now;
+        this.confirmedBy = plannerId;
+        this.updatedAt = now;
     }
 }
