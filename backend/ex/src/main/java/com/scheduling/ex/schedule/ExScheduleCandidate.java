@@ -55,6 +55,12 @@ public class ExScheduleCandidate {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "confirmed_at")
+    private Instant confirmedAt;
+
+    @Column(name = "confirmed_by", length = 40)
+    private String confirmedBy;
+
     protected ExScheduleCandidate() {}
 
     public ExScheduleCandidate(UUID exCandidateId, UUID scheduleId, String hoseId,
@@ -98,6 +104,26 @@ public class ExScheduleCandidate {
 
     public void transitionTo(CandidateStatus next, Instant now) {
         this.status = next;
+        this.updatedAt = now;
+    }
+
+    public Instant getConfirmedAt() { return confirmedAt; }
+    public String getConfirmedBy() { return confirmedBy; }
+
+    /**
+     * BR-X01 — Planner 확정 (SCHEDULED → CONFIRMED, TK-10-2-1).
+     */
+    public void confirm(String plannerId, Instant now) {
+        if (status != CandidateStatus.SCHEDULED) {
+            throw new IllegalStateException(
+                "BR-X01 confirm 전이는 SCHEDULED 에서만: 현재 " + status);
+        }
+        if (plannerId == null || plannerId.isBlank()) {
+            throw new IllegalArgumentException("plannerId 필수 (BR-X01 RBAC)");
+        }
+        this.status = CandidateStatus.CONFIRMED;
+        this.confirmedAt = now;
+        this.confirmedBy = plannerId;
         this.updatedAt = now;
     }
 }
