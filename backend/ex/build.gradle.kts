@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":master"))   // TK-07-2-1 master.api.WorkingCalendar
     implementation(project(":vc"))       // TK-07-1-1 vc.events.VcConfirmedEvent
+    implementation(project(":audit"))    // TK-11-1-2 @Auditable AOP
 
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.validation)

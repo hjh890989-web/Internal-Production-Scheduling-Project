@@ -1,5 +1,6 @@
 package com.scheduling.vc.confirm;
 
+import com.scheduling.audit.aop.Auditable;
 import com.scheduling.vc.domain.VcSchedule;
 import com.scheduling.vc.domain.VcScheduleRepository;
 import com.scheduling.vc.events.VcConfirmedEvent;
@@ -46,6 +47,7 @@ public class VcScheduleConfirmationService {
     /**
      * 단일 row 확정. Planner UI 단건 클릭 시.
      */
+    @Auditable("VC schedule Planner 단건 확정 (BR-X01)")
     @Transactional
     public VcSchedule confirm(UUID vcScheduleId, String plannerId) {
         VcSchedule schedule = repository.findById(vcScheduleId)
@@ -63,6 +65,7 @@ public class VcScheduleConfirmationService {
      *
      * @return 확정된 row 수
      */
+    @Auditable("VC schedule Planner 배치 확정 (BR-X01)")
     @Transactional
     public int confirmBatch(List<UUID> scheduleIds, String plannerId, UUID batchId) {
         Instant now = Instant.now(clock);

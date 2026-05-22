@@ -1,5 +1,6 @@
 package com.scheduling.ex.confirm;
 
+import com.scheduling.audit.aop.Auditable;
 import com.scheduling.ex.events.ExConfirmedEvent;
 import com.scheduling.ex.schedule.ExScheduleCandidate;
 import com.scheduling.ex.schedule.ExScheduleCandidateRepository;
@@ -42,6 +43,7 @@ public class ExCandidateConfirmationService {
         this.clock = clock;
     }
 
+    @Auditable("EX candidate Planner 단건 확정 (BR-X01)")
     @Transactional
     public ExScheduleCandidate confirm(UUID candidateId, String plannerId) {
         ExScheduleCandidate c = repository.findById(candidateId)
@@ -54,6 +56,7 @@ public class ExCandidateConfirmationService {
         return c;
     }
 
+    @Auditable("EX candidate Planner 배치 확정 (BR-X01)")
     @Transactional
     public int confirmBatch(List<UUID> candidateIds, String plannerId, UUID batchId) {
         Instant now = Instant.now(clock);

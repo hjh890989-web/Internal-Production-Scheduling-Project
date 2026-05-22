@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":order"))    // OrderChangedEvent 구독 (REQ-FUNC-VC-015)
     implementation(project(":master"))   // TK-05-1-1 master.api.VcMachineQuery facade
+    implementation(project(":audit"))    // TK-11-1-2 @Auditable AOP
 
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.validation)
