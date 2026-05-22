@@ -22,7 +22,7 @@ export default function MainLayout() {
     { key: '/vc/simview', label: t('menu.vc') },
     { key: '/extrusion-matrix', label: t('menu.ex') },
     { key: '/master', label: t('menu.master'), disabled: true },
-    { key: '/audit', label: t('menu.audit'), disabled: true },
+    { key: '/audit/restore', label: t('menu.audit') },
   ]
 
   return (

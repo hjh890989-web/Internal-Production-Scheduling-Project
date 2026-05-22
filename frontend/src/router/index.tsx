@@ -8,6 +8,7 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const OrderImportPage = lazy(() => import('@/pages/OrderImportPage'))
 const VcSimulationPage = lazy(() => import('@/pages/VcSimulationPage'))
 const ExMatrixPage = lazy(() => import('@/pages/ExMatrixPage'))
+const MasterRestorePage = lazy(() => import('@/pages/MasterRestorePage'))
 
 const fallback = (
   <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
@@ -60,6 +61,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={fallback}>
             <ExMatrixPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'audit/restore',
+        element: (
+          <Suspense fallback={fallback}>
+            <MasterRestorePage />
           </Suspense>
         ),
       },
