@@ -12,6 +12,7 @@ import com.scheduling.vc.required.OrderInput;
 import com.scheduling.vc.rule.HoseSlotCapRule;
 import com.scheduling.vc.rule.LeftRightRule;
 import com.scheduling.vc.rule.MachinePinRule;
+import com.scheduling.vc.rule.SpecLt7CapRule;
 import com.scheduling.vc.routing.LpFirstThenIcRoutingPolicy;
 import com.scheduling.vc.routing.RoutingAuditLogger;
 import com.scheduling.vc.routing.RoutingPolicyResolver;
@@ -60,6 +61,7 @@ class GreedyRotationAllocatorTest {
     private LeftRightRule leftRightRule;
     private MachinePinRule machinePinRule;
     private HoseSlotCapRule hoseSlotCapRule;
+    private SpecLt7CapRule specLt7CapRule;
     private SchedulingMetrics metrics;
     private GreedyRotationAllocator allocator;
 
@@ -74,11 +76,12 @@ class GreedyRotationAllocatorTest {
         leftRightRule = mock(LeftRightRule.class);
         machinePinRule = mock(MachinePinRule.class);
         hoseSlotCapRule = mock(HoseSlotCapRule.class);
+        specLt7CapRule = mock(SpecLt7CapRule.class);
         metrics = mock(SchedulingMetrics.class);
         allocator = new GreedyRotationAllocator(
             compatQuery, yieldCalc, angleValidator,
             policyResolver, auditLogger, deadlineCalc,
-            leftRightRule, machinePinRule, hoseSlotCapRule,
+            leftRightRule, machinePinRule, hoseSlotCapRule, specLt7CapRule,
             metrics, CLOCK);
 
         // 기본: 모든 슬롯 eligible, 앵글 capa 무한, validator 후 위반 0
@@ -97,6 +100,9 @@ class GreedyRotationAllocatorTest {
         lenient().when(machinePinRule.validate(anyString(), anyString())).thenReturn(true);
         lenient().when(hoseSlotCapRule.fitsSide(anyString(), anyString())).thenReturn(true);
         lenient().when(hoseSlotCapRule.fitsCap(anyString(), anyInt())).thenReturn(true);
+        // 기본 spec<7 — 항상 pass + ProductSpec 미등록 (단위 테스트는 ST-21-5 rule 비활성)
+        lenient().when(specLt7CapRule.fitsAngleCap(anyString(), anyInt())).thenReturn(true);
+        lenient().when(specLt7CapRule.productSpec(anyString())).thenReturn(java.util.Optional.empty());
     }
 
     /** LP 4대 × 18 회전 × 4 슬롯 (TOP/UPMID/LOWMID/BOT) AVAILABLE 격자 — 단순 합성. */

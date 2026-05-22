@@ -12,6 +12,7 @@ import com.scheduling.vc.required.OrderInput;
 import com.scheduling.vc.rule.HoseSlotCapRule;
 import com.scheduling.vc.rule.LeftRightRule;
 import com.scheduling.vc.rule.MachinePinRule;
+import com.scheduling.vc.rule.SpecLt7CapRule;
 import com.scheduling.vc.routing.DecisionType;
 import com.scheduling.vc.routing.MachineType;
 import com.scheduling.vc.routing.MachineTypeRoutingPolicy;
@@ -78,6 +79,7 @@ public class GreedyRotationAllocator {
     private final LeftRightRule leftRightRule;
     private final MachinePinRule machinePinRule;
     private final HoseSlotCapRule hoseSlotCapRule;
+    private final SpecLt7CapRule specLt7CapRule;
     private final SchedulingMetrics metrics;
     private final Clock clock;
 
@@ -91,6 +93,7 @@ public class GreedyRotationAllocator {
         LeftRightRule leftRightRule,
         MachinePinRule machinePinRule,
         HoseSlotCapRule hoseSlotCapRule,
+        SpecLt7CapRule specLt7CapRule,
         SchedulingMetrics metrics,
         Clock clock
     ) {
@@ -103,6 +106,7 @@ public class GreedyRotationAllocator {
         this.leftRightRule = leftRightRule;
         this.machinePinRule = machinePinRule;
         this.hoseSlotCapRule = hoseSlotCapRule;
+        this.specLt7CapRule = specLt7CapRule;
         this.metrics = metrics;
         this.clock = clock;
     }
@@ -116,6 +120,9 @@ public class GreedyRotationAllocator {
 
         // BR-X07 — D-2 deadline 계산 (TK-06-1-2). 같은 hose 다중 수주 = 가장 이른 납기 기준.
         DeadlineMap deadlines = deadlineCalc.compute(ctx.ordersByHose());
+
+        // BR-V17 — 가류기 (machine, date) 별 spec<7 angle 누적 ledger (TK-21-5-3)
+        SpecLt7CapRule.AngleLedger specLt7Ledger = new SpecLt7CapRule.AngleLedger();
 
         // 슬롯 점유 추적 (in-memory mutable copy)
         Map<RotationSlot, SlotAvailability> mutableCells = new HashMap<>(ctx.ledger().cells());
@@ -193,6 +200,10 @@ public class GreedyRotationAllocator {
                         // a.8) HoseSlotCap max_concurrent_slots (BR-V14·V15·V16, TK-21-3-2)
                         if (!hoseSlotCapRule.fitsCap(hose, (int) countSameRotation(hose, slot, schedules))) continue;
 
+                        // a.9) BR-V17 — spec<7 가류기당 ≤4 angle (TK-21-5-3 cross-master)
+                        if (!specLt7CapRule.fitsAngleCap(hose,
+                                specLt7Ledger.count(slot.machineId(), slot.date()))) continue;
+
                         // b) 앵글 capa 사전 — 동일 (machine, date, rotation) 의 같은 hose 점유 슬롯 수 + 1
                         if (!fitsAngleCapacity(hose, machineType, slot, schedules)) continue;
 
@@ -214,6 +225,13 @@ public class GreedyRotationAllocator {
                         mutableCells.put(slot, SlotAvailability.RESERVED);
                         cumulativeYield += yieldPerRot;
                         slotsUsed++;
+
+                        // BR-V17 — spec<7 ledger 누적 (배치 확정 후)
+                        specLt7CapRule.productSpec(hose).ifPresent(spec -> {
+                            if (spec.isSpecLt7()) {
+                                specLt7Ledger.add(slot.machineId(), slot.date(), spec.angleCount());
+                            }
+                        });
 
                         // BR-X02 — 라우팅 결정 audit
                         DecisionType decisionType = classifyDecision(machineType, routingIndex);
