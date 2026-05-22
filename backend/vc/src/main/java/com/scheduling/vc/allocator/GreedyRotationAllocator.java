@@ -9,7 +9,9 @@ import com.scheduling.vc.domain.RotationSlot;
 import com.scheduling.vc.domain.VcSchedule;
 import com.scheduling.vc.domain.VcScheduleStatus;
 import com.scheduling.vc.required.OrderInput;
+import com.scheduling.vc.rule.HoseSlotCapRule;
 import com.scheduling.vc.rule.LeftRightRule;
+import com.scheduling.vc.rule.MachinePinRule;
 import com.scheduling.vc.routing.DecisionType;
 import com.scheduling.vc.routing.MachineType;
 import com.scheduling.vc.routing.MachineTypeRoutingPolicy;
@@ -74,6 +76,8 @@ public class GreedyRotationAllocator {
     private final RoutingAuditLogger auditLogger;
     private final BackwardDeadlineCalculator deadlineCalc;
     private final LeftRightRule leftRightRule;
+    private final MachinePinRule machinePinRule;
+    private final HoseSlotCapRule hoseSlotCapRule;
     private final SchedulingMetrics metrics;
     private final Clock clock;
 
@@ -85,6 +89,8 @@ public class GreedyRotationAllocator {
         RoutingAuditLogger auditLogger,
         BackwardDeadlineCalculator deadlineCalc,
         LeftRightRule leftRightRule,
+        MachinePinRule machinePinRule,
+        HoseSlotCapRule hoseSlotCapRule,
         SchedulingMetrics metrics,
         Clock clock
     ) {
@@ -95,6 +101,8 @@ public class GreedyRotationAllocator {
         this.auditLogger = auditLogger;
         this.deadlineCalc = deadlineCalc;
         this.leftRightRule = leftRightRule;
+        this.machinePinRule = machinePinRule;
+        this.hoseSlotCapRule = hoseSlotCapRule;
         this.metrics = metrics;
         this.clock = clock;
     }
@@ -173,8 +181,17 @@ public class GreedyRotationAllocator {
                         // a) Slot O/X 검증
                         if (!compatQuery.isEligible(hose, toSlotPositionName(slot, machineType))) continue;
 
-                        // a.5) LP 좌/우 셋팅 (BR-V15·V16) — TK-21-1-2
+                        // a.5) LP 좌/우 셋팅 — VcConstraint K/L 기반 (BR-V15·V16, TK-21-1-2)
                         if (!leftRightRule.validate(hose, slot.machineId())) continue;
+
+                        // a.6) machine_pin / lp_only (BR-V14, TK-21-3-1)
+                        if (!machinePinRule.validate(hose, slot.machineId())) continue;
+
+                        // a.7) HoseSlotCap side_lock (BR-V15·V16, TK-21-4-1) — VcHoseRule 기반 보조 가드
+                        if (!hoseSlotCapRule.fitsSide(hose, slot.machineId())) continue;
+
+                        // a.8) HoseSlotCap max_concurrent_slots (BR-V14·V15·V16, TK-21-3-2)
+                        if (!hoseSlotCapRule.fitsCap(hose, (int) countSameRotation(hose, slot, schedules))) continue;
 
                         // b) 앵글 capa 사전 — 동일 (machine, date, rotation) 의 같은 hose 점유 슬롯 수 + 1
                         if (!fitsAngleCapacity(hose, machineType, slot, schedules)) continue;
@@ -249,14 +266,20 @@ public class GreedyRotationAllocator {
     /** 같은 (machine, date, rotation) 의 같은 hose 점유 슬롯 + 1 ≤ angle_qty. */
     private boolean fitsAngleCapacity(String hose, String machineType, RotationSlot newSlot,
                                        Collection<VcSchedule> alreadyPlaced) {
-        long sameRotation = alreadyPlaced.stream()
+        long sameRotation = countSameRotation(hose, newSlot, alreadyPlaced);
+        int requested = (int) sameRotation + 1;
+        return angleValidator.isWithinCapacity(hose, machineType, requested);
+    }
+
+    /** 같은 (hose, machine, date, rotation) 의 이미 배치된 슬롯 수 — TK-21-3-2. */
+    private long countSameRotation(String hose, RotationSlot newSlot,
+                                    Collection<VcSchedule> alreadyPlaced) {
+        return alreadyPlaced.stream()
             .filter(s -> s.getHoseId().equals(hose))
             .filter(s -> s.getMachineId().equals(newSlot.machineId()))
             .filter(s -> s.getProductionDate().equals(newSlot.date()))
             .filter(s -> s.getRotationNo() == newSlot.rotationNo())
             .count();
-        int requested = (int) sameRotation + 1;
-        return angleValidator.isWithinCapacity(hose, machineType, requested);
     }
 
     /**
