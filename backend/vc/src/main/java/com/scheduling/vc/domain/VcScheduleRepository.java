@@ -23,4 +23,8 @@ public interface VcScheduleRepository extends JpaRepository<VcSchedule, UUID> {
     List<VcSchedule> findByDateRange(
         @Param("fromDate") LocalDate fromDate,
         @Param("toDate") LocalDate toDate);
+
+    /** EP-13 ST-13-2 IntraDayLockRule — (machine, slot, date) 같은 슬롯의 기존 row 조회. */
+    List<VcSchedule> findByMachineIdAndSlotPositionAndProductionDate(
+        String machineId, short slotPosition, LocalDate productionDate);
 }

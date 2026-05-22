@@ -66,6 +66,12 @@ public class VcSchedule {
     @Column(name = "confirmed_by", length = 40)
     private String confirmedBy;
 
+    @Column(name = "override_reason", columnDefinition = "text")
+    private String overrideReason;
+
+    @Column(name = "override_by", length = 40)
+    private String overrideBy;
+
     protected VcSchedule() {}
 
     public VcSchedule(UUID vcScheduleId, String hoseId, String machineId,
@@ -116,6 +122,26 @@ public class VcSchedule {
 
     public Instant getConfirmedAt() { return confirmedAt; }
     public String getConfirmedBy() { return confirmedBy; }
+    public String getOverrideReason() { return overrideReason; }
+    public String getOverrideBy() { return overrideBy; }
+
+    /**
+     * BR-V07 일중 앵글 교체 override — TK-13-4-1 (EP-13 ST-13-4).
+     *
+     * <p>DB trigger {@code trg_vc_intra_day_lock} 가 reason/by 누락 시 reject.
+     * 본 메서드는 도메인 invariant 만 강제 (reason blank 차단).
+     */
+    public void applyOverride(String reason, String overrideActor, Instant now) {
+        if (reason == null || reason.isBlank()) {
+            throw new IllegalArgumentException("BR-V07 override_reason 강제 필수");
+        }
+        if (overrideActor == null || overrideActor.isBlank()) {
+            throw new IllegalArgumentException("BR-V07 override_by 강제 필수");
+        }
+        this.overrideReason = reason;
+        this.overrideBy = overrideActor;
+        this.updatedAt = now;
+    }
 
     /**
      * BR-X01 — Planner 확정 (CANDIDATE → CONFIRMED, TK-10-1-2).
