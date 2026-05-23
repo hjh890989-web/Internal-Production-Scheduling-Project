@@ -21,7 +21,7 @@
 
 ---
 
-## 2. 베타 시나리오 SOP — Phase 4-B (5건)
+## 2. 베타 시나리오 SOP — Phase 4-B (5 + 1 후보)
 
 | ID | 파일 | 페르소나 | 핵심 |
 |---|---|---|---|
@@ -30,6 +30,7 @@
 | BS-03 | [03-vc-changed-cascade.md](beta-scenarios/03-vc-changed-cascade.md) | Planner | VC override → cascade chain (BR-X03) |
 | BS-04 | [04-master-restore.md](beta-scenarios/04-master-restore.md) | IT_OPS + Planner | audit forensic + 시점 복원 |
 | BS-05 | [05-intraday-lock-override.md](beta-scenarios/05-intraday-lock-override.md) | Planner | BR-V07 일중 락 override |
+| **BS-06** 🆕 | [06-capacity-overflow-kd-supplement.md](beta-scenarios/06-capacity-overflow-kd-supplement.md) | Planner + IT_OPS | **BR-V12·V13 capa 큐 + KD 보충** (DI-07/08 활성 후 후보) |
 
 ---
 
@@ -64,8 +65,8 @@ Phase 5 PROD cutover — prod-deploy.md (Blue/Green)
 
 ## 5. 상위 참조
 
-- [Phase-3_Completion_v1.0.md](../../Phase%203/2.Phase-Completion/Phase-3_Completion_v1.0.md)
-- [Phase-4_EntryPlan_v1.0.md](../../Phase%204/Phase-4_EntryPlan_v1.0.md)
+- [Phase-3_Completion_v1.1.md](../../Phase%203/2.Phase-Completion/Phase-3_Completion_v1.1.md) (전판 [v1.0](../../Phase%203/2.Phase-Completion/Phase-3_Completion_v1.0.md))
+- [Phase-4_EntryPlan_v1.1.md](../../Phase%204/Phase-4_EntryPlan_v1.1.md) (전판 [v1.0](../../Phase%204/Phase-4_EntryPlan_v1.0.md))
 
 ---
 
@@ -74,3 +75,4 @@ Phase 5 PROD cutover — prod-deploy.md (Blue/Green)
 | 버전 | 날짜 | 작성자 | 변경 |
 |----|-----|------|------|
 | 1.0 | 2026-05-23 | Claude Code | 초안 — 운영 매뉴얼 + 베타 시나리오 5 + 페르소나 4 index |
+| 1.1 | 2026-05-23 | Claude Code | Sprint 7 carry-over 풀 스택 반영 — BS-06 후보 (V12·V13) + Phase-3/4 v1.1 링크 갱신 |

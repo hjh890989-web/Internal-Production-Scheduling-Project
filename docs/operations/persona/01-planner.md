@@ -16,6 +16,7 @@
 | `/orders/import` | 수주 통합 | xlsx Excel import + 매핑 검토 |
 | `/vc/simview` | 성형 시뮬뷰 | 회전 격자 (BR-V04 1~18) + SwapProposalPanel (수용) |
 | `/extrusion-matrix` | 압출 매트릭스 | Tabs 매트릭스/Ranking + STOMP cascade + Excel 다운로드 |
+| `/vc/capacity-queue` | **Capa 큐 + KD 보충** (Sprint 7 v1.1) | BR-V12 split 미리보기 + BR-V13 1클릭 보충 (DI-07/08 입력 후) |
 | `/audit/restore` | 마스터 복원 (read-only) | audit timeline + 시점 snapshot (복원 자체는 IT_OPS 협의) |
 
 ---
@@ -55,6 +56,8 @@
 | **Override** | /vc/simview Override modal | POST /schedule/vc/{id}/override | reason + by 강제 + V027 |
 | **EX Confirm** | /extrusion-matrix | POST /schedule/ex/{id}/confirm | V023 SCHEDULED → CONFIRMED |
 | **Excel 다운로드** | /extrusion-matrix | GET /export/extrusion-matrix | BR-E09 시트명 |
+| **Capa 큐 split (BR-V12)** | /vc/capacity-queue Tab1 | POST /schedule/vc/capacity-overflow/split | priority rank ASC + 추가 요청 큐 분리 |
+| **KD 잔량 보충 (BR-V13)** | /vc/capacity-queue Tab2 | POST /schedule/vc/capacity-overflow/supplement | 동일 hose 1차 + 그룹 2차 + audit @Auditable |
 
 ---
 
@@ -71,6 +74,12 @@
 
 ### Q4. swap 수용 후 총량이 달라졌어요?
 **A**. 시스템 버그 — atomic SQL 충돌 가능성. IT_OPS 통보. SwapHelper SET CONSTRAINTS DEFERRED invariant 회귀.
+
+### Q5. `/vc/capacity-queue` 진입 시 빈 결과만 나옵니다.
+**A**. **활성 조건 미충족**. DI-07 PRODUCT_PRIORITY + DI-08 KD_ORDER 마스터 입력 후 정상 동작. IT_OPS 협의 후 시드 입력. ([BS-06](../beta-scenarios/06-capacity-overflow-kd-supplement.md) 참조)
+
+### Q6. capa 초과 시 split 미리보기 결과 (Tab1) 의 "추가 요청 큐" 는 자동 채택되나요?
+**A**. **아니오**. v1.1 시점 미리보기만 (Sprint 7 carry-over). Planner 가 별도 결정. 1클릭 승인 워크플로우는 Sprint 8+ 예정.
 
 ---
 
@@ -89,3 +98,4 @@
 | 버전 | 날짜 | 작성자 | 변경 |
 |----|-----|------|------|
 | 1.0 | 2026-05-23 | Claude Code | 초안 — Planner 페르소나 가이드 |
+| 1.1 | 2026-05-23 | Claude Code | Sprint 7 carry-over 마감 반영 — `/vc/capacity-queue` 추가, 액션 매트릭스 V12·V13 2건, FAQ Q5·Q6 추가 |
