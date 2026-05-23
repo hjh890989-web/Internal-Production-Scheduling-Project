@@ -168,3 +168,46 @@ Blue/Green 사이 **DB schema 호환성 필수**:
 - [ ] Rollback 절차 IT 부서 시연
 - [ ] DB migration 호환성 룰 (expand-contract) 문서화
 - [ ] 운영자 매뉴얼 (장애 대응 + 비상 연락) IT 부서 sign-off
+- [ ] **Sprint 7 carry-over 변경사항 정합 확인** — [stg-deploy.md §12](stg-deploy.md#12-sprint-7-carry-over-변경사항-phase-4-a-진입-시-추가-확인) STG 적용 후 PROD 동일 적용 (V033 + REST endpoint + Frontend route)
+
+---
+
+## 10. Sprint 7 carry-over PROD 진입 확인 (Phase 5 cutover 시)
+
+> STG 에서 Phase 4-A ~ 4-E 5주 베타 검증 통과 후 PROD cutover. [stg-deploy §12](stg-deploy.md#12-sprint-7-carry-over-변경사항-phase-4-a-진입-시-추가-확인) 와 동일 절차 PROD 적용.
+
+### 10.1 V033 마이그레이션 (Blue/Green expand-contract 호환)
+
+| 항목 | 변경 |
+|---|---|
+| **V033** | `master.product_priority` + `master.kd_order` (BR-V12·V13 마스터, deferred 활성) |
+| 호환성 | ✓ 신규 테이블 추가만 — 기존 Blue (v1.0.0) 영향 0 (expand 단계) |
+
+V033 은 신규 테이블만 추가하므로 Blue/Green 호환. Contract 단계 불필요.
+
+### 10.2 신규 REST endpoint 검증 (Blue/Green 호환)
+
+| 메서드 | 경로 | RBAC | 검증 |
+|---|---|---|---|
+| POST | `/api/v1/schedule/vc/capacity-overflow/split` | PLANNER | CapacityOverflowControllerIT 7 / 7 PASSED (RBAC + happy + 400 validation) |
+| POST | `/api/v1/schedule/vc/capacity-overflow/supplement` | PLANNER | (동) |
+
+### 10.3 신규 Frontend route 검증
+
+`/vc/capacity-queue` 라우트 — PROD nginx `prod-active.conf` 변경 불필요 (SPA fallback 기존 룰 적용).
+
+### 10.4 PROD 활성 절차 (BS-06 운영 진입 시)
+
+```bash
+# 1. Blue/Green 호환 — V033 신규 테이블만 추가 → expand 자동 적용 (롤백 영향 0)
+# 2. PROD DI-07 PRODUCT_PRIORITY + DI-08 KD_ORDER 실 운영 데이터 입력 (IT_OPS)
+#    - STG SEED_V12V13=1 sample 시드와 다름 — PROD 는 실 영업 데이터 (사용자 입력 또는 수주통합 자동)
+# 3. Planner /vc/capacity-queue 진입 → 실 운영
+```
+
+### 10.5 회귀 통과 기준 (Phase 4-E PROD cutover 게이트)
+
+- Backend **795 tests / 0 failures** (Sprint 7 v1.1 누적 + @Valid 400 IT 2 + Controller IT 5 합계 7)
+- Frontend **58 vitest / 0 failures**
+- Playwright 226 등록 + BS-06 spec 추가 검토 (Phase 4-B 후반)
+- VSCode 문제 탭 0 + Modulith verify 0 위반 + ArchUnit 29 rule 통과
