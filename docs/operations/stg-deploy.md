@@ -233,3 +233,75 @@ docker compose --env-file .env.stg \
 - Resilience4j @Retry/@CircuitBreaker (Kakao) + spring-modulith-events-jpa 영속
 - Prometheus + Grafana 11 panel + Loki 90일 + 19 KPI 영속
 - Backend 249 IT + Frontend 54 vitest + Playwright 226 등록
+
+---
+
+## 12. Sprint 7 carry-over 변경사항 (Phase 4-A 진입 시 추가 확인)
+
+> Sprint 7 carry-over (2026-05-23) — BR-V12·V13 풀 스택 마감 + tooling. Phase 4-A 진입 시
+> §11 (Sprint 6) 외에 본 §12 추가 확인 필수.
+
+### 12.1 신규 DB schema + 마이그레이션 (V033)
+
+| 항목 | 변경 |
+|---|---|
+| **V033** | `master.product_priority` + `master.kd_order` (BR-V12·V13 마스터 — composite + CHECK + 4-status 머신) |
+| Flyway schemas | `app,master,audit,public,business_kpi` (V032 변동 없음, master 확장만) |
+
+본 V033 은 **deferred 활성** — `master.product_priority` (DI-07) + `master.kd_order` (DI-08) 입력 후에만
+실제 cascade 동작 ([BS-06](beta-scenarios/06-capacity-overflow-kd-supplement.md) 참조).
+
+### 12.2 신규 REST endpoint (Sprint 7 carry-over)
+
+| 메서드 | 경로 | RBAC | 용도 |
+|---|---|---|---|
+| POST | `/api/v1/schedule/vc/capacity-overflow/split` | PLANNER | BR-V12 priority rank ASC + 추가 요청 큐 분리 미리보기 |
+| POST | `/api/v1/schedule/vc/capacity-overflow/supplement` | PLANNER | BR-V13 KD 잔량 보충 (동일 hose 1차 + 셋팅 그룹 2차 + @Auditable) |
+
+REST IT 5 — `CapacityOverflowControllerIT` (RBAC 401/403 + happy path).
+
+### 12.3 신규 Frontend route + UI
+
+| 경로 | 화면 | RBAC | 진입 |
+|---|---|---|---|
+| `/vc/capacity-queue` | Tabs (BR-V12 Split + BR-V13 KD 보충) | PLANNER | MainLayout 메뉴 + i18n ko/en (`menu.capacityQueue`) |
+
+신규 Vite chunk — `CapacityQueuePage` 2.72kB gzip (lazy). Entry first paint +0.10kB (57.41 → 57.51kB).
+
+### 12.4 베타 시드 스크립트 — V033 sample seed 옵션
+
+```bash
+# 기본 — BS-01~05 만 (V033 시드 생략)
+./infrastructure/scripts/seed-stg-beta-data.sh
+
+# Phase 4-B 후반 — BS-06 활성 시 재실행
+SEED_V12V13=1 ./infrastructure/scripts/seed-stg-beta-data.sh
+#   - DI-07 PRODUCT_PRIORITY 3 row (29673-2R060 rank 1 + 28422-2M800 rank 2 + 28421-2M800 rank 3)
+#   - DI-08 KD_ORDER 2 row OPEN status
+#   - idempotent (ON CONFLICT DO NOTHING)
+#   - Planner /vc/capacity-queue 진입 가능 확인 후 BS-06 진행
+```
+
+### 12.5 신규 베타 시나리오 (BS-06 후보 — Phase 4-B 후반)
+
+- [BS-06 capacity-overflow-kd-supplement.md](beta-scenarios/06-capacity-overflow-kd-supplement.md)
+- Tab1 BR-V12 split 미리보기 + Tab2 BR-V13 1클릭 보충
+- 페르소나 — Planner + IT_OPS (시드 입력 책임)
+- 활성 조건 — DI-07/08 입력 (`SEED_V12V13=1`) 완료 후
+
+### 12.6 Tooling — VSCode 문제 탭 노이즈 차단
+
+- `.markdownlint.json` — 11 룰 disable/relax (MD013/024/026/029/033/034/036/040/041/046)
+- `.cspell.json` — 프로젝트 단어 ~100 + `Phase 1~5/` + `0.Pprompt/` 무시
+- 효과 — VSCode "문제" 탭 54 → 0 (개발자 PC 노이즈 차단)
+
+### 12.7 회귀 수치 (Sprint 6 → Sprint 7 누적)
+
+| 영역 | Sprint 6 | Sprint 7 v1.1 |
+|---|---|---|
+| Backend IT | 249 | **793** (+5 BrV12V13IT + 5 CapacityOverflowControllerIT + 누적 정밀화) |
+| Frontend vitest | 54 | **58** (+4 capacityOverflow.types) |
+| Playwright spec | 226 | 226 (변동 없음 — BS-06 spec 후보 Phase 4-B) |
+| Vite entry gzip | ~50kB | 57.51kB (CapacityQueuePage chunk +2.72kB lazy) |
+| Phase 4 진입 게이트 | 5 | **9** |
+| VSCode 문제 탭 | (미측정) | **0** |
