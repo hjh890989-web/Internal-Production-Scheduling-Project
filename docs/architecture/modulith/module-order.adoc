@@ -1,0 +1,19 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.scheduling.order`
+|Spring components
+|_Controllers_
+
+* `c.s.o.api.MappingRuleController`
+* `c.s.o.api.OrderImportController`
+
+_Others_
+
+* `c.s.o.api.OrderExceptionHandler`
+|Bean references
+|* `c.s.c.metrics.SchedulingMetrics` (in Common)
+* `c.s.m.api.VcConstraintLookup` (in Master Data)
+* `c.s.m.api.LineRoutingLookup` (in Master Data)
+* `c.s.m.api.SettingGroupLookup` (in Master Data)
+|===

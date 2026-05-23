@@ -1,0 +1,15 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.scheduling.vc`
+|Bean references
+|* `c.s.m.api.SlotCompatibilityQuery` (in Master Data)
+* `c.s.c.metrics.SchedulingMetrics` (in Common)
+* `c.s.m.api.VcMachineQuery` (in Master Data)
+* `c.s.m.api.WorkingCalendar` (in Master Data)
+* `c.s.m.api.HoseRuleLookup` (in Master Data)
+* `c.s.m.api.VcConstraintLookup` (in Master Data)
+* `c.s.m.api.ProductSpecLookup` (in Master Data)
+|Events listened to
+|* `c.s.o.events.OrderChangedEvent` (async) 
+|===

@@ -1,0 +1,28 @@
+@startuml
+set separator none
+title VC Scheduling
+
+top to bottom direction
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Component>
+
+Container_Boundary("InternalProductionSchedulingSystem.InternalProductionSchedulingSystem_boundary", "Internal Production Scheduling System", $tags="") {
+  Component(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.AuditLog, "Audit Log", $techn="Module", $descr="", $tags="", $link="")
+  Component(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.Common, "Common", $techn="Module", $descr="", $tags="", $link="")
+  Component(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.MasterData, "Master Data", $techn="Module", $descr="", $tags="", $link="")
+  Component(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.OrderConsolidation, "Order Consolidation", $techn="Module", $descr="", $tags="", $link="")
+  Component(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.VCScheduling, "VC Scheduling", $techn="Module", $descr="", $tags="", $link="")
+}
+
+Rel(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.MasterData, InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.Common, "uses", $techn="", $tags="", $link="")
+Rel(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.VCScheduling, InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.OrderConsolidation, "listens to", $techn="", $tags="", $link="")
+Rel(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.VCScheduling, InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.AuditLog, "depends on", $techn="", $tags="", $link="")
+Rel(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.VCScheduling, InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.MasterData, "uses", $techn="", $tags="", $link="")
+Rel(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.VCScheduling, InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.Common, "uses", $techn="", $tags="", $link="")
+Rel(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.OrderConsolidation, InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.Common, "uses", $techn="", $tags="", $link="")
+Rel(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.OrderConsolidation, InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.MasterData, "uses", $techn="", $tags="", $link="")
+
+SHOW_LEGEND(true)
+@enduml

@@ -1,0 +1,7 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.scheduling.audit`
+|Spring components
+|* `c.s.a.aop.AuditableAspect`
+|===

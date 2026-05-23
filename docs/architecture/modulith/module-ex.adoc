@@ -1,0 +1,15 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.scheduling.ex`
+|Bean references
+|* `c.s.m.api.WorkingCalendar` (in Master Data)
+* `c.s.m.api.ShiftLookup` (in Master Data)
+* `c.s.m.api.ExConstraintLookup` (in Master Data)
+* `c.s.m.api.SettingGroupLookup` (in Master Data)
+* `c.s.m.api.ProductInventoryLookup` (in Master Data)
+* `c.s.m.api.LineRoutingLookup` (in Master Data)
+|Events listened to
+|* `c.s.v.events.VcChangedEvent` (async) 
+* `c.s.v.events.VcConfirmedEvent` (async) 
+|===

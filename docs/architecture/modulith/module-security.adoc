@@ -1,0 +1,9 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.scheduling.security`
+|Spring components
+|* `c.s.s.CustomAccessDeniedHandler`
+* `c.s.s.CustomAuthenticationEntryPoint`
+* `c.s.s.KeycloakJwtAuthConverter`
+|===

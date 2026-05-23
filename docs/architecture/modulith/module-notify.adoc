@@ -1,0 +1,41 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.scheduling.notify`
+|Spring components
+|_Controllers_
+
+* `c.s.n.api.AckController`
+
+_Services_
+
+* `c.s.n.KakaoDeliveryService`
+* `c.s.n.NotificationService`
+
+_Repositories_
+
+* `c.s.n.KakaoDeliveryRepository`
+* `c.s.n.NotificationRepository`
+
+_Event listeners_
+
+* `c.s.n.ExReplanPushListener`
+
+_Configuration properties_
+
+* `c.s.n.NotificationConfig`
+
+_Others_
+
+* `c.s.n.DeliveryEscalator`
+* `c.s.n.KakaoTalkClient`
+* `c.s.n.RedisStompFanoutConfig`
+* `c.s.n.WebSocketNotificationPublisher`
+* `c.s.n.WebSocketStompConfig`
+|Aggregate roots
+|* `c.s.n.KakaoDeliveryAttempt`
+* `c.s.n.NotificationEntity`
+|Events listened to
+|* `c.s.e.events.ExReplanCompletedEvent` (async) 
+* `c.s.o.events.OrderDiffPersistedEvent` (async) 
+|===

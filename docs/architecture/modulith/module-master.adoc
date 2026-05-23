@@ -1,0 +1,28 @@
+[%autowidth.stretch, cols="h,a"]
+|===
+|Base package
+|`com.scheduling.master`
+|Spring components
+|_Controllers_
+
+* `c.s.m.api.MasterCompatController`
+
+_Services_
+
+* `c.s.m.api.WorkingCalendar` (via `c.s.m.calendar.WorkingCalendarService`)
+
+_Others_
+
+* `c.s.m.api.ExConstraintLookup` (via `c.s.m.ex.ExConstraintLookupImpl`)
+* `c.s.m.api.ProductInventoryLookup` (via `c.s.m.inventory.ProductInventoryLookupImpl`)
+* `c.s.m.api.LineRoutingLookup` (via `c.s.m.line.LineRoutingLookupImpl`)
+* `c.s.m.api.SettingGroupLookup` (via `c.s.m.setting.SettingGroupLookupImpl`)
+* `c.s.m.api.ShiftLookup` (via `c.s.m.shift.ShiftLookupImpl`)
+* `c.s.m.api.ProductSpecLookup` (via `c.s.m.spec.ProductSpecCache`)
+* `c.s.m.api.HoseRuleLookup` (via `c.s.m.vc.HoseRuleLookupImpl`)
+* `c.s.m.api.SlotCompatibilityQuery` (via `c.s.m.vc.SlotCompatibilityQueryImpl`)
+* `c.s.m.api.VcConstraintLookup` (via `c.s.m.vc.VcConstraintLookupImpl`)
+* `c.s.m.api.VcMachineQuery` (via `c.s.m.vc.VcMachineQueryImpl`)
+|Bean references
+|* `c.s.c.metrics.SchedulingMetrics` (in Common)
+|===
