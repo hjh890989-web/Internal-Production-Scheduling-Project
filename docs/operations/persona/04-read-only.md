@@ -17,8 +17,9 @@
 | `/vc/simview` | 성형 시뮬뷰 | ✅ 회전 격자 read (swap 제안 disable) |
 | `/extrusion-matrix` | 압출 매트릭스 | ✅ 매트릭스 + Ranking + Excel 다운로드 |
 | `/audit/restore` | 마스터 복원 | ✅ forensic 조회 (실제 복원은 IT_OPS) |
+| `/vc/capacity-queue` | Capa 큐 + KD 보충 | ❌ 403 (BR-V12·V13 PLANNER 단독, [BS-06](../beta-scenarios/06-capacity-overflow-kd-supplement.md) 참조) |
 | Grafana | http://stg.../3000 | ✅ business-kpi 대시 + scheduling-overview |
-| ❌ confirm / accept / override / record | 모두 403 Forbidden |
+| ❌ confirm / accept / override / record / split / supplement | 모두 403 Forbidden |
 
 ---
 
@@ -42,6 +43,7 @@
 
 - 10개 카테고리 (NS · K-V · K-E) × 19 KPI 정의 — `business_kpi.definition`
 - Sprint 7+ — 베타 운영 데이터 누적 후 임계값 재조정
+- 🆕 **Sprint 8+ 후보 (BR-V12·V13)** — KD remaining_qty per hose (잔량 부족 경고) · BR-V12 추가 요청 큐 누적 · BR-V13 그룹 fallback 비율 ([BS-06 KPI 영향](../beta-scenarios/06-capacity-overflow-kd-supplement.md))
 
 ---
 
@@ -110,3 +112,4 @@ DBA 권한도 차단.
 | 버전 | 날짜 | 작성자 | 변경 |
 |----|-----|------|------|
 | 1.0 | 2026-05-23 | Claude Code | 초안 — READ_ONLY 페르소나 가이드 + 19 KPI + audit immutable |
+| 1.1 | 2026-05-23 | Claude Code | Sprint 7 carry-over — `/vc/capacity-queue` 403 명시 + Sprint 8+ V12·V13 KPI 후보 추가 |

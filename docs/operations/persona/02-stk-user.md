@@ -17,6 +17,7 @@
 | `/extrusion-matrix` | 압출 매트릭스 (read) | 실시간 STOMP push 수신 |
 | `/audit/restore` | (제한) timeline read only |
 | ❌ `/orders/import` | 권한 없음 |
+| ❌ `/vc/capacity-queue` | 권한 없음 (BR-V12·V13 — PLANNER 단독, [BS-06](../beta-scenarios/06-capacity-overflow-kd-supplement.md) 참조) |
 
 ---
 
@@ -92,3 +93,4 @@
 | 버전 | 날짜 | 작성자 | 변경 |
 |----|-----|------|------|
 | 1.0 | 2026-05-23 | Claude Code | 초안 — STK_USER 페르소나 가이드 |
+| 1.1 | 2026-05-23 | Claude Code | Sprint 7 carry-over — `/vc/capacity-queue` 권한 없음 cross-reference (BS-06 PLANNER 단독) |

@@ -27,8 +27,8 @@
 
 - [ ] `cp .env.stg.example .env.stg` + vault secret 주입 (6 신규 키)
 - [ ] `docker compose --env-file .env.stg up -d`
-- [ ] Flyway V001~V032 자동 적용 로그 확인
-- [ ] `./scripts/seed-stg-beta-data.sh` 실행
+- [ ] Flyway **V001~V033** 자동 적용 로그 확인 (V033 = PRODUCT_PRIORITY + KD_ORDER, Sprint 7 carry-over)
+- [ ] `./scripts/seed-stg-beta-data.sh` 실행 (BS-01~05 sample seed)
 - [ ] Grafana 7 대시 표시 확인
 - [ ] Keycloak realm `scheduling` import + LDAP/AD sync
 - [ ] 베타 사용자 5명 SSO 진입 검증
@@ -37,6 +37,9 @@
 
 - [ ] BS-01 ~ BS-05 5 시나리오 × Planner 인수 (`docs/operations/beta-scenarios/`)
 - [ ] 각 시나리오 실패 0건 + KPI 영향 확인
+- [ ] **🆕 BS-06 후보 활성 (Sprint 7 carry-over)** — DI-07/08 시드 입력 후 진행
+  - `SEED_V12V13=1 ./scripts/seed-stg-beta-data.sh` 재실행 (sample 시드 추가)
+  - Planner `/vc/capacity-queue` 진입 가능 확인 (Tab1 split + Tab2 supplement)
 
 ### 2.3 Phase 4-C — 사용자 교육 (Week 3)
 
@@ -130,6 +133,8 @@
 | `GET /api/v1/audit/timeline?...` | audit history |
 | `GET /api/v1/kpi/measurements?from=&to=` | EP-47 KPI raw |
 | `POST /api/v1/kpi/measurements/{kpiCode}` | KPI 수동 기록 |
+| `POST /api/v1/schedule/vc/capacity-overflow/split` 🆕 | BR-V12 capa 분리 미리보기 (PLANNER 단독, debug 용으로 IT_OPS curl 가능) |
+| `POST /api/v1/schedule/vc/capacity-overflow/supplement` 🆕 | BR-V13 KD 잔량 보충 (PLANNER 단독, [BS-06](../beta-scenarios/06-capacity-overflow-kd-supplement.md)) |
 
 ---
 
@@ -138,3 +143,4 @@
 | 버전 | 날짜 | 작성자 | 변경 |
 |----|-----|------|------|
 | 1.0 | 2026-05-23 | Claude Code | 초안 — IT_OPS 페르소나 가이드 + Phase 4 체크리스트 |
+| 1.1 | 2026-05-23 | Claude Code | Sprint 7 carry-over — Flyway V033 명시 + BS-06 후보 (DI-07/08 시드 SEED_V12V13=1) + capacity-overflow REST 2 endpoint 진단 추가 |
