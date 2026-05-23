@@ -9,6 +9,53 @@ All notable changes to **Internal Production Scheduling Project** are documented
 
 ---
 
+## [v1.0.1] — 2026-05-23 — Sprint 7 carry-over 풀 스택 마감
+
+### Added
+
+- **BR-V12·V13 REST endpoints** — `vc.capacity_overflow.CapacityOverflowController` (`POST /capacity-overflow/split`, `POST /capacity-overflow/supplement`, @PreAuthorize PLANNER)
+- **BR-V12·V13 Planner UI** — `frontend/src/features/capacity-overflow/`
+  - `api/capacityOverflowApi.ts` — SplitResult + SupplementResult + ConsumedEntry record 1:1
+  - `CapacityOverflowSplitPanel.tsx` — daily_capa + hose qty 입력 + 자동 채택/추가 요청 큐 미리보기 + Progress 사용률
+  - `KdSupplementPanel.tsx` — hose + shortage 입력 + Statistic 4종 + 소진 KD orders 테이블 (동일 hose green / 그룹 blue)
+  - `pages/CapacityQueuePage.tsx` — 두 패널 Tabs 통합
+  - Route `/vc/capacity-queue` + MainLayout 메뉴 + i18n ko/en (`menu.capacityQueue`)
+  - `capacityOverflow.types.test.ts` — 4 단위 테스트
+
+### Tooling
+
+- **`.markdownlint.json`** — 11 룰 disable/relax (MD013/024/026/029/033/034/036/040/041/046 + sibling-only) — 한국어 문서 친화
+- **`.cspell.json`** — 프로젝트 단어 ~100 (antd·Modulith·QueryDSL·hose·vulcanization 등) + Phase 1~5/`0.Pprompt/` 무시
+- **효과** — VSCode "문제" 탭 **54 → 0**
+
+### Reports
+
+- `Phase 3/1.Sprint-Reports/Sprint-7_Completion_v1.1.md` — Sprint 7 풀 스택 클로저 (3 추가 commit, vitest 54→58)
+- `docs/perf/PERF-002_Bundle_Regression_Report_v1.1.md` — Entry 57.41 → 57.51kB gzip (+0.10kB), `CapacityQueuePage` 2.72kB lazy chunk, antd-core +8.54kB
+
+### Metrics (v1.0.0 → v1.0.1)
+
+| 영역 | v1.0.0 | v1.0.1 |
+|---|---|---|
+| Backend tests | 788 / 0 fail | 788 / 0 fail |
+| Frontend vitest | 54 / 0 fail | **58 / 0 fail** (+4) |
+| Frontend lint | 0 warning | 0 warning |
+| Vite entry gzip | 57.41kB | **57.51kB** (+0.10kB) |
+| Vite prod build | 14.54s | 14.79s |
+| Modulith verify | 0 위반 | 0 위반 |
+| ArchUnit | 29 rule | 29 rule |
+| VSCode 문제 탭 | 54 | **0** |
+
+### Commits (+3)
+
+```text
+1f1313f  feat(vc): BR-V12·V13 REST endpoints — /capacity-overflow/split + /supplement
+9f3f5f0  feat(ui): Sprint 7 BR-V12·V13 Planner UI — capa 큐 + KD 보충
+c0df2d8  chore(tooling): VSCode 문제 탭 노이즈 차단 — .markdownlint + .cspell config
+```
+
+---
+
 ## [v1.0.0] — 2026-05-23 — **Phase 3 (개발) 완료 + Phase 4 (베타 운영) 진입 준비** 🎯
 
 ### Highlights
@@ -113,9 +160,11 @@ All notable changes to **Internal Production Scheduling Project** are documented
 | S6 | Keycloak `${...:}` 빈 문자열 → JwtDecoder 에러 | SpEL `#{null}` default |
 | S6 | jsdom navigator.language en-US (한국어 검증 실패) | `beforeAll changeLanguage('ko')` |
 
-### Carry-over (Phase 4+ Sprint 7+)
+### Carry-over (Phase 4+ Sprint 8+)
 
-- BR-V12·V13 (capa 초과/부족 — 수주통합 안정화 후)
+- ~~BR-V12·V13 백엔드 + UI~~ → **v1.0.1 마감** (Sprint 7 carry-over 풀 스택)
+- BR-V12 추가 요청 큐 승인 워크플로우 (Planner UI commit/reject + 백엔드 endpoint + audit) — Sprint 8+
+- BR-V13 Grafana panel (IT_OPS KD remaining_qty 시각화) — Sprint 8+
 - Mobile App (Flutter 압출 패드)
 - ML 추천 (EP-18 ranking 자동화)
 - ArchUnit DDD layer 강화 (`@DomainLayer`)

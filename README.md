@@ -4,9 +4,9 @@
 
 | 항목 | 값 |
 |---|---|
-| **Status** | **Phase 3 (개발) 완료** ✅ — Phase 4 (베타 운영) 진입 준비 |
+| **Status** | **Phase 3 (개발) 완료** ✅ — Phase 4 (베타 운영) 진입 준비 (Sprint 7 carry-over 풀 스택 마감) |
 | **Phase 2 산출** | 465 파일 · 253 SP · ~177 PD · 20+ ADR · SRS v1.5 |
-| **Phase 3 산출** | 7 Sprint · 47 Epic · ~287 Task · **163 commit** · 9 영업일 (AI 가속 5배 압축) |
+| **Phase 3 산출** | 7 Sprint + S7 carry-over · 47 Epic · ~287 Task · **~174 commit** · 9 영업일 (AI 가속 5배 압축) |
 | **언어·런타임** | Java 21 LTS · Spring Boot 3.5 · Spring Modulith 1.4 · React 18 · Vite 5 |
 | **운영 규모** | 47품번 · LP 4대 + IC 1대 + 압출 4-shift × 75% (1주 horizon · ~1500 row) |
 | **사용자** | ~10명 (사내 한정, 사번 8자리 + PIN 4자리 — NFR-SEC-007 v1.5) |
@@ -119,6 +119,7 @@ Modulith verify 0 위반 + ArchUnit 29 rule 통과.
 | 버전 | 날짜 | 마일스톤 |
 |---|---|---|
 | **v1.0.0** | 2026-05-23 | Phase 3 종료 + Phase 4 진입 준비 (Sprint 0~6 누적) |
+| **v1.0.1** | 2026-05-23 | Sprint 7 carry-over 풀 스택 — BR-V12·V13 REST + Planner UI + tooling (markdownlint+cspell) |
 
 ---
 
