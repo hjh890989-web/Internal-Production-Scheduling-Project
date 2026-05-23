@@ -29,13 +29,20 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     target: 'es2022',
+    // EP-46 — Sprint 5 ant-design 단일 청크 1.2MB → 세분화 + AG Grid/STOMP 별도 chunk
+    chunkSizeWarningLimit: 700,
     rollupOptions: {
       output: {
         manualChunks: {
           'react-vendor':  ['react', 'react-dom', 'react-router-dom'],
-          'ant-design':    ['antd', '@ant-design/icons'],
-          'tanstack':      ['@tanstack/react-query'],
+          'antd-core':     ['antd'],                            // 단일 import 분리
+          'antd-icons':    ['@ant-design/icons'],
+          'tanstack':      ['@tanstack/react-query', '@tanstack/react-query-devtools'],
           'i18n':          ['i18next', 'react-i18next'],
+          'dayjs':         ['dayjs'],
+          'dnd-kit':       ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+          'stomp':         ['@stomp/stompjs', 'sockjs-client'],
+          // ag-grid 는 자동 분리 (별도 chunk — agGridSetup.ts import 시점)
         },
       },
     },
