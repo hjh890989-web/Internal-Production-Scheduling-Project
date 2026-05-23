@@ -158,6 +158,15 @@ spring:
     schemas: app,master,audit,public,business_kpi     # public: V031 event_publication, business_kpi: V032 KPI
     locations: classpath:db/migration
 
+  # Sprint 6 EP-42 — Keycloak OIDC (사내 IdP). 미설정 시 SecurityConfig fallback (permitAll).
+  # SpEL #{null} — env var 미설정 시 property 자체 미등록 (빈 문자열 → JwtDecoder 빈 문자열 에러 회피)
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri:  ${KEYCLOAK_ISSUER_URI:#{null}}   # 예: https://keycloak.intranet/realms/scheduling
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:#{null}}     # 예: https://keycloak.intranet/realms/scheduling/protocol/openid-connect/certs
+
 # Resilience4j — Sprint 6 EP-41 (Kakao + Import client 안정성 NFR)
 resilience4j:
   retry:
