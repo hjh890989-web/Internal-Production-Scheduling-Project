@@ -20,6 +20,7 @@ export default function MainLayout() {
     { key: '/home', label: t('menu.home') },
     { key: '/orders/import', label: t('menu.orders') },
     { key: '/vc/simview', label: t('menu.vc') },
+    { key: '/vc/capacity-queue', label: t('menu.capacityQueue') },
     { key: '/extrusion-matrix', label: t('menu.ex') },
     { key: '/master', label: t('menu.master'), disabled: true },
     { key: '/audit/restore', label: t('menu.audit') },

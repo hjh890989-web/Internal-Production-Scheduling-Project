@@ -9,6 +9,7 @@ const OrderImportPage = lazy(() => import('@/pages/OrderImportPage'))
 const VcSimulationPage = lazy(() => import('@/pages/VcSimulationPage'))
 const ExMatrixPage = lazy(() => import('@/pages/ExMatrixPage'))
 const MasterRestorePage = lazy(() => import('@/pages/MasterRestorePage'))
+const CapacityQueuePage = lazy(() => import('@/pages/CapacityQueuePage'))
 
 const fallback = (
   <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
@@ -53,6 +54,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={fallback}>
             <VcSimulationPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'vc/capacity-queue',
+        element: (
+          <Suspense fallback={fallback}>
+            <CapacityQueuePage />
           </Suspense>
         ),
       },

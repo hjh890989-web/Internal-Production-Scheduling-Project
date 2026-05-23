@@ -21,6 +21,7 @@
     "home": "Home",
     "orders": "Order Consolidation",
     "vc": "Vulcanization",
+    "capacityQueue": "Capacity Queue + KD",
     "ex": "Extrusion",
     "master": "Master Data",
     "audit": "Audit Log",

@@ -21,6 +21,7 @@
     "home": "홈",
     "orders": "수주 통합",
     "vc": "성형 스케줄",
+    "capacityQueue": "Capa 큐 + KD 보충",
     "ex": "압출 스케줄",
     "master": "마스터 데이터",
     "audit": "감사 로그",
