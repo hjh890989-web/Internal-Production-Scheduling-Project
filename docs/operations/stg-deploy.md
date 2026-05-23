@@ -179,3 +179,57 @@ docker compose --env-file .env.stg \
     -f docker-compose.yml -f docker-compose.stg.yml \
     down -v
 ```
+
+---
+
+## 11. Sprint 6 변경사항 (Phase 4-A 진입 시 확인 필수)
+
+> Phase 3 종료 (2026-05-23) 시점 누적 변경. STG 부팅 전 `.env.stg` 갱신 필수.
+
+### 11.1 신규 env var (`.env.stg.example` 참조)
+
+| Key | 용도 | 미설정 시 동작 |
+|---|---|---|
+| `KEYCLOAK_ISSUER_URI` | EP-42 OAuth2 issuer | SecurityConfig fallback (permitAll) |
+| `KEYCLOAK_JWKS_URI` | EP-42 JWKS 키 | OIDC JwtDecoder 비활성 (SpEL `#{null}`) |
+| `KAKAO_ENABLED` | EP-16 Resilience4j 활성 | stub log only |
+| `KAKAO_WEBHOOK_URL` | EP-16 Workplace Bot 엔드포인트 | 도달 실패 (3회 retry FAILED) |
+| `KAKAO_BOT_TOKEN` | EP-16 Bearer | 도달 실패 |
+| `VITE_AG_GRID_LICENSE_KEY` | EP-15·17 Enterprise 라이센스 (build 시 주입) | 워터마크 노출 |
+
+### 11.2 신규 DB schema + 마이그레이션 (V030~V032)
+
+| 항목 | 변경 |
+|---|---|
+| V030 | `audit.schedule_audit_log` 월별 RANGE 파티셔닝 36 child + DEFAULT (NFR-SEC-004 3년 보존) |
+| V031 | `public.event_publication` (spring-modulith-events-jpa — 재시작 publication 복구) |
+| V032 | `business_kpi.measurement` + `definition` (9 KPI baseline seed) |
+| Flyway schemas | `app,master,audit,public,business_kpi` (Sprint 5 `app,master,audit` → 확장) |
+
+### 11.3 베타 시드 스크립트
+
+```bash
+# Phase 4-A STG 부팅 후 베타 시드 import
+./infrastructure/scripts/seed-stg-beta-data.sh
+#   - DS-VC-CONSTRAINT-47 마스터 (47 품번 + 5 hose rule + 4 line type)
+#   - 1주 horizon vc_schedule baseline ~6,300 row CANDIDATE
+#   - business_kpi 9 baseline 영속
+```
+
+### 11.4 Sprint 6 신규 Modulith 모듈
+
+- `com.scheduling.kpi` — `BusinessKpiPersister` + `BusinessKpiController` (REST `/api/v1/kpi/*`)
+- 9 Modulith 모듈 (common·master·order·vc·ex·audit·notify·security·kpi)
+- ArchUnit ModuleBoundaryTest expected 9 (Sprint 5 8 → Sprint 6 9)
+
+### 11.5 신규 Grafana 대시 (Phase 4-A 베타 진입 즉시 활용)
+
+- `infrastructure/observability/grafana/dashboards/scheduling-overview.json` — API p95 + Resilience4j retry/CB + audit INSERT rate + HikariCP + JVM
+- `infrastructure/observability/grafana/dashboards/business-kpi.json` — NS-S04 도달률 + NS-S09 신규 라인 + BR-V07 위반 + D-1 준수율 + K-V02 가동률
+
+### 11.6 베타 진입 게이트 — Phase-4_EntryPlan §7 참조
+
+- 9 핵심 BR (X01·X02·X03·X04·V07·E05·E08·E09·X07) hard 강제 통과
+- Resilience4j @Retry/@CircuitBreaker (Kakao) + spring-modulith-events-jpa 영속
+- Prometheus + Grafana 11 panel + Loki 90일 + 19 KPI 영속
+- Backend 249 IT + Frontend 54 vitest + Playwright 226 등록
