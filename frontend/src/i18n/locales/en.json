@@ -1,0 +1,57 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "retry": "Retry",
+    "close": "Close"
+  },
+  "app": {
+    "title": "Internal Production Scheduling System",
+    "subtitle": "Rubber Hose Manufacturing — Vulcanization + Extrusion"
+  },
+  "menu": {
+    "home": "Home",
+    "orders": "Order Consolidation",
+    "vc": "Vulcanization",
+    "ex": "Extrusion",
+    "master": "Master Data",
+    "audit": "Audit Log",
+    "settings": "Settings"
+  },
+  "messages": {
+    "constraint_violation": "Constraint violation: {{detail}}",
+    "save_success": "Saved successfully.",
+    "save_failure": "Save failed.",
+    "session_expired": "Session expired. Please sign in again."
+  },
+  "import": {
+    "title": "Review Order Mapping",
+    "upload_title": "Order Consolidation — Excel Import",
+    "upload_drag": "Drag or click to upload",
+    "upload_hint": ".xlsx · max 3 files · ≤ 20MB each",
+    "success_rate": "Mapping success rate",
+    "retry": "Retry",
+    "retry_after_fix": "Retry after rule fix",
+    "next": "Next: review changes",
+    "open_review": "Open mapping review",
+    "alias_add": "Add alias",
+    "alias_remove": "Remove alias",
+    "rule_save": "Save rule",
+    "rule_saved": "Rule saved. Retry will apply it.",
+    "fail": {
+      "hose_id": "Hose ID mapping failed",
+      "delivery_date": "Delivery date mapping failed",
+      "qty": "Quantity mapping failed",
+      "customer": "Customer mapping failed",
+      "header": "Header row not found"
+    }
+  }
+}

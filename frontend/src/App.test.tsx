@@ -1,11 +1,16 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeAll } from 'vitest'
 import { render } from '@testing-library/react'
 import { ConfigProvider } from 'antd'
 import koKR from 'antd/locale/ko_KR'
-import './i18n'
+import i18n from './i18n'
 import HomePage from './pages/HomePage'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
+
+beforeAll(async () => {
+  // EP-43 — detectInitialLanguage() 가 jsdom navigator.language 기반 en 선택할 수 있음
+  await i18n.changeLanguage('ko')
+})
 
 /**
  * Smoke test — i18n + Ant Design + TanStack Query + Router 통합 동작.
