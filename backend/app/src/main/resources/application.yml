@@ -155,7 +155,7 @@ spring:
 
   flyway:
     enabled: true
-    schemas: app,master,audit,public     # public: V031 spring-modulith event_publication
+    schemas: app,master,audit,public,business_kpi     # public: V031 event_publication, business_kpi: V032 KPI
     locations: classpath:db/migration
 
 # Resilience4j — Sprint 6 EP-41 (Kakao + Import client 안정성 NFR)

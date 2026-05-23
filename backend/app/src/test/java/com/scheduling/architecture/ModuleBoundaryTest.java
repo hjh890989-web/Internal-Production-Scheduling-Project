@@ -26,9 +26,9 @@ class ModuleBoundaryTest {
     }
 
     @Test
-    @DisplayName("8 모듈 등재 — 7 도메인 (order·vc·ex·master·audit·notify·common) + 1 인프라 (security)")
+    @DisplayName("9 모듈 등재 — 7 도메인 + 1 인프라 (security) + 1 KPI (EP-47)")
     void allModulesRegistered() {
         long count = MODULES.stream().count();
-        assertThat(count).isEqualTo(8);
+        assertThat(count).isEqualTo(9);
     }
 }
