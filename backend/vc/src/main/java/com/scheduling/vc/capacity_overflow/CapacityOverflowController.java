@@ -1,5 +1,6 @@
 package com.scheduling.vc.capacity_overflow;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.context.annotation.Profile;
@@ -52,7 +53,7 @@ public class CapacityOverflowController {
     @PostMapping("/split")
     @PreAuthorize("hasRole('PLANNER')")
     public ResponseEntity<CapacityOverflowQueueService.SplitResult> split(
-        @RequestBody SplitPayload payload
+        @RequestBody @Valid SplitPayload payload
     ) {
         CapacityOverflowQueueService.SplitResult result =
             overflowService.split(payload.required(), payload.dailyCapa());
@@ -63,7 +64,7 @@ public class CapacityOverflowController {
     @PostMapping("/supplement")
     @PreAuthorize("hasRole('PLANNER')")
     public ResponseEntity<KdSupplementService.SupplementResult> supplement(
-        @RequestBody SupplementPayload payload,
+        @RequestBody @Valid SupplementPayload payload,
         Principal principal
     ) {
         KdSupplementService.SupplementResult result =

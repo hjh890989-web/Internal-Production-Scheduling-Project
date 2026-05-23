@@ -153,6 +153,34 @@ class CapacityOverflowControllerIT {
     }
 
     @Test
+    @WithMockUser(roles = "PLANNER")
+    @DisplayName("POST /split — invalid dailyCapa (@Min 1) → 400")
+    void split_invalid_daily_capa_returns_400() throws Exception {
+        Map<String, Object> payload = Map.of(
+            "required", Map.of("29673-2R060", 60),
+            "dailyCapa", 0    // @Min(1) 위반
+        );
+        mockMvc.perform(post(BASE + "/split")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(roles = "PLANNER")
+    @DisplayName("POST /supplement — invalid shortage (@Min 1) → 400")
+    void supplement_invalid_shortage_returns_400() throws Exception {
+        Map<String, Object> payload = Map.of(
+            "hoseId", "29673-2R060",
+            "shortage", 0    // @Min(1) 위반
+        );
+        mockMvc.perform(post(BASE + "/supplement")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @WithMockUser(roles = "READ_ONLY")
     @DisplayName("POST /supplement — READ_ONLY 403")
     void supplement_read_only_forbidden() throws Exception {
