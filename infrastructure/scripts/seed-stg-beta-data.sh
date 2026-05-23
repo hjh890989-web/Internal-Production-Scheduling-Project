@@ -73,7 +73,7 @@ EOF
 echo "  → 9 KPI baseline 영속 — Grafana business-kpi 대시 즉시 query 가능"
 
 # ---------- 4. 시드 검증 ----------
-echo "[4/4] 시드 검증"
+echo "[4/5] 시드 검증"
 $PSQL <<'EOF'
 SELECT 'vc_constraint' AS tbl, COUNT(*) AS row_count FROM master.vc_constraint
 UNION ALL SELECT 'vc_hose_rule',   COUNT(*) FROM master.vc_hose_rule
@@ -84,9 +84,47 @@ UNION ALL SELECT 'kpi_baseline',   COUNT(*) FROM business_kpi.measurement WHERE 
 ORDER BY tbl;
 EOF
 
+# ---------- 5. (옵션) V033 BR-V12·V13 sample seed — BS-06 활성 조건 ----------
+# Sprint 7 v1.1 carry-over — BS-06 (Phase 4-B 후반) 진입 시점에 IT_OPS 가 실행.
+# 환경변수 SEED_V12V13=1 인 경우만 적용 (기본 비활성 — BS-01 ~ BS-05 와 분리).
+if [ "${SEED_V12V13:-0}" = "1" ]; then
+    echo "[5/5] (옵션) V033 BR-V12·V13 sample seed — BS-06 활성 조건"
+    $PSQL <<'EOF'
+-- DI-07 PRODUCT_PRIORITY — rank ASC + effective_from CURRENT_DATE (즉시 효력)
+INSERT INTO master.product_priority
+    (hose_id, priority_rank, rationale, effective_from, effective_to, updated_at, updated_by)
+VALUES
+    ('29673-2R060', 1, 'VIP 고객 X사',    CURRENT_DATE, NULL, now(), 'beta-seed'),
+    ('28422-2M800', 2, '긴급 수주',       CURRENT_DATE, NULL, now(), 'beta-seed'),
+    ('28421-2M800', 3, '일반',            CURRENT_DATE, NULL, now(), 'beta-seed')
+ON CONFLICT (hose_id) DO NOTHING;
+
+-- DI-08 KD_ORDER — 1 sample OPEN row per hose
+INSERT INTO master.kd_order
+    (kd_order_id, hose_id, order_qty, remaining_qty, order_date, customer_code,
+     status, updated_at, updated_by)
+VALUES
+    (gen_random_uuid(), '29673-2R060', 100, 100, '2026-06-01', 'CUST-X',
+     'OPEN', now(), 'beta-seed'),
+    (gen_random_uuid(), '28422-2M800',  80,  80, '2026-06-01', 'CUST-Y',
+     'OPEN', now(), 'beta-seed')
+ON CONFLICT (kd_order_id) DO NOTHING;
+
+SELECT 'product_priority' AS tbl, COUNT(*) AS row_count FROM master.product_priority
+UNION ALL SELECT 'kd_order', COUNT(*) FROM master.kd_order WHERE status = 'OPEN'
+ORDER BY tbl;
+EOF
+    echo "  → PRODUCT_PRIORITY 3 + KD_ORDER 2 OPEN seed — BS-06 진입 준비 완료"
+else
+    echo "[5/5] V033 sample seed 생략 (SEED_V12V13=1 로 재실행 시 활성)"
+fi
+
 echo "==============================================="
 echo "Phase 4-A STG 베타 시드 import 완료"
 echo "  - Planner 가 /vc/simview 진입 → 회전 격자 즉시 표시"
 echo "  - Grafana business-kpi 대시 → 0% baseline 표시 (실 운영 누적 시 갱신)"
 echo "  - 베타 시나리오 5건 진행 가능 (Phase-4_EntryPlan §5)"
+if [ "${SEED_V12V13:-0}" = "1" ]; then
+    echo "  - 🆕 BS-06 (BR-V12·V13 capacity-queue) 활성 조건 충족 — Planner /vc/capacity-queue 진입 가능"
+fi
 echo "==============================================="
