@@ -98,17 +98,10 @@ public class SwapProposalService {
     }
 
     /**
-     * Atomic rotation_no swap. VcSchedule 에 rotation setter 가 없으므로 임시 row 를 거쳐
-     * UNIQUE(machine, slot, date, rotation) 충돌 회피 (3-step swap).
+     * Atomic rotation_no swap — V028 DEFERRABLE UNIQUE + SET CONSTRAINTS DEFERRED 활용
+     * ({@link SwapHelper#swapRotation}).
      */
     private void applyRotationSwap(VcSchedule a, VcSchedule b, Instant now) {
-        short rotA = a.getRotationNo();
-        short rotB = b.getRotationNo();
-        // 1) a 를 임시 rotation (sentinel — 두 회전 모두 다른 값) 으로 잠깐 이동
-        //    실용적 sentinel — UNIQUE 충돌 방지를 위해 임시 ID 컬럼 없이 raw native SQL 회피.
-        //    JPA EntityManager 의 flushOrder 가 일반적으로 동작 — short rotation_no 변경만
-        //    수행. UNIQUE 충돌은 deferrable 이 아니라면 transient 문제 — 같은 transaction 안
-        //    flush 순서를 명시 (saveAndFlush) + sentinel 단계 추가.
         SwapHelper.swapRotation(a, b, now);
     }
 }

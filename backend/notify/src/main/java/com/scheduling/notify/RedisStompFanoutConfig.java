@@ -38,10 +38,7 @@ public class RedisStompFanoutConfig {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(cf);
         // Sprint 7+ — container.addMessageListener(stompFanoutListener, new ChannelTopic("stomp.fanout"))
-        if (!enabled) {
-            container.afterPropertiesSet();
-            // 활성 안 함 — Spring lifecycle 만 등록 (다중 instance 운영 시 enabled=true)
-        }
+        // Spring lifecycle 이 자동 afterPropertiesSet() 호출 — 수동 호출 금지 (충돌)
         return container;
     }
 

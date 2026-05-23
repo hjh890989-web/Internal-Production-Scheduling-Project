@@ -141,6 +141,12 @@ spring:
     hibernate:
       ddl-auto: validate     # Flyway가 스키마 관리
 
+  modulith:
+    events:
+      jdbc:
+        schema-initialization:
+          enabled: true        # Sprint 6 EP-41 — spring-modulith-events-jpa event_publication 테이블 자동 생성
+
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -149,7 +155,7 @@ spring:
 
   flyway:
     enabled: true
-    schemas: app,master,audit
+    schemas: app,master,audit,public     # public: V031 spring-modulith event_publication
     locations: classpath:db/migration
 
 # Resilience4j — Sprint 6 EP-41 (Kakao + Import client 안정성 NFR)
