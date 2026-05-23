@@ -120,6 +120,7 @@ Modulith verify 0 위반 + ArchUnit 29 rule 통과.
 |---|---|---|
 | **v1.0.0** | 2026-05-23 | Phase 3 종료 + Phase 4 진입 준비 (Sprint 0~6 누적) |
 | **v1.0.1** | 2026-05-23 | Sprint 7 carry-over 풀 스택 — BR-V12·V13 REST + Planner UI + tooling (markdownlint+cspell) |
+| **v1.0.2** | 2026-05-23 | Phase 4-A 진입 직전 outward 클로저 — Controller IT (+5) + Phase-3/4 v1.1 + 4 페르소나 v1.1 + BS-06 + stg-deploy §12 |
 
 ---
 

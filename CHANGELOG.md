@@ -9,6 +9,57 @@ All notable changes to **Internal Production Scheduling Project** are documented
 
 ---
 
+## [v1.0.2] — 2026-05-23 — Phase 4-A 진입 직전 outward 문서 클로저
+
+> v1.0.1 (Sprint 7 carry-over 풀 스택 마감) 이후 outward 자산 동기화 + REST IT 보강.
+> 새 Sprint/Phase 없이 light-touch documentation + 1 quality follow-up.
+
+### Added
+
+- **CapacityOverflowController REST IT** — `CapacityOverflowControllerIT` 5 tests / 5 PASSED:
+  - POST /split — PLANNER 200 + accepted/requestQueue JSON
+  - POST /split — STK_USER 403 (BR-X05 작성자 ≠ 승인자)
+  - POST /split — 미인증 401
+  - POST /supplement — PLANNER 200 + 실제 KD 차감 (audit principal)
+  - POST /supplement — READ_ONLY 403
+  - Backend 회귀 788 → **793 tests / 0 failures**
+- **베타 시나리오 BS-06** — `docs/operations/beta-scenarios/06-capacity-overflow-kd-supplement.md` (Phase 4-B 후반 후보)
+  - DI-07 PRODUCT_PRIORITY + DI-08 KD_ORDER SQL 시드 예시
+  - Tab1 (BR-V12) split 미리보기 + Tab2 (BR-V13) 1클릭 보충 절차
+  - 기대 결과 + 실패 시 대처 5건 + KPI 영향 (Sprint 8+ Grafana panel 후보)
+- **STG seed V033 옵션** — `infrastructure/scripts/seed-stg-beta-data.sh` `[5/5]` 단계:
+  - `SEED_V12V13=1` 환경변수 활성 시만 PRODUCT_PRIORITY 3 + KD_ORDER 2 sample seed
+  - idempotent (ON CONFLICT DO NOTHING)
+- **Phase-3 Completion v1.1** + **Phase-4 EntryPlan v1.1** — Sprint 7 carry-over 풀 스택 반영, 진입 게이트 5/5 → **9/9**
+- **Planner 페르소나 v1.1** + **STK_USER v1.1** + **IT_OPS v1.1** + **READ_ONLY v1.1** — 4 페르소나 모두 `/vc/capacity-queue` + BS-06 cross-reference 통일
+- **stg-deploy.md §12** — Sprint 7 carry-over 변경사항 추가 (V033 + REST 2 endpoint + Frontend route + SEED_V12V13 + BS-06 + tooling + 회귀 수치)
+
+### Metrics (v1.0.1 → v1.0.2)
+
+| 영역 | v1.0.1 | v1.0.2 |
+|---|---|---|
+| Backend tests | 788 / 0 fail | **793 / 0 fail** (+5 CapacityOverflowControllerIT) |
+| Frontend vitest | 58 / 0 fail | 58 / 0 fail |
+| Modulith verify | 0 위반 | 0 위반 |
+| ArchUnit | 29 rule | 29 rule |
+| Phase 4 진입 게이트 | 9/9 | 9/9 (재확인) |
+| 4 페르소나 v1.1 | 1 (Planner) | **4** (Planner + STK_USER + IT_OPS + READ_ONLY) |
+| 베타 시나리오 | BS-01~05 | BS-01~05 + **BS-06 후보** |
+
+### Commits (+7)
+
+```text
+1671157  test(vc): CapacityOverflowController REST IT — RBAC + happy path
+4ceb7de  docs(phase4): EntryPlan v1.1 — Sprint 7 carry-over 풀 스택 마감 + 게이트 5→9
+7b985b6  docs(phase3): Phase-3 Completion v1.1 — Sprint 7 carry-over 풀 스택 반영
+1f371a6  docs(operations): Planner 페르소나 v1.1 + BS-06 신규
+0ff2fe0  infra(stg): seed-stg-beta-data.sh V033 sample seed 옵션 추가 — BS-06 활성 조건
+d0d6f5f  docs(operations): 3 persona v1.1 정합 — STK_USER + IT_OPS + READ_ONLY V12·V13 cross-reference
+(본 commit) docs(stg): stg-deploy §12 + CHANGELOG v1.0.2
+```
+
+---
+
 ## [v1.0.1] — 2026-05-23 — Sprint 7 carry-over 풀 스택 마감
 
 ### Added
