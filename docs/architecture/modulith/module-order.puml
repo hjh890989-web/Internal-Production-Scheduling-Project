@@ -14,9 +14,9 @@ Container_Boundary("InternalProductionSchedulingSystem.InternalProductionSchedul
   Component(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.OrderConsolidation, "Order Consolidation", $techn="Module", $descr="", $tags="", $link="")
 }
 
-Rel(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.MasterData, InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.Common, "uses", $techn="", $tags="", $link="")
 Rel(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.OrderConsolidation, InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.Common, "uses", $techn="", $tags="", $link="")
 Rel(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.OrderConsolidation, InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.MasterData, "uses", $techn="", $tags="", $link="")
+Rel(InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.MasterData, InternalProductionSchedulingSystem.InternalProductionSchedulingSystem.Common, "uses", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)
 @enduml

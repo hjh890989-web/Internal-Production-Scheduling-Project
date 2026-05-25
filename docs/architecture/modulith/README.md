@@ -75,9 +75,9 @@ Spring Modulith `Documenter` 는 **명시적 cross-module 의존성** 이 있는
 | 모듈 | 의존 | 책임 | puml | adoc |
 |---|---|---|---|---|
 | **common** | (의존 0) | BR / BrCode / ProblemDetail / ChangeSeverity | [module-common.puml](module-common.puml) | [module-common.adoc](module-common.adoc) |
-| **master** | common | VcConstraint / HoseRule / ExConstraint / Shift / Inventory / SettingGroup / LineType / Calendar | [module-master.puml](module-master.puml) | [module-master.adoc](module-master.adoc) |
+| **master** | common | VcConstraint / HoseRule / ExConstraint / Shift / Inventory / SettingGroup / LineType / Calendar + 🆕 **ProductPriority / KdOrder** (Sprint 7 V033) | [module-master.puml](module-master.puml) | [module-master.adoc](module-master.adoc) |
 | **order** | common · master::api · audit::events | ExcelParser / ImportOrchestrator / FolderWatcher / Diff / Mapping | [module-order.puml](module-order.puml) | [module-order.adoc](module-order.adoc) |
-| **vc** | common · master::api · order::events · audit::events · audit::aop | Schedule / Rotation / Capacity / Allocator(5 룰) / Confirm / Override / Swap / events(2) | [module-vc.puml](module-vc.puml) | [module-vc.adoc](module-vc.adoc) |
+| **vc** | common · master::api (+ 🆕 ProductPriorityLookup / KdOrderLookup) · order::events · audit::events · audit::aop | Schedule / Rotation / Capacity / Allocator(5 룰) / Confirm / Override / Swap / events(2) + 🆕 **capacity_overflow** (BR-V12·V13, Sprint 7) | [module-vc.puml](module-vc.puml) | [module-vc.adoc](module-vc.adoc) |
 | **ex** | common · master::api · vc::events · audit::events · audit::aop | Deadline / Yield / Demand / Grouping / Gate / Conflict / Routing / Confirm / Replan / Ranking / Export | [module-ex.puml](module-ex.puml) | [module-ex.adoc](module-ex.adoc) |
 | **audit** | common | trigger(V025/V026/V030) · AOP(@Auditable) · Snapshot forensic | [module-audit.puml](module-audit.puml) | [module-audit.adoc](module-audit.adoc) |
 | **notify** | common · order::events · vc::events · ex::events | WebSocket STOMP · Kakao Resilience4j · Redis fanout · ExReplanListener | [module-notify.puml](module-notify.puml) | [module-notify.adoc](module-notify.adoc) |
@@ -150,3 +150,4 @@ CI 통합 — Sprint 7+ Jenkins stage 추가 검토 (산출물 archive).
 | 버전 | 날짜 | 작성자 | 변경 |
 |----|-----|------|------|
 | 1.0 | 2026-05-23 | Claude Code | 초안 — 9 Modulith 모듈 자동 PlantUML + Mermaid C4 Context + 이벤트 흐름도 |
+| 1.1 | 2026-05-23 | Claude Code | Sprint 7 carry-over 재생성 — master + ProductPriority/KdOrder facade + vc capacity_overflow 패키지 반영. ModuleBoundaryTest 9 모듈 유지 + Modulith verify 0 위반 + ArchUnit 29 rule 통과 재확인 |
