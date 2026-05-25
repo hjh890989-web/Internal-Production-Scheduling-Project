@@ -155,3 +155,52 @@ docker compose start postgres
 2. `/backup/wal` 디스크 공간 점검 (PG 가 archive 실패 시 WAL 누적)
 3. `archive-wal.sh` 권한·경로 확인
 4. PG 가 자동 재시도 — 5분 내 정상 복귀 못 하면 IT lead 호출
+
+---
+
+## 8. Backup scope (Sprint 7 carry-over 갱신 — 2026-05-23)
+
+`pg_basebackup` 은 **전 schema 통합 백업** — 별도 추가 작업 없이 Sprint 7 carry-over V033 자동 포함.
+
+### 8.1 백업 포함 schema 전수
+
+| Schema | 핵심 테이블 | 비고 |
+|---|---|---|
+| `app` | vc_schedule + ex_schedule_candidate + vc_schedule_swap_proposal + kakao_delivery_log | 운영 트랜잭션 |
+| `master` | vc_constraint + ex_constraint + shift + setting_group + line_type + inventory + holiday + **🆕 product_priority (V033)** + **🆕 kd_order (V033)** | Sprint 7 V033 신규 테이블 자동 포함 |
+| `audit` | schedule_audit_log (월별 RANGE partition 36 + DEFAULT) | NFR-SEC-004 3년 immutable |
+| `public` | event_publication (spring-modulith-events-jpa) | 재시작 publication 복구 |
+| `business_kpi` | definition + measurement | 19 KPI 영속 |
+
+### 8.2 V033 PITR 시나리오 — 정합 확인 절차
+
+DI-07/08 운영 데이터 실 입력 후 (Phase 4-B 또는 Phase 5 PROD), PITR 시 master.product_priority + master.kd_order 도 복원 정합 확인:
+
+```sql
+-- 복원 후 검증 query
+SELECT COUNT(*) AS priority_rows FROM master.product_priority;
+SELECT COUNT(*) AS kd_orders, SUM(remaining_qty) AS total_remaining
+  FROM master.kd_order WHERE status IN ('OPEN', 'PARTIAL');
+
+-- 4-status 머신 invariant 검증
+SELECT status, COUNT(*) FROM master.kd_order GROUP BY status;
+```
+
+### 8.3 BR-V13 audit 정합 확인 (KdSupplementService @Auditable)
+
+KdSupplementService 호출 시 audit.schedule_audit_log 에 자동 row 발행 (V025 trigger). PITR 후:
+
+```sql
+-- BR-V13 consume audit row 정합 (kd_order remaining_qty 차감 시점)
+SELECT COUNT(*) FROM audit.schedule_audit_log
+WHERE table_name = 'kd_order' AND action IN ('UPDATE');
+```
+
+---
+
+## 9. 개정 이력
+
+| 버전 | 날짜 | 작성자 | 변경 |
+|----|-----|------|------|
+| 1.0 | (TK-33-2 작성 시점) | (작성자) | 초안 — pg_basebackup + WAL archive + PITR 절차 + 7 사고 대응 |
+| 1.1 | 2026-05-23 | Claude Code | §8 추가 — Sprint 7 carry-over backup scope (V033 product_priority + kd_order 자동 포함, BR-V13 audit 정합 확인 절차) |
