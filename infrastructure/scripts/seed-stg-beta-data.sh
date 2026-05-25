@@ -35,6 +35,9 @@ $PSQL < "$SEED_SQL"
 echo "  → 47 품번 vc_constraint + 5 vc_hose_rule + 4 line_type seed 완료"
 
 # ---------- 2. 1주 horizon (2026-06-01 ~ 2026-06-07) 시드 ----------
+# V028 uq_vc_schedule_slot_rotation (machine_id, slot_position, production_date, rotation_no)
+# 가 DEFERRABLE INITIALLY IMMEDIATE — ON CONFLICT 의 arbiter 사용 불가.
+# WHERE NOT EXISTS idempotent 패턴 사용 (재실행 안전).
 echo "[2/4] 1주 horizon vc_schedule baseline (CANDIDATE 상태)"
 $PSQL <<'EOF'
 -- 베타 운영 1주 horizon — LP-01~04 + IC-01 × slot × rotation
@@ -55,9 +58,15 @@ SELECT
     'ANG-A-S' || s.slot, 100, 'CANDIDATE', '', now(), now()
 FROM days d, machines m, slot_seq s, rot_seq r
 WHERE s.slot <= m.slots
-ON CONFLICT DO NOTHING;
+  AND NOT EXISTS (
+      SELECT 1 FROM app.vc_schedule existing
+      WHERE existing.machine_id = m.machine_id
+        AND existing.slot_position = s.slot
+        AND existing.production_date = d.prod_date
+        AND existing.rotation_no = r.rotation
+  );
 EOF
-echo "  → 1주 horizon × 5 머신 × ~7 슬롯 × 18 회전 = ~6,300 row baseline seed"
+echo "  → 1주 horizon × 5 머신 × ~7 슬롯 × 18 회전 = ~6,300 row baseline seed (idempotent)"
 
 # ---------- 3. business_kpi.definition baseline KPI 값 ----------
 echo "[3/4] business_kpi.measurement baseline (오늘 기준)"
