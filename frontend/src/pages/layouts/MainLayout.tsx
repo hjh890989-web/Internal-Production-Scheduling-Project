@@ -1,6 +1,7 @@
 import { Layout, Button, Typography } from 'antd'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useAuthStore } from '@/stores/authStore'
 
 const { Header, Content, Footer } = Layout
 const { Text } = Typography
@@ -15,6 +16,13 @@ export default function MainLayout() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
+  const user = useAuthStore((s) => s.user)
+  const logout = useAuthStore((s) => s.logout)
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   const menuItems = [
     { key: '/home', label: t('menu.home') },
@@ -73,6 +81,27 @@ export default function MainLayout() {
             )
           })}
         </div>
+        {user && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+            <Text style={{ color: '#d1d5db', fontSize: 13 }}>
+              {user.employeeId} ({user.role})
+            </Text>
+            <Button
+              size="small"
+              onClick={handleLogout}
+              style={{
+                background: 'linear-gradient(180deg, #7f1d1d 0%, #450a0a 100%)',
+                borderColor: '#b91c1c',
+                color: '#fecaca',
+                fontSize: 12,
+                fontWeight: 500,
+                borderRadius: 6,
+              }}
+            >
+              로그아웃
+            </Button>
+          </div>
+        )}
       </Header>
       <Content style={{ padding: 24 }}>
         <Outlet />

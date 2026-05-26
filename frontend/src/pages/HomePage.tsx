@@ -20,7 +20,7 @@ export default function HomePage() {
         <Paragraph>Phase 2/4.Tasks ST-00-3 골격 — Sprint 1+에서 본 화면 대체.</Paragraph>
         {user && (
           <Paragraph>
-            로그인: {user.name} ({user.role})
+            로그인: {user.employeeId} ({user.role})
           </Paragraph>
         )}
       </Card>

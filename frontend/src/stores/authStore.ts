@@ -2,31 +2,40 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 /**
- * 인증 store — 로그인된 사용자 + JWT.
- * EP-30 (Keycloak) 통합 시 OIDC 토큰 갱신 로직 추가.
+ * Sprint 10 EP-AUTH 인증 store — 로그인된 사용자 + JWT.
+ *
+ * Role enum 은 backend RoleConstants 정합 (대문자) — PLANNER/STK_USER/IT_OPS/READ_ONLY.
+ * persist — localStorage 영속 (탭 닫고 8h 토큰 유효기간 내 재진입 시 자동 로그인).
  */
-export type Role = 'planner' | 'floor_supervisor' | 'it_operator' | 'read_only'
+export type Role = 'PLANNER' | 'STK_USER' | 'IT_OPS' | 'READ_ONLY'
 
 export interface AuthUser {
-  id: string
-  name: string
+  employeeId: string
   role: Role
+  expiresAt: string   // ISO Instant
 }
 
 interface AuthState {
   user: AuthUser | null
   token: string | null
-  setUser: (user: AuthUser, token: string) => void
+  setSession: (token: string, user: AuthUser) => void
   logout: () => void
+  isAuthenticated: () => boolean
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
-      setUser: (user, token) => set({ user, token }),
+      setSession: (token, user) => set({ token, user }),
       logout: () => set({ user: null, token: null }),
+      isAuthenticated: () => {
+        const state = get()
+        if (!state.token || !state.user) return false
+        // exp 시점 지나면 인증 무효 — interceptor 401 처리 전 1차 가드
+        return new Date(state.user.expiresAt).getTime() > Date.now()
+      },
     }),
     {
       name: 'scheduling-auth',

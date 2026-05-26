@@ -2,8 +2,10 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import { Spin } from 'antd'
 import MainLayout from '@/pages/layouts/MainLayout'
+import { ProtectedRoute } from '@/routes/ProtectedRoute'
 
 const HomePage = lazy(() => import('@/pages/HomePage'))
+const LoginPage = lazy(() => import('@/pages/LoginPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const OrderImportPage = lazy(() => import('@/pages/OrderImportPage'))
 const VcSimulationPage = lazy(() => import('@/pages/VcSimulationPage'))
@@ -19,13 +21,25 @@ const fallback = (
 
 /**
  * React Router 6 데이터 라우터.
- * Sprint 1+ UI Story 추가 시 children 에 라우트 추가 (예: /orders, /vc, /ex, /master, /audit).
+ * Sprint 10 EP-AUTH — /login 단독 라우트 + 나머지는 ProtectedRoute 로 wrap.
  * 모든 페이지는 React.lazy + Suspense 로 code splitting (NFR-PER-005).
  */
 export const router = createBrowserRouter([
   {
+    path: '/login',
+    element: (
+      <Suspense fallback={fallback}>
+        <LoginPage />
+      </Suspense>
+    ),
+  },
+  {
     path: '/',
-    element: <MainLayout />,
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     errorElement: (
       <Suspense fallback={fallback}>
         <NotFoundPage />
