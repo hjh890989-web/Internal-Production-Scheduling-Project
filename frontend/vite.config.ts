@@ -17,10 +17,8 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  // sockjs-client (STOMP/SockJS) 가 Node.js `global` 참조 → 브라우저 polyfill (Vite 표준 fix)
-  define: {
-    global: 'globalThis',
-  },
+  // sockjs-client `global` polyfill 은 main.tsx 의 runtime 으로 처리 (`window.global = window`).
+  // vite.config.ts 의 `define` 은 Vite server-side middleware 에 영향 가능성 식별 → 제거.
   server: {
     port: 5173,
     // DEV 가벼운 mode — VITE_LAN_HOST=1 시 사내 LAN 노출 (본 PC IP 통해 사내 5명 접속)
@@ -29,7 +27,21 @@ export default defineConfig({
     proxy: {
       // Windows IPv6 ::1 vs IPv4 127.0.0.1 race condition 회피 — Vite http-proxy 가 fallback 안 함.
       '/api':      { target: 'http://127.0.0.1:8080', changeOrigin: true },
-      '/actuator': { target: 'http://127.0.0.1:8080', changeOrigin: true },
+      '/actuator': {
+        target: 'http://127.0.0.1:8080',
+        changeOrigin: true,
+        // 진단용 logging — Vite Terminal 에 proxy 동작 표시 (production build 영향 0).
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            // eslint-disable-next-line no-console
+            console.log(`[proxy /actuator] ${req.method} ${req.url} → ${proxyReq.path}`)
+          })
+          proxy.on('error', (err) => {
+            // eslint-disable-next-line no-console
+            console.log(`[proxy /actuator ERROR]`, err.message)
+          })
+        },
+      },
       '/ws':       { target: 'ws://127.0.0.1:8080',   ws: true },
     },
   },
