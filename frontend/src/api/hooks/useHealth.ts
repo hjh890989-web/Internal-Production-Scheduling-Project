@@ -13,7 +13,7 @@ interface HealthResponse {
 export function useHealth() {
   return useQuery({
     queryKey: ['actuator', 'health'],
-    queryFn: () => apiFetch<HealthResponse>('/actuator/health'),
+    queryFn: () => apiFetch<HealthResponse>('/api/actuator/health'),
     refetchInterval: 30_000,
   })
 }

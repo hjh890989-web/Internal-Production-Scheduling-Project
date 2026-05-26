@@ -84,6 +84,9 @@ scheduling:
 management:
   endpoints:
     web:
+      # Vite proxy /actuator 매칭 issue 회피 — actuator base-path 를 /api/actuator 로 변경.
+      # 기존 /api proxy 활용 (모든 frontend 페이지에서 검증된 작동). PROD nginx 도 /api 통합.
+      base-path: /api/actuator
       exposure:
         include: health,info,metrics,prometheus,loggers
   endpoint:
