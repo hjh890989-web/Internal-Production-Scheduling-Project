@@ -3,12 +3,14 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useUIStore } from '@/stores/uiStore'
 
-const { Header, Sider, Content } = Layout
-const { Title } = Typography
+const { Header, Sider, Content, Footer } = Layout
+const { Title, Text } = Typography
 
 /**
- * 공통 레이아웃 — Header (제목) + Sider (메뉴) + Content (Outlet).
- * Sprint 1+ UI Story에서 menu item 활성화 (disabled 제거).
+ * 공통 레이아웃 — Header (로고 + 제목) + Sider (메뉴) + Content (Outlet) + Footer (sub 로고).
+ *
+ * <p>FCB (Fuel-Cost-Automatic-Billing-Project) 패턴 적용 — top nav main 로고 + footer EVS 로고.
+ * 로고 source — public/logos/ (Vite static path, build 시 dist/logos/ 그대로 copy).
  */
 export default function MainLayout() {
   const { t } = useTranslation()
@@ -28,7 +30,19 @@ export default function MainLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ display: 'flex', alignItems: 'center' }}>
+      <Header style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <a
+          href="/home"
+          onClick={(e) => { e.preventDefault(); navigate('/home') }}
+          title="홈으로 — Check In · 사내 공정 스케줄링"
+          style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+        >
+          <img
+            src="/logos/cheek-in-main-logo.svg"
+            alt="Check In · 사내 공정 스케줄링"
+            style={{ height: 36, background: '#fff', padding: '4px 8px', borderRadius: 4 }}
+          />
+        </a>
         <Title level={4} style={{ color: '#fff', margin: 0 }}>
           {t('app.title')}
         </Title>
@@ -46,6 +60,18 @@ export default function MainLayout() {
           <Outlet />
         </Content>
       </Layout>
+      <Footer style={{ textAlign: 'center', background: '#f5f5f5', padding: '16px 24px' }}>
+        <img
+          src="/logos/cheek-in-evs-logo.svg"
+          alt="Check In · EVS"
+          style={{ height: 28, marginBottom: 8 }}
+        />
+        <div>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            송우산업 사내 공정 스케줄링 시스템 (S-D 베타 · Hybrid Dev Mode)
+          </Text>
+        </div>
+      </Footer>
     </Layout>
   )
 }
