@@ -2,9 +2,11 @@ package com.scheduling.vc.capacity_overflow;
 
 import com.scheduling.audit.aop.Auditable;
 import com.scheduling.master.api.ProductPriorityLookup;
+import com.scheduling.vc.events.CapacityOverflowAcceptedEvent;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -36,13 +38,16 @@ public class CapacityOverflowApprovalService {
 
     private final CapacityOverflowRequestRepository requestRepo;
     private final ProductPriorityLookup priorityLookup;
+    private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
 
     public CapacityOverflowApprovalService(CapacityOverflowRequestRepository requestRepo,
                                             ProductPriorityLookup priorityLookup,
+                                            ApplicationEventPublisher eventPublisher,
                                             Clock clock) {
         this.requestRepo = requestRepo;
         this.priorityLookup = priorityLookup;
+        this.eventPublisher = eventPublisher;
         this.clock = clock;
     }
 
@@ -78,13 +83,22 @@ public class CapacityOverflowApprovalService {
         return persisted;
     }
 
-    /** Planner 1클릭 승인 — Allocator 후속 처리 (Sprint 8+ event) 진입점. */
+    /**
+     * Planner 1클릭 승인 — Sprint 9 EP-V12-Allocator-Chain 진입점.
+     *
+     * <p>{@link CapacityOverflowAcceptedEvent} 발행 → 후속 listener (AllocatorChainListener)
+     * 가 vc_schedule INSERT chain 진입 (Sprint 9 본 turn 은 listener stub, 실 Allocator
+     * 호출은 베타 운영 후 별 turn).
+     */
     @Auditable("BR-V12 추가 요청 큐 Planner 승인")
     @Transactional
     public CapacityOverflowRequest accept(UUID requestId, String plannerId, String note) {
         CapacityOverflowRequest req = loadPending(requestId);
         req.accept(plannerId, clock.instant(), note);
         log.info("BR-V12 accept — request={} by {}", requestId, plannerId);
+        eventPublisher.publishEvent(new CapacityOverflowAcceptedEvent(
+            req.getRequestId(), req.getHoseId(), req.getRequestedQty(),
+            req.getPriorityRank(), plannerId, clock.instant()));
         return req;
     }
 

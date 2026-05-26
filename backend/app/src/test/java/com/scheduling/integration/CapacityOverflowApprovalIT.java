@@ -6,7 +6,13 @@ import com.scheduling.master.priority.ProductPriorityRepository;
 import com.scheduling.vc.capacity_overflow.CapacityOverflowApprovalService;
 import com.scheduling.vc.capacity_overflow.CapacityOverflowRequest;
 import com.scheduling.vc.capacity_overflow.CapacityOverflowRequestRepository;
+import com.scheduling.vc.events.CapacityOverflowAcceptedEvent;
 import jakarta.persistence.EntityNotFoundException;
+import org.awaitility.Awaitility;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.event.EventListener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,11 +32,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -56,6 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("with-infra")
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Import(CapacityOverflowApprovalIT.TestEventCaptureConfig.class)
 class CapacityOverflowApprovalIT {
 
     @Container
@@ -79,6 +88,20 @@ class CapacityOverflowApprovalIT {
     @Autowired private ProductPriorityRepository priorityRepo;
     @Autowired private CapacityOverflowRequestRepository requestRepo;
     @Autowired private CapacityOverflowApprovalService approvalService;
+    @Autowired private AcceptedEventCapture eventCapture;
+
+    /** Sprint 9 EP-V12-Allocator-Chain — accept() 후 CapacityOverflowAcceptedEvent 발행 검증. */
+    static class AcceptedEventCapture {
+        final AtomicReference<CapacityOverflowAcceptedEvent> last = new AtomicReference<>();
+        @EventListener
+        void on(CapacityOverflowAcceptedEvent event) { last.set(event); }
+    }
+
+    @TestConfiguration
+    static class TestEventCaptureConfig {
+        @Bean
+        AcceptedEventCapture acceptedEventCapture() { return new AcceptedEventCapture(); }
+    }
 
     private MockMvc mockMvc;
 
@@ -90,6 +113,7 @@ class CapacityOverflowApprovalIT {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
         requestRepo.deleteAll();
         priorityRepo.deleteAll();
+        eventCapture.last.set(null);
     }
 
     @Test
@@ -255,6 +279,38 @@ class CapacityOverflowApprovalIT {
     void service_accept_missing_id_throws() {
         assertThatThrownBy(() -> approvalService.accept(UUID.randomUUID(), "planner-001", null))
             .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("Sprint 9 EP-V12-Allocator-Chain — accept() 후 CapacityOverflowAcceptedEvent 발행 (AFTER_COMMIT 비동기)")
+    void service_accept_publishes_event() {
+        List<UUID> ids = approvalService.enqueue(Map.of("29673-2R060", 60), "seed");
+        UUID id = ids.get(0);
+
+        approvalService.accept(id, "planner-chain", "ok");
+
+        Awaitility.await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
+            CapacityOverflowAcceptedEvent ev = eventCapture.last.get();
+            assertThat(ev).isNotNull();
+            assertThat(ev.requestId()).isEqualTo(id);
+            assertThat(ev.hoseId()).isEqualTo("29673-2R060");
+            assertThat(ev.requestedQty()).isEqualTo(60);
+            assertThat(ev.acceptedBy()).isEqualTo("planner-chain");
+            assertThat(ev.acceptedAt()).isNotNull();
+        });
+    }
+
+    @Test
+    @DisplayName("Sprint 9 EP-V12-Allocator-Chain — reject() 는 event 발행 안 함 (accept 만 chain 진입)")
+    void service_reject_does_not_publish_event() {
+        List<UUID> ids = approvalService.enqueue(Map.of("X-REJECT", 20), "seed");
+        UUID id = ids.get(0);
+
+        approvalService.reject(id, "planner-chain", "low priority");
+
+        // 1초 대기 — 비동기 listener 가 발화 안 함 확인
+        try { Thread.sleep(500); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        assertThat(eventCapture.last.get()).isNull();
     }
 
     @Test
