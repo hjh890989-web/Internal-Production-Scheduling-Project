@@ -11,7 +11,7 @@
 -- =============================================================================
 
 CREATE TABLE app.user_account (
-    employee_id      CHAR(8)      PRIMARY KEY
+    employee_id      VARCHAR(8)   PRIMARY KEY
                                   CHECK (employee_id ~ '^[0-9]{8}$'),     -- 숫자 8자리 (regex enforce)
     pin_hash         VARCHAR(60)  NOT NULL,                               -- BCrypt strength 12 (고정 60 char)
     role             VARCHAR(20)  NOT NULL

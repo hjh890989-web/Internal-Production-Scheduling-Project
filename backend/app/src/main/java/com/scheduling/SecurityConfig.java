@@ -1,9 +1,15 @@
 package com.scheduling;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.scheduling.security.CustomAccessDeniedHandler;
 import com.scheduling.security.CustomAuthenticationEntryPoint;
 import com.scheduling.security.KeycloakJwtAuthConverter;
 import com.scheduling.security.auth.AppUserDetailsService;
+import com.scheduling.security.auth.JwtAuthenticationFilter;
+import com.scheduling.security.auth.JwtService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +23,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Spring Security 6 — JWT Resource Server (Keycloak) — TK-30-2-2.
@@ -46,21 +61,24 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final String issuerUri;
+    private final String jwtSecret;
 
     public SecurityConfig(
         KeycloakJwtAuthConverter jwtConverter,
         CustomAccessDeniedHandler accessDeniedHandler,
         CustomAuthenticationEntryPoint authenticationEntryPoint,
-        @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:}") String issuerUri
+        @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:}") String issuerUri,
+        @Value("${app.auth.jwt.secret:DEV-INSECURE-32-CHARS-min-secret-replace-in-PROD}") String jwtSecret
     ) {
         this.jwtConverter = jwtConverter;
         this.accessDeniedHandler = accessDeniedHandler;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.issuerUri = issuerUri;
+        this.jwtSecret = jwtSecret;
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -68,25 +86,32 @@ public class SecurityConfig {
                 .authenticationEntryPoint(authenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler));
 
+        // Sprint 10 ST-AUTH-4 — 자체 JWT 필터 (사번+PIN 발급 토큰 검증).
+        // 양 분기 (Keycloak / DEV anonymous) 모두에서 활성 — Bearer 헤더 있으면 검증, 없으면 통과.
+        http.addFilterBefore(new JwtAuthenticationFilter(jwtService),
+            UsernamePasswordAuthenticationFilter.class);
+
         if (issuerUri != null && !issuerUri.isBlank()) {
-            // STG/PROD — JWT resource server + RBAC strict (BR-X05 dual-review)
+            // STG/PROD — Keycloak JWT resource server + RBAC strict (BR-X05 dual-review)
             http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(EndpointRequest.to("health", "info", "prometheus")).permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/v1/public/**").permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()    // Sprint 10 사번+PIN 로그인 endpoint
                 .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("IT_OPS")
                 .anyRequest().authenticated()
             );
             http.oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
         } else {
-            // DEV 가벼운 mode (KEYCLOAK_ISSUER_URI 미설정) — 개발자 PC 또는 사내 LAN 베타
-            // (사용자 ~10명, BR-X05 우회 OK — 사내 한정).
-            // 사내 STG/PROD 진입 시 KEYCLOAK_ISSUER_URI 설정 → 위 분기 자동 활성.
-            http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+            // DEV 가벼운 mode (KEYCLOAK_ISSUER_URI 미설정) — 본 PC 알파 + 사내 LAN 베타.
+            // Sprint 10 ST-AUTH-6 (DEV fallback 분기 제거) 진입 후 strict 모드로 전환 예정.
+            http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/v1/auth/**").permitAll()    // 로그인 endpoint
+                .anyRequest().permitAll()
+            );
             // @PreAuthorize method security 를 anonymous user 도 통과시키기 위해
             // anonymous 가 PLANNER + STK_USER + IT_OPS + READ_ONLY 모든 role 보유 (DEV 한정).
-            // 테스트 IT @WithMockUser 는 본 분기 영향 0 (Security context 직접 주입).
             http.anonymous(anon -> anon.authorities(
                 "ROLE_PLANNER", "ROLE_STK_USER", "ROLE_IT_OPS", "ROLE_READ_ONLY"));
         }
@@ -115,5 +140,30 @@ public class SecurityConfig {
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return new ProviderManager(provider);
+    }
+
+    // =========================================================================
+    // Sprint 10 ST-AUTH-4 — 자체 JWT 발급/검증 bean (HS256)
+    //
+    // secret — application.yml app.auth.jwt.secret (default = DEV-INSECURE,
+    //   PROD 진입 시 env var JWT_HMAC_SECRET 필수). 32 bytes 이상 권장 (HS256 표준).
+    // =========================================================================
+
+    @Bean
+    JwtEncoder jwtEncoder() throws Exception {
+        OctetSequenceKey key = new OctetSequenceKey.Builder(
+                jwtSecret.getBytes(StandardCharsets.UTF_8))
+            .algorithm(JWSAlgorithm.HS256)
+            .build();
+        return new NimbusJwtEncoder(new ImmutableJWKSet<>(new JWKSet(key)));
+    }
+
+    @Bean
+    JwtDecoder jwtDecoder() {
+        SecretKeySpec key = new SecretKeySpec(
+            jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        return NimbusJwtDecoder.withSecretKey(key)
+            .macAlgorithm(MacAlgorithm.HS256)
+            .build();
     }
 }
