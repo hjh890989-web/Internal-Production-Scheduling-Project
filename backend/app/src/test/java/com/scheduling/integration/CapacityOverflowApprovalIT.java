@@ -258,6 +258,72 @@ class CapacityOverflowApprovalIT {
     }
 
     @Test
+    @DisplayName("Sprint 9 EP-V12-Auto-Expire — 25h 전 PENDING → expirePending() → 1 REJECTED + reason 'auto-expired'")
+    void service_expire_pending_after_24h() {
+        Instant past25h = Instant.now().minus(java.time.Duration.ofHours(25));
+        CapacityOverflowRequest stale = new CapacityOverflowRequest(
+            UUID.randomUUID(), "X-STALE", 30, (short) 99, past25h, "seed-actor");
+        requestRepo.save(stale);
+
+        int expired = approvalService.expirePending();
+
+        assertThat(expired).isEqualTo(1);
+        CapacityOverflowRequest reloaded = requestRepo.findById(stale.getRequestId()).orElseThrow();
+        assertThat(reloaded.getStatus()).isEqualTo(CapacityOverflowRequest.Status.REJECTED);
+        assertThat(reloaded.getDecidedBy()).isEqualTo("system");
+        assertThat(reloaded.getDecisionReason()).contains("auto-expired");
+    }
+
+    @Test
+    @DisplayName("Sprint 9 EP-V12-Auto-Expire — 12h 전 PENDING → expirePending() → 만료 0 (24h 미달, PENDING 보존)")
+    void service_expire_pending_within_24h_preserved() {
+        Instant past12h = Instant.now().minus(java.time.Duration.ofHours(12));
+        CapacityOverflowRequest fresh = new CapacityOverflowRequest(
+            UUID.randomUUID(), "X-FRESH", 30, (short) 99, past12h, "seed-actor");
+        requestRepo.save(fresh);
+
+        int expired = approvalService.expirePending();
+
+        assertThat(expired).isZero();
+        CapacityOverflowRequest reloaded = requestRepo.findById(fresh.getRequestId()).orElseThrow();
+        assertThat(reloaded.getStatus()).isEqualTo(CapacityOverflowRequest.Status.PENDING);
+    }
+
+    @Test
+    @DisplayName("Sprint 9 EP-V12-Auto-Expire — 혼합 (ACCEPTED + PENDING<24h + PENDING>24h) → PENDING>24h 만 만료")
+    void service_expire_pending_selective() {
+        Instant past25h = Instant.now().minus(java.time.Duration.ofHours(25));
+        Instant past12h = Instant.now().minus(java.time.Duration.ofHours(12));
+
+        // 25h 전 ACCEPTED — 보존 (V034 trigger 도 차단)
+        CapacityOverflowRequest staleAccepted = new CapacityOverflowRequest(
+            UUID.randomUUID(), "X-OLD-ACC", 10, (short) 1, past25h, "actor");
+        requestRepo.save(staleAccepted);
+        approvalService.accept(staleAccepted.getRequestId(), "planner-1", null);
+
+        // 12h 전 PENDING — 보존
+        CapacityOverflowRequest fresh = new CapacityOverflowRequest(
+            UUID.randomUUID(), "X-FRESH", 20, (short) 99, past12h, "actor");
+        requestRepo.save(fresh);
+
+        // 25h 전 PENDING × 2 — 만료 대상
+        for (int i = 0; i < 2; i++) {
+            requestRepo.save(new CapacityOverflowRequest(
+                UUID.randomUUID(), "X-STALE-" + i, 30, (short) 99, past25h, "actor"));
+        }
+
+        int expired = approvalService.expirePending();
+
+        assertThat(expired).isEqualTo(2);
+        assertThat(requestRepo.findByStatusOrderByPriorityRankAscRequestedAtAsc(
+            CapacityOverflowRequest.Status.PENDING)).hasSize(1);   // fresh 만 PENDING
+        assertThat(requestRepo.findByStatusOrderByPriorityRankAscRequestedAtAsc(
+            CapacityOverflowRequest.Status.ACCEPTED)).hasSize(1);  // ACCEPTED 보존
+        assertThat(requestRepo.findByStatusOrderByPriorityRankAscRequestedAtAsc(
+            CapacityOverflowRequest.Status.REJECTED)).hasSize(2);  // 2 만료
+    }
+
+    @Test
     @DisplayName("V034 trigger — DB 레벨 중복 결정 차단 (PENDING 이외 UPDATE 시도 차단)")
     void v034_trigger_blocks_double_decision_at_db() {
         List<UUID> ids = approvalService.enqueue(Map.of("29673-2R060", 50), "planner-001");

@@ -6,10 +6,13 @@ import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,5 +102,37 @@ public class CapacityOverflowApprovalService {
         return requestRepo.findById(requestId)
             .orElseThrow(() -> new EntityNotFoundException(
                 "capacity_overflow_request 미존재: " + requestId));
+    }
+
+    /** Sprint 9 EP-V12-Auto-Expire — 24h 보존 임계 (Planner 잊은 PENDING 누적 방지). */
+    static final Duration AUTO_EXPIRE_THRESHOLD = Duration.ofHours(24);
+    static final String AUTO_EXPIRE_REASON = "auto-expired after 24h (Sprint 9 EP-V12-Auto-Expire)";
+    static final String AUTO_EXPIRE_ACTOR = "system";
+
+    /**
+     * Sprint 9 EP-V12-Auto-Expire — 매일 03:00 KST PENDING > 24h 자동 REJECTED.
+     *
+     * <p>운영 시간 외 (Planner 일과 시작 전) 실행 — 일과 중 변동 충돌 회피. 본 메서드는
+     * 단순 batch — V034 trigger 가 PENDING 외 status 변경 차단 (이중 보장).
+     */
+    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
+    public void expirePendingScheduled() {
+        int expired = expirePending();
+        if (expired > 0) {
+            log.info("BR-V12 auto-expire — {} requests PENDING → REJECTED (24h threshold)", expired);
+        }
+    }
+
+    /** 본 메서드는 직접 호출 가능 (IT + 수동 cleanup). 반환 — 만료 처리한 row 수. */
+    @Auditable("BR-V12 추가 요청 큐 24h 자동 만료 (Sprint 9 EP-V12-Auto-Expire)")
+    @Transactional
+    public int expirePending() {
+        Instant threshold = clock.instant().minus(AUTO_EXPIRE_THRESHOLD);
+        List<CapacityOverflowRequest> stale = requestRepo.findByStatusAndRequestedAtBefore(
+            CapacityOverflowRequest.Status.PENDING, threshold);
+        for (CapacityOverflowRequest req : stale) {
+            req.reject(AUTO_EXPIRE_ACTOR, clock.instant(), AUTO_EXPIRE_REASON);
+        }
+        return stale.size();
     }
 }
