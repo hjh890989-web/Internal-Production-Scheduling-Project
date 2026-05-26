@@ -1,22 +1,20 @@
-import { Layout, Menu, Typography } from 'antd'
+import { Layout, Button, Typography } from 'antd'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useUIStore } from '@/stores/uiStore'
 
-const { Header, Sider, Content, Footer } = Layout
-const { Title, Text } = Typography
+const { Header, Content, Footer } = Layout
+const { Text } = Typography
 
 /**
- * 공통 레이아웃 — Header (로고 + 제목) + Sider (메뉴) + Content (Outlet) + Footer (sub 로고).
+ * 공통 레이아웃 — Header (서브 로고 + 박스 메뉴) + Content (Outlet) + Footer (메인 로고).
  *
- * <p>FCB (Fuel-Cost-Automatic-Billing-Project) 패턴 적용 — top nav main 로고 + footer EVS 로고.
- * 로고 source — public/logos/ (Vite static path, build 시 dist/logos/ 그대로 copy).
+ * <p>FCB (Fuel-Cost-Automatic-Billing-Project) 패턴 정합 — 메뉴 아이템 다크 그라디언트 박스
+ * (border + radius + hover transform). 좌측 Sider 폐지.
  */
 export default function MainLayout() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
-  const collapsed = useUIStore((s) => s.sidebarCollapsed)
 
   const menuItems = [
     { key: '/home', label: t('menu.home') },
@@ -28,47 +26,66 @@ export default function MainLayout() {
     { key: '/audit/restore', label: t('menu.audit') },
   ]
 
+  const buttonBaseStyle: React.CSSProperties = {
+    background: 'linear-gradient(180deg, #374151 0%, #1f2937 100%)',
+    borderColor: '#4b5563',
+    color: '#e5e7eb',
+    fontSize: 13,
+    fontWeight: 500,
+    borderRadius: 6,
+  }
+
+  const buttonSelectedStyle: React.CSSProperties = {
+    ...buttonBaseStyle,
+    background: 'linear-gradient(180deg, #4b5563 0%, #374151 100%)',
+    borderColor: '#9ca3af',
+    color: '#fff',
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 4px rgba(0,0,0,0.4)',
+  }
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <Header style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '0 24px', height: 80 }}>
         <a
           href="/home"
           onClick={(e) => { e.preventDefault(); navigate('/home') }}
-          title="홈으로 — Check In · 사내 공정 스케줄링"
-          style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+          title="홈으로 — Check In · EVS (사내 공정 스케줄링)"
+          style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}
         >
           <img
-            src="/logos/cheek-in-main-logo.svg"
-            alt="Check In · 사내 공정 스케줄링"
-            style={{ height: 36, background: '#fff', padding: '4px 8px', borderRadius: 4 }}
+            src="/logos/cheek-in-evs-logo.svg"
+            alt="Check In · EVS (사내 공정 스케줄링)"
+            style={{ height: 60, background: '#fff', padding: '4px 8px', borderRadius: 4 }}
           />
         </a>
-        <Title level={4} style={{ color: '#fff', margin: 0 }}>
-          {t('app.title')}
-        </Title>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, flex: 1, alignItems: 'center' }}>
+          {menuItems.map((item) => {
+            const selected = location.pathname === item.key
+            return (
+              <Button
+                key={item.key}
+                disabled={item.disabled}
+                onClick={() => navigate(item.key)}
+                style={selected ? buttonSelectedStyle : buttonBaseStyle}
+              >
+                {item.label}
+              </Button>
+            )
+          })}
+        </div>
       </Header>
-      <Layout>
-        <Sider collapsed={collapsed} width={220} theme="light">
-          <Menu
-            mode="inline"
-            selectedKeys={[location.pathname]}
-            onClick={(e) => navigate(e.key)}
-            items={menuItems}
-          />
-        </Sider>
-        <Content style={{ padding: 24 }}>
-          <Outlet />
-        </Content>
-      </Layout>
+      <Content style={{ padding: 24 }}>
+        <Outlet />
+      </Content>
       <Footer style={{ textAlign: 'center', background: '#f5f5f5', padding: '16px 24px' }}>
         <img
-          src="/logos/cheek-in-evs-logo.svg"
-          alt="Check In · EVS"
-          style={{ height: 28, marginBottom: 8 }}
+          src="/logos/cheek-in-main-logo.svg"
+          alt="Check In"
+          style={{ height: 70, marginBottom: 8 }}
         />
         <div>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            송우산업 사내 공정 스케줄링 시스템 (S-D 베타 · Hybrid Dev Mode)
+            송우산업 사내 업무 자동화 플랫폼
           </Text>
         </div>
       </Footer>
