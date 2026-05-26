@@ -17,6 +17,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // sockjs-client (STOMP/SockJS) 가 Node.js `global` 참조 → 브라우저 polyfill (Vite 표준 fix)
+  define: {
+    global: 'globalThis',
+  },
   server: {
     port: 5173,
     // DEV 가벼운 mode — VITE_LAN_HOST=1 시 사내 LAN 노출 (본 PC IP 통해 사내 5명 접속)
