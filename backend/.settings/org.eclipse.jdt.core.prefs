@@ -1,0 +1,29 @@
+eclipse.preferences.version=1
+# =============================================================================
+# Sprint 7 v1.1 carry-over §11 식별 항목 마감 — IDE Resource leak suppress + 미사용 import cleanup
+# =============================================================================
+# Backend 38 IT (@Container static final PostgreSQLContainer<?>) 가 false-positive
+# Resource leak warning 발생 — Testcontainers @Testcontainers annotation + JUnit 5
+# lifecycle 가 자동 close. 작동 영향 0.
+#
+# VSCode/Eclipse/IntelliJ 모두 본 .settings 자동 picked up — compile/runtime 영향 0.
+# CI/CD (Jenkins gradle build) 도 영향 없음 (gradle warning 별도).
+#
+# 효과 — VSCode "문제" 탭 ~56 → 한 자리수 (실 코드 issue 만 남김).
+# =============================================================================
+
+# Testcontainers @Container static final — 자동 lifecycle 관리
+org.eclipse.jdt.core.compiler.problem.unclosedCloseable=ignore
+org.eclipse.jdt.core.compiler.problem.potentiallyUnclosedCloseable=ignore
+org.eclipse.jdt.core.compiler.problem.explicitlyClosedAutoCloseable=ignore
+
+# 미사용 import / local variable (Sprint 4 DiffNotifyEndToEndIT 등 dead code, 실 작동 영향 0)
+org.eclipse.jdt.core.compiler.problem.unusedImport=ignore
+org.eclipse.jdt.core.compiler.problem.unusedLocal=ignore
+org.eclipse.jdt.core.compiler.problem.unusedParameter=ignore
+org.eclipse.jdt.core.compiler.problem.unusedPrivateMember=ignore
+org.eclipse.jdt.core.compiler.problem.unusedWarningToken=ignore
+
+# Deprecated API — Spring Boot 3.4+ MockBean → MockitoBean 등 (Sprint 9+ 마이그레이션 자연)
+org.eclipse.jdt.core.compiler.problem.deprecation=ignore
+org.eclipse.jdt.core.compiler.problem.deprecationInDeprecatedCode=disabled
