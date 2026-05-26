@@ -1,3 +1,8 @@
+// sockjs-client browser polyfill — Node.js `global` 참조 회피 (Vite 5 + sockjs 호환)
+// main.tsx 최상단 — 다른 import 전에 적용. Vite 의 define option 은 pre-bundled deps 에
+// 적용 안 됨, runtime polyfill 필요.
+;(window as unknown as { global: typeof window }).global = window
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { ConfigProvider } from 'antd'
