@@ -23,4 +23,11 @@ public interface KdOrderLookup {
      * @return 실 차감량 (remaining 부족 시 가능량만 — caller 가 잔여 부족 처리)
      */
     int consume(UUID kdOrderId, int qty, String actor);
+
+    /**
+     * Sprint 8 EP-V13-Grafana — hose 별 OPEN+PARTIAL remaining_qty 합계.
+     *
+     * @return hose_id → total remaining qty (잔량 0 hose 는 결과에서 제외)
+     */
+    java.util.Map<String, Long> remainingByHose();
 }

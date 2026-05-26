@@ -28,4 +28,21 @@ public interface KdOrderRepository extends JpaRepository<KdOrder, UUID> {
         ORDER BY k.orderDate ASC
         """)
     List<KdOrder> findOpenByHoseIn(@Param("hoseIds") List<String> hoseIds);
+
+    /** Sprint 8 EP-V13-Grafana — hose 별 remaining_qty 합계 (OPEN+PARTIAL). IT_OPS metric source. */
+    @Query("""
+        SELECT k.hoseId AS hoseId, SUM(k.remainingQty) AS totalRemaining
+        FROM KdOrder k
+        WHERE k.status IN
+            (com.scheduling.master.kd.KdOrder.Status.OPEN,
+             com.scheduling.master.kd.KdOrder.Status.PARTIAL)
+        GROUP BY k.hoseId
+        """)
+    List<HoseRemainingProjection> findRemainingSumByHose();
+
+    /** Projection for hose-level remaining qty aggregation. */
+    interface HoseRemainingProjection {
+        String getHoseId();
+        Long getTotalRemaining();
+    }
 }

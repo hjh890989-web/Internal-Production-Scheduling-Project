@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.spring.boot.starter.security)   // TK-VC16-1-1 @PreAuthorize
     implementation(libs.spring.modulith.starter.core)
     implementation(libs.spring.modulith.events.api)
+    implementation("io.micrometer:micrometer-core")     // Sprint 8 EP-V13-Grafana CapacityOverflowMetrics
     // spring-modulith-starter-jpa 는 Sprint 1+ Task에서 활성
 
     testImplementation(libs.spring.boot.starter.test)

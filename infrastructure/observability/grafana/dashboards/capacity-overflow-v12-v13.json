@@ -1,0 +1,116 @@
+{
+  "title": "Scheduling — Capacity Overflow V12·V13 (Sprint 8 EP-V13-Grafana)",
+  "tags": ["scheduling", "sprint8", "ep-v13", "capa-overflow", "it-ops"],
+  "timezone": "Asia/Seoul",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "BR-V13 — KD remaining_qty per hose (OPEN+PARTIAL)",
+      "type": "bargauge",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "scheduling_v13_kd_remaining_qty_units",
+          "legendFormat": "{{hose}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red",    "value": null },
+              { "color": "yellow", "value": 20 },
+              { "color": "green",  "value": 50 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "valueMode": "color"
+      }
+    },
+    {
+      "id": 2,
+      "title": "BR-V12 — Pending Queue 상태별 count (Sprint 8 EP-V12-승인)",
+      "type": "stat",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "scheduling_v12_pending_request_count_requests{status=\"PENDING\"}",
+          "legendFormat": "PENDING",
+          "refId": "A"
+        },
+        {
+          "expr": "scheduling_v12_pending_request_count_requests{status=\"ACCEPTED\"}",
+          "legendFormat": "ACCEPTED",
+          "refId": "B"
+        },
+        {
+          "expr": "scheduling_v12_pending_request_count_requests{status=\"REJECTED\"}",
+          "legendFormat": "REJECTED",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow","value": 5 },
+              { "color": "red",   "value": 20 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["last"], "fields": "" },
+        "orientation": "horizontal",
+        "colorMode": "background"
+      }
+    },
+    {
+      "id": 3,
+      "title": "BR-V13 — KD remaining_qty 시계열 (1시간 trend)",
+      "type": "timeseries",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 10 },
+      "targets": [
+        {
+          "expr": "scheduling_v13_kd_remaining_qty_units",
+          "legendFormat": "{{hose}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none" } },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["last", "min"] }
+      }
+    },
+    {
+      "id": 4,
+      "title": "BR-V12 — Pending Queue 누적 (Planner 결정 대기 시간 추적)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
+      "targets": [
+        {
+          "expr": "scheduling_v12_pending_request_count_requests",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none" } },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    }
+  ]
+}

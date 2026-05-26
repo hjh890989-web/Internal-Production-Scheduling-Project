@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @Profile("with-infra")
@@ -42,6 +44,14 @@ class KdOrderLookupImpl implements KdOrderLookup {
         int actualConsumed = k.consume(qty, Instant.now(clock), actor);
         repository.save(k);
         return actualConsumed;
+    }
+
+    @Override
+    public Map<String, Long> remainingByHose() {
+        return repository.findRemainingSumByHose().stream()
+            .collect(Collectors.toMap(
+                KdOrderRepository.HoseRemainingProjection::getHoseId,
+                p -> p.getTotalRemaining() == null ? 0L : p.getTotalRemaining()));
     }
 
     private KdOrderSummary toSummary(KdOrder k) {
