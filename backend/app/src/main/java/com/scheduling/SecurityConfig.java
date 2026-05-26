@@ -3,14 +3,20 @@ package com.scheduling;
 import com.scheduling.security.CustomAccessDeniedHandler;
 import com.scheduling.security.CustomAuthenticationEntryPoint;
 import com.scheduling.security.KeycloakJwtAuthConverter;
+import com.scheduling.security.auth.AppUserDetailsService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -86,5 +92,28 @@ public class SecurityConfig {
         }
 
         return http.build();
+    }
+
+    // =========================================================================
+    // Sprint 10 ST-AUTH-2 — 사번+PIN 인증 bean (NFR-SEC-007)
+    //
+    // BCryptPasswordEncoder strength=12 — 5명 사용자라 응답 ~200ms acceptable.
+    // DaoAuthenticationProvider — AppUserDetailsService + PasswordEncoder.
+    // AuthenticationManager — AuthController (ST-AUTH-4) 에서 inject 받아
+    //   authenticate(UsernamePasswordAuthenticationToken) 호출. JWT 발급은 별도.
+    // =========================================================================
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);
+    }
+
+    @Bean
+    AuthenticationManager authenticationManager(AppUserDetailsService userDetailsService,
+                                                PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(provider);
     }
 }
