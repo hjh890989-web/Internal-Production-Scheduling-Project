@@ -82,6 +82,15 @@ public class CapacityOverflowController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * DEV 가벼운 mode (KEYCLOAK_ISSUER_URI 미설정) — Spring Security anonymous user 시 Controller
+     * 의 {@code Principal} 파라미터가 null inject. STG/PROD JWT 환경에서는 정상 inject.
+     * 양 환경 호환 — null fallback "anonymousUser".
+     */
+    private static String actorOf(Principal principal) {
+        return principal != null ? principal.getName() : "anonymousUser";
+    }
+
     /** BR-V13 — capa 부족 KD 잔량 보충 (동일 hose 1차 + 셋팅 그룹 2차). */
     @PostMapping("/supplement")
     @PreAuthorize("hasRole('PLANNER')")
@@ -90,8 +99,7 @@ public class CapacityOverflowController {
         Principal principal
     ) {
         KdSupplementService.SupplementResult result =
-            supplementService.supplement(payload.hoseId(), payload.shortage(),
-                principal.getName());
+            supplementService.supplement(payload.hoseId(), payload.shortage(), actorOf(principal));
         return ResponseEntity.ok(result);
     }
 
@@ -102,7 +110,7 @@ public class CapacityOverflowController {
         @RequestBody @Valid EnqueuePayload payload,
         Principal principal
     ) {
-        List<UUID> ids = approvalService.enqueue(payload.queue(), principal.getName());
+        List<UUID> ids = approvalService.enqueue(payload.queue(), actorOf(principal));
         return ResponseEntity.ok(new EnqueueResponse(ids));
     }
 
@@ -115,7 +123,7 @@ public class CapacityOverflowController {
         Principal principal
     ) {
         String note = payload != null ? payload.reason() : null;
-        CapacityOverflowRequest req = approvalService.accept(requestId, principal.getName(), note);
+        CapacityOverflowRequest req = approvalService.accept(requestId, actorOf(principal), note);
         return ResponseEntity.ok(req);
     }
 
@@ -127,7 +135,7 @@ public class CapacityOverflowController {
         @RequestBody @Valid DecisionPayload payload,
         Principal principal
     ) {
-        CapacityOverflowRequest req = approvalService.reject(requestId, principal.getName(),
+        CapacityOverflowRequest req = approvalService.reject(requestId, actorOf(principal),
             payload.reason());
         return ResponseEntity.ok(req);
     }
