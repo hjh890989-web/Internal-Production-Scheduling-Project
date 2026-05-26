@@ -77,8 +77,12 @@ public class SecurityConfig {
             // DEV 가벼운 mode (KEYCLOAK_ISSUER_URI 미설정) — 개발자 PC 또는 사내 LAN 베타
             // (사용자 ~10명, BR-X05 우회 OK — 사내 한정).
             // 사내 STG/PROD 진입 시 KEYCLOAK_ISSUER_URI 설정 → 위 분기 자동 활성.
-            // @PreAuthorize method security 는 본 분기에서도 활성 (테스트 IT @WithMockUser 호환).
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+            // @PreAuthorize method security 를 anonymous user 도 통과시키기 위해
+            // anonymous 가 PLANNER + STK_USER + IT_OPS + READ_ONLY 모든 role 보유 (DEV 한정).
+            // 테스트 IT @WithMockUser 는 본 분기 영향 0 (Security context 직접 주입).
+            http.anonymous(anon -> anon.authorities(
+                "ROLE_PLANNER", "ROLE_STK_USER", "ROLE_IT_OPS", "ROLE_READ_ONLY"));
         }
 
         return http.build();
