@@ -62,19 +62,24 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final String issuerUri;
     private final String jwtSecret;
+    private final boolean devFallback;
 
     public SecurityConfig(
         KeycloakJwtAuthConverter jwtConverter,
         CustomAccessDeniedHandler accessDeniedHandler,
         CustomAuthenticationEntryPoint authenticationEntryPoint,
         @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:}") String issuerUri,
-        @Value("${app.auth.jwt.secret:DEV-INSECURE-32-CHARS-min-secret-replace-in-PROD}") String jwtSecret
+        @Value("${app.auth.jwt.secret:DEV-INSECURE-32-CHARS-min-secret-replace-in-PROD}") String jwtSecret,
+        // Sprint 10 ST-AUTH-6 — env APP_AUTH_DEV_FALLBACK=false 로 strict mode 진입 (사번+PIN 필수).
+        // default true 유지 (본 PC 알파 + Sprint 11 RBAC 작업 중 호환). PROD/베타 진입 시 false.
+        @Value("${app.auth.dev-fallback:true}") boolean devFallback
     ) {
         this.jwtConverter = jwtConverter;
         this.accessDeniedHandler = accessDeniedHandler;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.issuerUri = issuerUri;
         this.jwtSecret = jwtSecret;
+        this.devFallback = devFallback;
     }
 
     @Bean
@@ -103,17 +108,25 @@ public class SecurityConfig {
             );
             http.oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
-        } else {
-            // DEV 가벼운 mode (KEYCLOAK_ISSUER_URI 미설정) — 본 PC 알파 + 사내 LAN 베타.
-            // Sprint 10 ST-AUTH-6 (DEV fallback 분기 제거) 진입 후 strict 모드로 전환 예정.
+        } else if (devFallback) {
+            // DEV 가벼운 mode — 본 PC 알파 + Sprint 11~ 작업 중. JWT 있으면 인증, 없으면 anonymous fallback.
             http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()    // 로그인 endpoint
+                .requestMatchers("/api/v1/auth/**").permitAll()
                 .anyRequest().permitAll()
             );
-            // @PreAuthorize method security 를 anonymous user 도 통과시키기 위해
-            // anonymous 가 PLANNER + STK_USER + IT_OPS + READ_ONLY 모든 role 보유 (DEV 한정).
+            // anonymous 4 role 자동 부여 — JwtAuthenticationFilter 가 SecurityContext 설정 시 우선.
             http.anonymous(anon -> anon.authorities(
                 "ROLE_PLANNER", "ROLE_STK_USER", "ROLE_IT_OPS", "ROLE_READ_ONLY"));
+        } else {
+            // strict mode (env APP_AUTH_DEV_FALLBACK=false) — 사번+PIN JWT 필수, anonymous 비활성.
+            // Sprint 19 EP-BETA-LAUNCH 진입 시 (또는 사용자 명시 결정 시) 전환.
+            http.authorizeHttpRequests(auth -> auth
+                .requestMatchers(EndpointRequest.to("health", "info", "prometheus")).permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("IT_OPS")
+                .anyRequest().authenticated()
+            );
         }
 
         return http.build();
