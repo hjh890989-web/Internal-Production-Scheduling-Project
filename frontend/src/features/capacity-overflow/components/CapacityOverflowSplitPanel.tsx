@@ -13,7 +13,7 @@ import {
   Typography,
   message,
 } from 'antd'
-import { splitCapacity, type SplitResult } from '../api/capacityOverflowApi'
+import { enqueueRequests, splitCapacity, type SplitResult } from '../api/capacityOverflowApi'
 
 const { Text, Paragraph } = Typography
 
@@ -54,6 +54,16 @@ export function CapacityOverflowSplitPanel() {
       )
     },
     onError: (e) => void message.error(`Split 실패: ${String(e)}`),
+  })
+
+  const enqueueMutation = useMutation({
+    mutationFn: () => enqueueRequests(result?.requestQueue ?? {}),
+    onSuccess: (r) => {
+      void message.success(
+        `큐 등록 완료 — ${r.requestIds.length} 건 PENDING (Tab3 Pending Queue 에서 승인/거절)`,
+      )
+    },
+    onError: (e) => void message.error(`큐 등록 실패: ${String(e)}`),
   })
 
   const acceptedRows = result
@@ -170,7 +180,7 @@ export function CapacityOverflowSplitPanel() {
                 <Alert
                   type="warning"
                   message="Planner 승인 필요"
-                  description="본 큐는 Sprint 8+ 의 1클릭 승인 모달과 연동 예정. 현재는 미리보기만."
+                  description="Sprint 8 — '큐 등록' 클릭 시 PENDING 으로 영속화. 이후 Tab3 Pending Queue 에서 1클릭 승인/거절."
                   style={{ marginBottom: 12 }}
                 />
                 <Table
@@ -183,6 +193,16 @@ export function CapacityOverflowSplitPanel() {
                     { title: '대기 qty', dataIndex: 'qty', render: (v) => <Tag color="gold">{v}</Tag> },
                   ]}
                 />
+                <div style={{ marginTop: 12, textAlign: 'right' }}>
+                  <Button
+                    type="primary"
+                    onClick={() => enqueueMutation.mutate()}
+                    loading={enqueueMutation.isPending}
+                    disabled={queueRows.length === 0}
+                  >
+                    큐 등록 ({queueRows.length} 건 PENDING)
+                  </Button>
+                </div>
               </>
             ) : (
               <Empty description="추가 요청 없음 — capa 내 모두 채택" />
