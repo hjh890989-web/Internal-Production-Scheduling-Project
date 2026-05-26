@@ -58,27 +58,27 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // permitAll — Actuator (health·info·prometheus only) + Swagger + auth endpoint
-                .requestMatchers(EndpointRequest.to("health", "info", "prometheus")).permitAll()
-                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/api/v1/public/**").permitAll()
-                // 그 외 actuator endpoint 는 IT_OPS만
-                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("IT_OPS")
-                // 인증 요구 (JWT 비활성 시 본 정책은 effective 안 됨 — Sprint 0 baseline DEV 폴백)
-                .anyRequest().authenticated()
-            )
             .exceptionHandling(eh -> eh
                 .authenticationEntryPoint(authenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler));
 
-        // JWT resource server 활성 조건: issuer-uri 설정된 경우만 (PROD/STG/with-infra).
-        // DEV baseline (issuer-uri 빈 값) 은 httpBasic 폴백.
         if (issuerUri != null && !issuerUri.isBlank()) {
+            // STG/PROD — JWT resource server + RBAC strict (BR-X05 dual-review)
+            http.authorizeHttpRequests(auth -> auth
+                .requestMatchers(EndpointRequest.to("health", "info", "prometheus")).permitAll()
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/api/v1/public/**").permitAll()
+                .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("IT_OPS")
+                .anyRequest().authenticated()
+            );
             http.oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
         } else {
-            http.httpBasic(b -> {});
+            // DEV 가벼운 mode (KEYCLOAK_ISSUER_URI 미설정) — 개발자 PC 또는 사내 LAN 베타
+            // (사용자 ~10명, BR-X05 우회 OK — 사내 한정).
+            // 사내 STG/PROD 진입 시 KEYCLOAK_ISSUER_URI 설정 → 위 분기 자동 활성.
+            // @PreAuthorize method security 는 본 분기에서도 활성 (테스트 IT @WithMockUser 호환).
+            http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         }
 
         return http.build();

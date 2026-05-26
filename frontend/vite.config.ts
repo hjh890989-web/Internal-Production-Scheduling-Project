@@ -19,7 +19,9 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    host: '127.0.0.1',          // DEV: localhost only (NFR-SEC-001)
+    // DEV 가벼운 mode — VITE_LAN_HOST=1 시 사내 LAN 노출 (본 PC IP 통해 사내 5명 접속)
+    // 기본 — localhost only (NFR-SEC-001 사내망 가드)
+    host: process.env.VITE_LAN_HOST === '1' ? '0.0.0.0' : '127.0.0.1',
     proxy: {
       '/api':  { target: 'http://localhost:8080', changeOrigin: true },
       '/ws':   { target: 'ws://localhost:8080',   ws: true },
