@@ -9,6 +9,76 @@ All notable changes to **Internal Production Scheduling Project** are documented
 
 ---
 
+## [v1.0.3] — 2026-05-23 — Sprint 8 V12 승인 워크플로우 + V13 Grafana panel
+
+> Sprint 7 carry-over 식별 2 항목 마감 — V12 풀 스택 (split → enqueue → Planner accept/reject) +
+> V13 IT_OPS 관측 (Prometheus + Grafana). Phase 4-A 실 STG 진입 직전 마지막 코드 작업 마일스톤.
+
+### Added
+
+#### Backend (Sprint 8)
+
+- **V034** `app.capacity_overflow_request` — UUID PK + status PENDING/ACCEPTED/REJECTED + CHECK chk_decided_consistency + chk_reject_reason + transition trigger (Sprint 5 V028 동일 패턴, 중복 결정 차단)
+- **`CapacityOverflowRequest`** entity (Status enum + accept/reject + invariants) + `CapacityOverflowRequestRepository`
+- **`CapacityOverflowApprovalService`** — enqueue + accept + reject (priority_rank 보존 + reason 필수 + 3 method @Auditable)
+- **REST endpoint +4** — POST `/enqueue` + `/queue/{id}/accept` + `/queue/{id}/reject` + GET `/queue?status=` (PLANNER 단독 mutation + PLANNER/IT_OPS/READ_ONLY 조회)
+- **`CapacityOverflowMetrics`** — MultiGauge `scheduling.v13.kd.remaining.qty{hose}` + `scheduling.v12.pending.request.count{status}` + @Scheduled(30s) refresh
+- **`KdOrderLookup.remainingByHose()`** facade — Repository custom query (group by hose, SUM)
+- **`VcSchedulingEnabledConfig`** — vc 모듈 @EnableScheduling (notify/order 동일 패턴)
+- `vc/build.gradle.kts` +micrometer-core
+
+#### Frontend (Sprint 8)
+
+- **api/capacityOverflowApi.ts +5 method** — `CapacityOverflowRequest` + `EnqueueResponse` types + enqueueRequests/acceptRequest/rejectRequest/listQueueRequests
+- **Tab1 `CapacityOverflowSplitPanel`** — "큐 등록 (N 건 PENDING)" 버튼 (split 결과의 requestQueue → POST /enqueue)
+- **Tab3 `PendingQueuePanel`** (신규) — Table (Rank/Hose/Qty/시각/요청자/액션) + 1클릭 Accept/Reject + reject reason Modal (필수, max 500자)
+- **`CapacityQueuePage` Tab3 통합** — "Pending Queue (Sprint 8)"
+
+#### Observability (Sprint 8)
+
+- **Grafana dashboard `capacity-overflow-v12-v13.json`** — 4 panel (bargauge KD remaining + stat V12 status × 3 + 시계열 × 2 + threshold)
+
+### Reports
+
+- `Phase 3/1.Sprint-Reports/Sprint-8_Completion_v1.0.md` — Sprint 8 마감 (4 commit, 16 신규 tests)
+- `Phase 2/4.Tasks/TASK-001_WBS_v1.4.md` — 51 Epic / 291 SP (Sprint 8 +2 Epic + ~6 SP AI 가속)
+
+### Metrics (v1.0.2 → v1.0.3)
+
+| 영역 | v1.0.2 | v1.0.3 |
+|---|---|---|
+| Backend tests | 795 / 0 fail | **811 / 0 fail** (+16 — 12 IT + 4 unit) |
+| Frontend vitest | 58 / 0 fail | **61 / 0 fail** (+3 types) |
+| Flyway 마이그레이션 | V001~V033 (34) | **V001~V034** (35) |
+| Modulith verify | 0 위반 | 0 위반 |
+| ArchUnit | 29 rule | 29 rule |
+| Grafana dashboards | 7 | **8** (+ capacity-overflow-v12-v13) |
+| Frontend chunk `CapacityQueuePage` gzip | 2.72kB | **3.85kB** (+1.13kB Tab3+Modal) |
+| Vite entry first paint gzip | 7.23kB | 7.23kB |
+| WBS Epic | 49 | **51** (+EP-V12-승인 + EP-V13-Grafana) |
+| WBS SP | 285 | **291** |
+
+### Commits (+4)
+
+```text
+23e9c03  feat(vc): Sprint 8 BR-V12 추가 요청 큐 승인 워크플로우 backend (REQ-FUNC-VC-022)
+176df99  feat(vc): Sprint 8 V12 GET /queue?status= endpoint + 2 IT
+8961124  feat(ui): Sprint 8 V12 UI 확장 — Tab1 큐 등록 + Tab3 PendingQueuePanel
+8df0df6  feat(observability): Sprint 8 EP-V13-Grafana — IT_OPS metric + 4 panel dashboard
+```
+
+### Carry-over (Sprint 9+ / Phase 5+ 재정렬)
+
+- ~~BR-V12 승인 워크플로우~~ → ✅ **Sprint 8 마감**
+- ~~BR-V13 Grafana panel~~ → ✅ **Sprint 8 마감**
+- V12 ACCEPTED → vc_schedule 자동 INSERT chain (Allocator 후속) — Sprint 9+ Medium
+- V12 PENDING 자동 만료 (24h 후 자동 REJECTED) — Sprint 9+ Low
+- Mobile App (Flutter 압출 패드) — Phase 5+
+- ML 추천 (EP-18 ranking 자동화) — Phase 6+
+- ArchUnit DDD layer 강화 — Medium
+
+---
+
 ## [v1.0.2] — 2026-05-23 — Phase 4-A 진입 직전 outward 문서 클로저
 
 > v1.0.1 (Sprint 7 carry-over 풀 스택 마감) 이후 outward 자산 동기화 + REST IT 보강.
