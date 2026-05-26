@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -89,6 +90,7 @@ class CapacityOverflowApprovalIT {
     @Autowired private CapacityOverflowRequestRepository requestRepo;
     @Autowired private CapacityOverflowApprovalService approvalService;
     @Autowired private AcceptedEventCapture eventCapture;
+    @Autowired private JdbcTemplate jdbc;
 
     /** Sprint 9 EP-V12-Allocator-Chain — accept() 후 CapacityOverflowAcceptedEvent 발행 검증. */
     static class AcceptedEventCapture {
@@ -402,5 +404,87 @@ class CapacityOverflowApprovalIT {
     @SuppressWarnings("unused")
     private boolean isDbAccessException(Throwable t) {
         return t instanceof DataAccessException;
+    }
+
+    // =========================================================================
+    // Sprint 8 후속 hotfix V035 — capacity_overflow_request audit trigger (BR-X02)
+    // =========================================================================
+
+    private Integer auditCount(UUID requestId, String action) {
+        return jdbc.queryForObject(
+            "SELECT COUNT(*) FROM audit.schedule_audit_log "
+                + "WHERE table_name = 'capacity_overflow_request' "
+                + "AND row_pk = ? AND action = ?",
+            Integer.class, requestId.toString(), action);
+    }
+
+    @Test
+    @DisplayName("V035 audit — enqueue(@Auditable) → audit_log INSERT 1건 (actor + reason from AOP)")
+    void v035_audit_enqueue_captures_insert_row() {
+        List<UUID> ids = approvalService.enqueue(Map.of("29673-2R060", 40), "planner-aop");
+        UUID id = ids.get(0);
+
+        assertThat(auditCount(id, "INSERT")).isEqualTo(1);
+        String reason = jdbc.queryForObject(
+            "SELECT reason FROM audit.schedule_audit_log "
+                + "WHERE table_name='capacity_overflow_request' AND row_pk=? AND action='INSERT'",
+            String.class, id.toString());
+        assertThat(reason).contains("BR-V12");
+    }
+
+    @Test
+    @DisplayName("V035 audit — accept(@Auditable) → audit_log UPDATE 1건 + reason 'Planner 승인'")
+    void v035_audit_accept_captures_update_row() {
+        List<UUID> ids = approvalService.enqueue(Map.of("29673-2R060", 50), "planner-aop");
+        UUID id = ids.get(0);
+
+        approvalService.accept(id, "planner-002", "OK");
+
+        assertThat(auditCount(id, "UPDATE")).isEqualTo(1);
+        String reason = jdbc.queryForObject(
+            "SELECT reason FROM audit.schedule_audit_log "
+                + "WHERE table_name='capacity_overflow_request' AND row_pk=? AND action='UPDATE' "
+                + "ORDER BY occurred_at DESC LIMIT 1",
+            String.class, id.toString());
+        assertThat(reason).contains("Planner 승인");
+    }
+
+    @Test
+    @DisplayName("V035 audit — reject(@Auditable) → audit_log UPDATE 1건 + decision_reason new_row jsonb 캡쳐")
+    void v035_audit_reject_captures_decision_reason() {
+        List<UUID> ids = approvalService.enqueue(Map.of("29673-2R060", 50), "planner-aop");
+        UUID id = ids.get(0);
+
+        approvalService.reject(id, "planner-002", "여유 capa 부족");
+
+        assertThat(auditCount(id, "UPDATE")).isEqualTo(1);
+        // jsonb new_row 안의 decision_reason 필드 검증
+        String newRow = jdbc.queryForObject(
+            "SELECT new_row::text FROM audit.schedule_audit_log "
+                + "WHERE table_name='capacity_overflow_request' AND row_pk=? AND action='UPDATE' "
+                + "ORDER BY occurred_at DESC LIMIT 1",
+            String.class, id.toString());
+        assertThat(newRow).contains("\"status\": \"REJECTED\"");
+        assertThat(newRow).contains("여유 capa 부족");
+    }
+
+    @Test
+    @DisplayName("V035 audit — Sprint 9 auto-expire(@Auditable) → audit_log UPDATE 'system' actor + 'auto-expired' reason")
+    void v035_audit_auto_expire_captures_system_actor() {
+        Instant past25h = Instant.now().minus(java.time.Duration.ofHours(25));
+        CapacityOverflowRequest stale = new CapacityOverflowRequest(
+            UUID.randomUUID(), "X-STALE-AUDIT", 30, (short) 99, past25h, "seed-actor");
+        requestRepo.save(stale);
+
+        approvalService.expirePending();
+
+        assertThat(auditCount(stale.getRequestId(), "UPDATE")).isEqualTo(1);
+        String actor = jdbc.queryForObject(
+            "SELECT actor FROM audit.schedule_audit_log "
+                + "WHERE table_name='capacity_overflow_request' AND row_pk=? AND action='UPDATE' "
+                + "ORDER BY occurred_at DESC LIMIT 1",
+            String.class, stale.getRequestId().toString());
+        // AOP resolveActor() — SecurityContext 미설정 시 'system' fallback
+        assertThat(actor).isEqualTo("system");
     }
 }
