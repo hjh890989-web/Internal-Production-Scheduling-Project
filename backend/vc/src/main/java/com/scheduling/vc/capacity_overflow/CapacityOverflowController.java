@@ -7,10 +7,12 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
@@ -37,13 +39,16 @@ public class CapacityOverflowController {
     private final CapacityOverflowQueueService overflowService;
     private final KdSupplementService supplementService;
     private final CapacityOverflowApprovalService approvalService;
+    private final CapacityOverflowRequestRepository requestRepo;
 
     public CapacityOverflowController(CapacityOverflowQueueService overflowService,
                                       KdSupplementService supplementService,
-                                      CapacityOverflowApprovalService approvalService) {
+                                      CapacityOverflowApprovalService approvalService,
+                                      CapacityOverflowRequestRepository requestRepo) {
         this.overflowService = overflowService;
         this.supplementService = supplementService;
         this.approvalService = approvalService;
+        this.requestRepo = requestRepo;
     }
 
     public record SplitPayload(
@@ -125,5 +130,15 @@ public class CapacityOverflowController {
         CapacityOverflowRequest req = approvalService.reject(requestId, principal.getName(),
             payload.reason());
         return ResponseEntity.ok(req);
+    }
+
+    /** Sprint 8 BR-V12 — 상태별 큐 조회 (기본 PENDING). PLANNER + IT_OPS + READ_ONLY 조회. */
+    @GetMapping("/queue")
+    @PreAuthorize("hasAnyRole('PLANNER', 'IT_OPS', 'READ_ONLY')")
+    public ResponseEntity<List<CapacityOverflowRequest>> list(
+        @RequestParam(defaultValue = "PENDING") CapacityOverflowRequest.Status status
+    ) {
+        return ResponseEntity.ok(
+            requestRepo.findByStatusOrderByPriorityRankAscRequestedAtAsc(status));
     }
 }

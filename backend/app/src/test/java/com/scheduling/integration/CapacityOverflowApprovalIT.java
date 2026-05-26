@@ -35,6 +35,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -219,6 +220,34 @@ class CapacityOverflowApprovalIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"reason\":\"test\"}"))
             .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "PLANNER")
+    @DisplayName("REST GET /queue?status=PENDING — PLANNER 200 + rank ASC 정렬")
+    void rest_list_pending_returns_sorted() throws Exception {
+        priorityRepo.save(new ProductPriority("29673-2R060", (short) 1, "VIP",
+            LocalDate.of(2026, 1, 1), null, T0, "seed"));
+        approvalService.enqueue(Map.of(
+            "29673-2R060", 40,    // rank 1
+            "X-UNKNOWN",   30     // rank 99
+        ), "seed-actor");
+
+        mockMvc.perform(get(BASE + "/queue?status=PENDING"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].hoseId").value("29673-2R060"))
+            .andExpect(jsonPath("$[0].priorityRank").value(1))
+            .andExpect(jsonPath("$[1].hoseId").value("X-UNKNOWN"));
+    }
+
+    @Test
+    @WithMockUser(roles = "READ_ONLY")
+    @DisplayName("REST GET /queue — READ_ONLY 200 (조회는 PLANNER + IT_OPS + READ_ONLY)")
+    void rest_list_read_only_allowed() throws Exception {
+        mockMvc.perform(get(BASE + "/queue?status=PENDING"))
+            .andExpect(status().isOk());
     }
 
     @Test
