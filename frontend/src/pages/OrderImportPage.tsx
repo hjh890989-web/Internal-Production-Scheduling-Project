@@ -11,6 +11,7 @@ import {
   message,
   type UploadFile,
 } from 'antd'
+import { useNavigate } from 'react-router-dom'
 import { InboxOutlined } from '@ant-design/icons'
 import { MappingReviewModal } from '@/features/order-import/components/MappingReviewModal'
 import { useImportStatus } from '@/features/order-import/hooks/useImportStatus'
@@ -35,6 +36,7 @@ export default function OrderImportPage() {
   const [uploading, setUploading] = useState(false)
   const { data: status } = useImportStatus(trackingId, !!trackingId)
   const token = useAuthStore((s) => s.token)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (status?.status === 'MAPPED' || status?.status === 'REVIEW_REQUIRED') {
@@ -134,7 +136,12 @@ export default function OrderImportPage() {
         trackingId={trackingId}
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onProceed={() => message.info('Sprint 1+ Diff 화면 (ST-03-1) — 후속 구현')}
+        onProceed={() => {
+          if (trackingId) {
+            setModalOpen(false)
+            navigate(`/orders/diff/${trackingId}`)
+          }
+        }}
       />
     </Space>
   )

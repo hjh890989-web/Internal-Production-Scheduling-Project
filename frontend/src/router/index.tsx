@@ -20,6 +20,8 @@ const UserAdminPage = lazy(() => import('@/pages/master/UserAdminPage'))
 const ProductPriorityPage = lazy(() => import('@/pages/master/ProductPriorityPage'))
 const KdOrderPage = lazy(() => import('@/pages/master/KdOrderPage'))
 const ProductSpecPage = lazy(() => import('@/pages/master/ProductSpecPage'))
+// Sprint 13 EP-OC-FULL — Diff 검토 페이지 (PLANNER + IT_OPS + READ_ONLY)
+const DiffPage = lazy(() => import('@/pages/DiffPage'))
 
 const fallback = (
   <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
@@ -69,6 +71,16 @@ export const router = createBrowserRouter([
           <Suspense fallback={fallback}>
             <OrderImportPage />
           </Suspense>
+        ),
+      },
+      {
+        path: 'orders/diff/:trackingId',
+        element: (
+          <RoleGuard roles={['PLANNER', 'IT_OPS', 'READ_ONLY']}>
+            <Suspense fallback={fallback}>
+              <DiffPage />
+            </Suspense>
+          </RoleGuard>
         ),
       },
       {
