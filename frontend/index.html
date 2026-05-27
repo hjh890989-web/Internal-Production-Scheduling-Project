@@ -5,6 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
     <title>사내 공정 스케줄링 시스템</title>
+    <!-- Sprint 18 fix — sockjs-client pre-bundled chunk 가 module import 시점에 `global` 참조.
+         ES module hoisting 으로 main.tsx 의 runtime polyfill 보다 먼저 평가됨 → inline script 로
+         module loader 보다 먼저 실행해 polyfill 보장. -->
+    <script>
+      window.global = window;
+    </script>
   </head>
   <body>
     <div id="root"></div>
