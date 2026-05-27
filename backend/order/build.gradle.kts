@@ -6,6 +6,7 @@ plugins {
 dependencies {
     implementation(project(":common"))
     implementation(project(":master"))                       // TK-12-1-1 master.api facades for export
+    implementation(project(":audit"))                        // Sprint 13 EP-OC-FULL — @Auditable AOP
 
     implementation(libs.spring.boot.starter.web)            // TK-01-1-3 @RestController
     implementation(libs.spring.boot.starter.data.jpa)
