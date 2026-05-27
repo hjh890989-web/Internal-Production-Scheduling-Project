@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":order"))    // TK-03-3-1 OrderDiffPersistedEvent 구독
     implementation(project(":ex"))       // TK-EX14-1-2 ExReplanCompletedEvent 구독
+    implementation(project(":vc"))       // Sprint 14 ST-VC-4 — VcChangedEvent/VcConfirmedEvent STOMP push
 
     implementation(libs.spring.boot.starter.web)          // TK-03-3-2 AckController
     implementation(libs.spring.boot.starter.data.jpa)     // TK-03-3-2 NotificationRepository

@@ -83,3 +83,6 @@ export const stompClient = new SchedulingStompClient()
 
 /** EP-EX14 — 압출 매트릭스 PUSH 토픽. */
 export const TOPIC_EXTRUSION_UPDATES = '/topic/extrusion-updates'
+
+/** Sprint 14 EP-VC-FULL ST-VC-4 — VC schedule 변경/확정 PUSH 토픽. */
+export const TOPIC_VC_SCHEDULE_UPDATES = '/topic/vc-schedule-updates'
