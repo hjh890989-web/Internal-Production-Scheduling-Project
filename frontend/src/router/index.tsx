@@ -14,6 +14,9 @@ const VcSimulationPage = lazy(() => import('@/pages/VcSimulationPage'))
 const ExMatrixPage = lazy(() => import('@/pages/ExMatrixPage'))
 const MasterRestorePage = lazy(() => import('@/pages/MasterRestorePage'))
 const CapacityQueuePage = lazy(() => import('@/pages/CapacityQueuePage'))
+// Sprint 12 EP-MASTER-UI — IT_OPS 권한 마스터 페이지
+const MasterHubPage = lazy(() => import('@/pages/master/MasterHubPage'))
+const UserAdminPage = lazy(() => import('@/pages/master/UserAdminPage'))
 
 const fallback = (
   <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
@@ -107,6 +110,27 @@ export const router = createBrowserRouter([
           <Suspense fallback={fallback}>
             <ForbiddenPage />
           </Suspense>
+        ),
+      },
+      // Sprint 12 EP-MASTER-UI — IT_OPS 전용
+      {
+        path: 'master',
+        element: (
+          <RoleGuard roles={['IT_OPS']}>
+            <Suspense fallback={fallback}>
+              <MasterHubPage />
+            </Suspense>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'master/user',
+        element: (
+          <RoleGuard roles={['IT_OPS']}>
+            <Suspense fallback={fallback}>
+              <UserAdminPage />
+            </Suspense>
+          </RoleGuard>
         ),
       },
       {

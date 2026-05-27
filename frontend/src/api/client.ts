@@ -38,7 +38,13 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     }
     throw new HttpError(res.status, body)
   }
-  return (await res.json()) as T
+  // 204 No Content 또는 빈 body — DELETE/POST(빈 응답) endpoint 호환
+  if (res.status === 204 || res.headers.get('Content-Length') === '0') {
+    return undefined as T
+  }
+  const text = await res.text()
+  if (text.length === 0) return undefined as T
+  return JSON.parse(text) as T
 }
 
 /**

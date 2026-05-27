@@ -34,7 +34,7 @@ export default function MainLayout() {
     { key: '/vc/capacity-queue', label: t('menu.capacityQueue'),
       allowedRoles: ['PLANNER', 'IT_OPS', 'READ_ONLY'] },
     { key: '/extrusion-matrix', label: t('menu.ex') },
-    { key: '/master', label: t('menu.master'), allowedRoles: ['IT_OPS'], disabled: true },
+    { key: '/master', label: t('menu.master'), allowedRoles: ['IT_OPS'] },
     { key: '/audit/restore', label: t('menu.audit'),
       allowedRoles: ['PLANNER', 'IT_OPS', 'READ_ONLY'] },
   ]
