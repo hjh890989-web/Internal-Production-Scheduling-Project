@@ -46,7 +46,7 @@ public class MasterCompatController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('PLANNER','STK_USER','IT_OPS','READ_ONLY')")
     public ResponseEntity<CompatibilityResponse> get(
         @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch
     ) {
@@ -64,7 +64,7 @@ public class MasterCompatController {
     }
 
     @GetMapping("/{hoseId}/{slotPosition}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('PLANNER','STK_USER','IT_OPS','READ_ONLY')")
     public CompatibilityResponse.PointCheck check(
         @PathVariable String hoseId,
         @PathVariable String slotPosition

@@ -46,7 +46,7 @@ public class AckController {
     }
 
     @PostMapping("/{id}/ack")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('PLANNER','STK_USER','IT_OPS','READ_ONLY')")
     @Transactional
     public AckResponse acknowledge(@PathVariable UUID id) {
         NotificationEntity entity = repository.findById(id)

@@ -66,13 +66,13 @@ public class HoseRuleController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('PLANNER','STK_USER','IT_OPS','READ_ONLY')")
     public List<RuleResponse> list() {
         return repository.findAll().stream().map(RuleResponse::from).toList();
     }
 
     @GetMapping("/{hoseId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('PLANNER','STK_USER','IT_OPS','READ_ONLY')")
     public ResponseEntity<RuleResponse> get(@PathVariable String hoseId) {
         return repository.findById(hoseId).map(RuleResponse::from)
             .map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());

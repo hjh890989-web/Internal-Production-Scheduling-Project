@@ -31,7 +31,7 @@ public class ScheduleValidateController {
     }
 
     @PostMapping("/validate-all")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('PLANNER','STK_USER','IT_OPS','READ_ONLY')")
     public ResponseEntity<ValidationResult> validateAll(
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to

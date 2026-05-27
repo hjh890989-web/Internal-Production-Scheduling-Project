@@ -60,7 +60,7 @@ public class ConflictController {
      * Q_required 입력 통합.
      */
     @GetMapping("/conflicts")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('PLANNER','STK_USER','IT_OPS','READ_ONLY')")
     public ResponseEntity<ConflictReport> getConflicts(
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to

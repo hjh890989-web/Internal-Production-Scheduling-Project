@@ -65,6 +65,8 @@ class CapacityOverflowControllerIT {
         registry.add("spring.data.redis.host", () -> "localhost");
         registry.add("spring.data.redis.port", () -> "65535");
         registry.add("scheduling.notification.kakao.enabled", () -> "false");
+        // Sprint 11 ST-RBAC-2 — strict mode 강제 (anonymous → 401 검증)
+        registry.add("app.auth.dev-fallback", () -> "false");
     }
 
     @Autowired private WebApplicationContext context;

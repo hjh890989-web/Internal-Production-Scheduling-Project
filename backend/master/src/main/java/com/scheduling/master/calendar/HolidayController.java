@@ -64,7 +64,7 @@ public class HolidayController {
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('PLANNER','STK_USER','IT_OPS','READ_ONLY')")
     public List<HolidayResponse> list(@RequestParam(required = false) Integer year) {
         List<Holiday> rows = (year == null) ? repository.findAll() : repository.findByYear(year);
         return rows.stream().map(HolidayResponse::from).toList();
