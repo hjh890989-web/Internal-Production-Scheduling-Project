@@ -181,9 +181,26 @@ resilience4j:
         retry-exceptions:
           - java.io.IOException
           - org.springframework.web.client.RestClientException
+      # Sprint 18 EP-NOTIFY — Slack webhook retry (TK-NOTIFY-3-1)
+      slack:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.io.IOException
+          - org.springframework.web.client.RestClientException
+          - org.springframework.web.client.HttpServerErrorException
   circuitbreaker:
     instances:
       kakaotalk:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+      # Sprint 18 EP-NOTIFY — Slack webhook circuit breaker (TK-NOTIFY-3-1)
+      slack:
         sliding-window-size: 10
         minimum-number-of-calls: 5
         failure-rate-threshold: 50

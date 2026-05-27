@@ -32,10 +32,14 @@ public class DeliveryEscalator {
     private static final Duration CRITICAL_SLA = Duration.ofMinutes(1);  // REQ-FUNC-OC-009
 
     private final NotificationRepository repository;
+    private final SlackNotifier slackNotifier;
     private final Clock clock;
 
-    public DeliveryEscalator(NotificationRepository repository, Clock clock) {
+    public DeliveryEscalator(NotificationRepository repository,
+                              SlackNotifier slackNotifier,
+                              Clock clock) {
         this.repository = repository;
+        this.slackNotifier = slackNotifier;
         this.clock = clock;
     }
 
@@ -52,9 +56,14 @@ public class DeliveryEscalator {
 
         for (NotificationEntity n : overdue) {
             n.incrementRetry();
-            // Sprint 2 — SlackClient.send(SlackChannel.OPS, buildEscalationMessage(n))
             log.warn("[SLA-BREACH] Critical Notification overdue notificationId={} hose={} dispatched={} retryCount={}",
                 n.getNotificationId(), n.getHoseId(), n.getDispatchedAt(), n.getRetryCount());
+            // Sprint 18 ST-NOTIFY-1 — Slack alert push (1분 overdue Critical → #scheduling-critical)
+            String title = String.format("Critical 알림 1분 SLA 초과 — %s", n.getHoseId());
+            String body = String.format(
+                "*notificationId*: %s%n*hose*: %s%n*dispatched*: %s%n*retryCount*: %d (REQ-FUNC-OC-009)",
+                n.getNotificationId(), n.getHoseId(), n.getDispatchedAt(), n.getRetryCount());
+            slackNotifier.alert(ChangeSeverity.CRITICAL, title, body);
         }
         repository.saveAll(overdue);
 

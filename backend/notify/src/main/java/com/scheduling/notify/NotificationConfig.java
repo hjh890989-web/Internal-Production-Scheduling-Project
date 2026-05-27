@@ -31,6 +31,7 @@ public class NotificationConfig {
 
     private Kakao kakao = new Kakao();
     private InApp inApp = new InApp();
+    private Slack slack = new Slack();
 
     public String getAppUrl() { return appUrl; }
     public void setAppUrl(String appUrl) { this.appUrl = appUrl; }
@@ -43,6 +44,9 @@ public class NotificationConfig {
 
     public InApp getInApp() { return inApp; }
     public void setInApp(InApp inApp) { this.inApp = inApp; }
+
+    public Slack getSlack() { return slack; }
+    public void setSlack(Slack slack) { this.slack = slack; }
 
     public static class Kakao {
         private boolean enabled = false;
@@ -66,5 +70,30 @@ public class NotificationConfig {
 
         public String getTopicPrefix() { return topicPrefix; }
         public void setTopicPrefix(String topicPrefix) { this.topicPrefix = topicPrefix; }
+    }
+
+    /**
+     * Sprint 18 BR-OPS Slack alert 설정.
+     *
+     * <p>{@code enabled=false} (default) 시 SlackNotifier 가 LOG only — 실 webhook 미발급 환경 보호.
+     * 실 운영 URL 은 Phase 4+ application-prod.yml.
+     */
+    public static class Slack {
+        private boolean enabled = false;
+        private String webhookUrl = "";
+        private String alertsChannel = "#scheduling-alerts";
+        private String criticalChannel = "#scheduling-critical";
+        private int timeoutSeconds = 5;
+
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+        public String getWebhookUrl() { return webhookUrl; }
+        public void setWebhookUrl(String webhookUrl) { this.webhookUrl = webhookUrl; }
+        public String getAlertsChannel() { return alertsChannel; }
+        public void setAlertsChannel(String alertsChannel) { this.alertsChannel = alertsChannel; }
+        public String getCriticalChannel() { return criticalChannel; }
+        public void setCriticalChannel(String criticalChannel) { this.criticalChannel = criticalChannel; }
+        public int getTimeoutSeconds() { return timeoutSeconds; }
+        public void setTimeoutSeconds(int timeoutSeconds) { this.timeoutSeconds = timeoutSeconds; }
     }
 }
