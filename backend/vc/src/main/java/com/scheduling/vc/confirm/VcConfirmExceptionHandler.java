@@ -49,6 +49,17 @@ public class VcConfirmExceptionHandler {
         return ResponseEntity.status(HttpStatus.LOCKED).body(pd);
     }
 
+    @ExceptionHandler(D0LockViolationException.class)
+    public ResponseEntity<ProblemDetail> handleD0Lock(D0LockViolationException e) {
+        log.warn("BR-V07 D-0 lock reject — production_date={} today={}",
+            e.getProductionDate(), e.getToday());
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.LOCKED, e.getMessage());
+        pd.setTitle("BR-V07 D-0 lock");
+        pd.setProperty("brCode", "BR-V07");
+        pd.setProperty("productionDate", e.getProductionDate().toString());
+        return ResponseEntity.status(HttpStatus.LOCKED).body(pd);
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ProblemDetail> handleIllegalState(IllegalStateException e) {
         log.warn("VC confirm state reject — {}", e.getMessage());

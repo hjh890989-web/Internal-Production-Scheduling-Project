@@ -221,6 +221,8 @@ public class GreedyRotationAllocator {
                             linkedOrderIdsCsv(ctx.ordersByHose().get(hose)),
                             now, now
                         );
+                        // Sprint 17 BR-X05 dual-review — INSERT actor 명시 (TK-DAY-LOCK-2-1)
+                        vc.assignCreatedBy(ctx.requestedBy());
                         schedules.add(vc);
                         mutableCells.put(slot, SlotAvailability.RESERVED);
                         cumulativeYield += yieldPerRot;
