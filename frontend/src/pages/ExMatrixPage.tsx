@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Alert, Badge, Button, Card, DatePicker, Space, Tabs, Typography, message } from 'antd'
 import { DownloadOutlined, WifiOutlined } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 import dayjs, { type Dayjs } from 'dayjs'
 import { ExMatrixGrid } from '@/features/ex-scheduling/components/ExMatrixGrid'
 import { CandidateRankingTable } from '@/features/ex-scheduling/components/CandidateRankingTable'
@@ -21,6 +22,7 @@ export default function ExMatrixPage() {
     dayjs().subtract(2, 'day'),
     dayjs().add(7, 'day'),
   ])
+  const navigate = useNavigate()
   const [from, to] = range
   const fromStr = from.format('YYYY-MM-DD')
   const toStr = to.format('YYYY-MM-DD')
@@ -44,32 +46,50 @@ export default function ExMatrixPage() {
 
   return (
     <Space direction="vertical" size="middle" style={{ width: '100%', padding: 16 }}>
-      <Title level={3}>압출 매트릭스 (EP-17)</Title>
-
-      <Space>
-        <RangePicker
-          value={range}
-          onChange={(v) => v && v[0] && v[1] && setRange([v[0], v[1]])}
-          allowClear={false}
-        />
-        <Button type="primary" icon={<DownloadOutlined />} onClick={onDownload}>
-          Excel 다운로드 (EP-12)
+      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+        <Title level={3} style={{ margin: 0 }}>압출 매트릭스 (EP-17)</Title>
+        <Button onClick={() => navigate('/vc/simview')}>
+          ← 성형 시뮬뷰
         </Button>
-        <Badge
-          status={connected ? 'success' : 'default'}
-          text={
-            <Text type={connected ? 'success' : 'secondary'}>
-              <WifiOutlined /> STOMP {connected ? 'connected' : 'disconnected'}
-            </Text>
-          }
-        />
-        {lastUpdate && (
-          <Text type="secondary">
-            마지막 cascade: {dayjs(lastUpdate.completedAt).format('HH:mm:ss')}
-            {' '}({lastUpdate.triggeredCount}건 갱신)
-          </Text>
-        )}
       </Space>
+
+      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+        <Space>
+          <RangePicker
+            value={range}
+            onChange={(v) => v && v[0] && v[1] && setRange([v[0], v[1]])}
+            allowClear={false}
+          />
+          <Button type="primary" icon={<DownloadOutlined />} onClick={onDownload}>
+            Excel 다운로드 (EP-12)
+          </Button>
+        </Space>
+        <Space>
+          <Badge
+            status={connected ? 'success' : 'default'}
+            text={
+              <Text type={connected ? 'success' : 'secondary'}>
+                <WifiOutlined /> STOMP {connected ? 'connected' : 'disconnected'}
+              </Text>
+            }
+          />
+          {lastUpdate && (
+            <Text type="secondary">
+              마지막 cascade: {dayjs(lastUpdate.completedAt).format('HH:mm:ss')}
+              {' '}({lastUpdate.triggeredCount}건 갱신)
+            </Text>
+          )}
+        </Space>
+      </Space>
+
+      {data && data.length === 0 && !isLoading && (
+        <Alert
+          type="info"
+          showIcon
+          message="압출 매트릭스 데이터 없음"
+          description="VC 확정 후 자동 입력 (Sprint 6 EP-EX13/14 chain). 현재 V040 시드 99999-SAMPLE-EX-* 가 있어야 표시 (V039 vc_schedule sample chain)."
+        />
+      )}
 
       {error ? (
         <Alert type="error" message="매트릭스 조회 실패" description={String(error)} />
