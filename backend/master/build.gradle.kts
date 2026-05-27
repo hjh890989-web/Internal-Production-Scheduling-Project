@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":audit"))    // Sprint 12 EP-MASTER-UI — @Auditable AOP (PRODUCT_PRIORITY/KD_ORDER admin)
 
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.validation)

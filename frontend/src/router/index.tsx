@@ -17,6 +17,8 @@ const CapacityQueuePage = lazy(() => import('@/pages/CapacityQueuePage'))
 // Sprint 12 EP-MASTER-UI — IT_OPS 권한 마스터 페이지
 const MasterHubPage = lazy(() => import('@/pages/master/MasterHubPage'))
 const UserAdminPage = lazy(() => import('@/pages/master/UserAdminPage'))
+const ProductPriorityPage = lazy(() => import('@/pages/master/ProductPriorityPage'))
+const KdOrderPage = lazy(() => import('@/pages/master/KdOrderPage'))
 
 const fallback = (
   <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
@@ -129,6 +131,26 @@ export const router = createBrowserRouter([
           <RoleGuard roles={['IT_OPS']}>
             <Suspense fallback={fallback}>
               <UserAdminPage />
+            </Suspense>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'master/product-priority',
+        element: (
+          <RoleGuard roles={['IT_OPS']}>
+            <Suspense fallback={fallback}>
+              <ProductPriorityPage />
+            </Suspense>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'master/kd-order',
+        element: (
+          <RoleGuard roles={['IT_OPS']}>
+            <Suspense fallback={fallback}>
+              <KdOrderPage />
             </Suspense>
           </RoleGuard>
         ),

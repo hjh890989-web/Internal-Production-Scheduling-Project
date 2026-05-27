@@ -9,6 +9,6 @@
  */
 @org.springframework.modulith.ApplicationModule(
     displayName = "Master Data",
-    allowedDependencies = { "common", "audit::events" }
+    allowedDependencies = { "common", "audit::events", "audit::aop" }
 )
 package com.scheduling.master;
