@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -63,6 +64,7 @@ public class AuthController {
     public record LoginResponse(String token, String employeeId, String role, Instant expiresAt) {}
 
     @PostMapping("/login")
+    @PreAuthorize("permitAll()")    // ArchUnit PreAuthorizeArchTest 정합 — anonymous 도달 명시
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest req) {
         try {
             Authentication auth = authenticationManager.authenticate(
