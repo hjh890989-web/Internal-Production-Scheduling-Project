@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Alert, Card, DatePicker, Divider, Space, Tag, Typography } from 'antd'
+import { Alert, Button, Card, DatePicker, Divider, Space, Tag, Typography } from 'antd'
+import { useNavigate } from 'react-router-dom'
 import dayjs, { type Dayjs } from 'dayjs'
 import { VcRotationGrid } from '@/features/vc-scheduling/components/VcRotationGrid'
 import { SwapProposalPanel } from '@/features/vc-scheduling/components/SwapProposalPanel'
 import { fetchVcSlots, type VcSlotRow } from '@/features/vc-scheduling/api/vcScheduleApi'
 import { stompClient, TOPIC_VC_SCHEDULE_UPDATES } from '@/api/stompClient'
+import { useAuthStore } from '@/stores/authStore'
 
 const { Title, Text } = Typography
 const { RangePicker } = DatePicker
@@ -25,6 +27,8 @@ export default function VcSimulationPage() {
   ])
   const [stompConnected, setStompConnected] = useState(false)
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const isPlanner = useAuthStore((s) => s.hasRole('PLANNER'))
 
   const [from, to] = range
   const fromStr = from.format('YYYY-MM-DD')
@@ -70,18 +74,32 @@ export default function VcSimulationPage() {
           {stompConnected ? '● STOMP 실시간 연결' : '○ STOMP 미연결 (수동 갱신)'}
         </Tag>
       </Space>
-      <Space>
+      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
         <RangePicker
           value={range}
           onChange={(v) => v && v[0] && v[1] && setRange([v[0], v[1]])}
           allowClear={false}
         />
-        {query.data && query.data.length === 0 && (
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            ⓘ 수주 확정 후 자동 입력 (Phase 5+). 현재는 V039 시드 (99999-SAMPLE-*) 만 표시.
-          </Text>
-        )}
+        {/* Sprint 14 ST-VC-5 — Capa/KD 통합 link (PLANNER + IT_OPS + READ_ONLY) */}
+        <Space>
+          <Button onClick={() => navigate('/vc/capacity-queue')}>
+            Capa 큐 + KD 보충 →
+          </Button>
+          {isPlanner && (
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              ⓘ capa 초과 시 자동 큐 분리 (Phase 5+ allocator chain — 현재는 수동)
+            </Text>
+          )}
+        </Space>
       </Space>
+      {query.data && query.data.length === 0 && (
+        <Alert
+          type="info"
+          showIcon
+          message="시뮬뷰 데이터 없음"
+          description="수주 확정 후 자동 입력 진입 (Phase 5+). 현재 V039 시드 (99999-SAMPLE-*) 가 있어야 1주 horizon 표시."
+        />
+      )}
 
       {query.error ? (
         <Alert type="error" message="시뮬뷰 조회 실패" description={String(query.error)} />
