@@ -6,6 +6,8 @@ import dayjs, { type Dayjs } from 'dayjs'
 import { VcRotationGrid } from '@/features/vc-scheduling/components/VcRotationGrid'
 import { SwapProposalPanel } from '@/features/vc-scheduling/components/SwapProposalPanel'
 import { ConfirmModal, type ConfirmTarget } from '@/features/vc-scheduling/components/ConfirmModal'
+import { DegradedBanner } from '@/features/mes/components/DegradedBanner'
+import { ExcelFallbackModal } from '@/features/mes/components/ExcelFallbackModal'
 import { fetchVcSlots, type VcSlotRow } from '@/features/vc-scheduling/api/vcScheduleApi'
 import { stompClient, TOPIC_VC_SCHEDULE_UPDATES } from '@/api/stompClient'
 import { useAuthStore } from '@/stores/authStore'
@@ -28,6 +30,7 @@ export default function VcSimulationPage() {
   ])
   const [stompConnected, setStompConnected] = useState(false)
   const [confirmTarget, setConfirmTarget] = useState<ConfirmTarget | null>(null)
+  const [fallbackOpen, setFallbackOpen] = useState(false)
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const isPlanner = useAuthStore((s) => s.hasRole('PLANNER'))
@@ -76,6 +79,7 @@ export default function VcSimulationPage() {
           {stompConnected ? '● STOMP 실시간 연결' : '○ STOMP 미연결 (수동 갱신)'}
         </Tag>
       </Space>
+      <DegradedBanner onOpenFallback={() => setFallbackOpen(true)} />
       <Space style={{ width: '100%', justifyContent: 'space-between' }}>
         <RangePicker
           value={range}
@@ -131,6 +135,15 @@ export default function VcSimulationPage() {
         onSuccess={() => {
           setConfirmTarget(null)
           void queryClient.invalidateQueries({ queryKey: ['vc-slots'] })
+        }}
+      />
+
+      <ExcelFallbackModal
+        open={fallbackOpen}
+        onClose={() => setFallbackOpen(false)}
+        onSuccess={() => {
+          setFallbackOpen(false)
+          void queryClient.invalidateQueries({ queryKey: ['mes-degraded-status'] })
         }}
       />
     </Space>
