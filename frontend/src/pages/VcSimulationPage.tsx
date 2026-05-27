@@ -1,11 +1,24 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Alert, Button, Card, DatePicker, Divider, List, Space, Tag, Typography } from 'antd'
+import {
+  Alert,
+  Button,
+  Card,
+  DatePicker,
+  Divider,
+  Space,
+  Table,
+  Tag,
+  Typography,
+  message,
+} from 'antd'
+import type { TableColumnsType, TableProps } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import dayjs, { type Dayjs } from 'dayjs'
 import { VcRotationGrid } from '@/features/vc-scheduling/components/VcRotationGrid'
 import { SwapProposalPanel } from '@/features/vc-scheduling/components/SwapProposalPanel'
 import { ConfirmModal, type ConfirmTarget } from '@/features/vc-scheduling/components/ConfirmModal'
+import { BatchConfirmModal } from '@/features/vc-scheduling/components/BatchConfirmModal'
 import { DegradedBanner } from '@/features/mes/components/DegradedBanner'
 import { ExcelFallbackModal } from '@/features/mes/components/ExcelFallbackModal'
 import { fetchVcSlots, type VcSlotRow } from '@/features/vc-scheduling/api/vcScheduleApi'
@@ -31,9 +44,12 @@ export default function VcSimulationPage() {
   const [stompConnected, setStompConnected] = useState(false)
   const [confirmTarget, setConfirmTarget] = useState<ConfirmTarget | null>(null)
   const [fallbackOpen, setFallbackOpen] = useState(false)
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
+  const [batchOpen, setBatchOpen] = useState(false)
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const isPlanner = useAuthStore((s) => s.hasRole('PLANNER'))
+  const employeeId = useAuthStore((s) => s.user?.employeeId ?? null)
 
   const [from, to] = range
   const fromStr = from.format('YYYY-MM-DD')
@@ -117,10 +133,14 @@ export default function VcSimulationPage() {
 
       {isPlanner && (
         <>
-          <Divider orientation="left">확정 대기 CANDIDATE (Sprint 16 EP-CONFIRM, BR-X01·X05)</Divider>
-          <CandidateConfirmList
+          <Divider orientation="left">확정 대기 CANDIDATE (Sprint 16/17 EP-CONFIRM, BR-X01·X05)</Divider>
+          <CandidateConfirmTable
             rows={query.data ?? []}
-            onConfirm={(t) => setConfirmTarget(t)}
+            currentEmployeeId={employeeId}
+            selectedRowKeys={selectedRowKeys}
+            onSelectChange={setSelectedRowKeys}
+            onSingleConfirm={(t) => setConfirmTarget(t)}
+            onOpenBatch={() => setBatchOpen(true)}
           />
         </>
       )}
@@ -146,17 +166,52 @@ export default function VcSimulationPage() {
           void queryClient.invalidateQueries({ queryKey: ['mes-degraded-status'] })
         }}
       />
+
+      <BatchConfirmModalWrapper
+        rows={query.data ?? []}
+        currentEmployeeId={employeeId}
+        selectedRowKeys={selectedRowKeys}
+        open={batchOpen}
+        onClose={() => setBatchOpen(false)}
+        onSuccess={(count) => {
+          setBatchOpen(false)
+          setSelectedRowKeys([])
+          message.success(`${count} 건 일괄 확정 완료`)
+          void queryClient.invalidateQueries({ queryKey: ['vc-slots'] })
+        }}
+      />
     </Space>
   )
 }
 
-interface CandidateListProps {
+interface CandidateTableProps {
   rows: VcSlotRow[]
-  onConfirm: (target: ConfirmTarget) => void
+  currentEmployeeId: string | null
+  selectedRowKeys: React.Key[]
+  onSelectChange: (keys: React.Key[]) => void
+  onSingleConfirm: (target: ConfirmTarget) => void
+  onOpenBatch: () => void
 }
 
-function CandidateConfirmList({ rows, onConfirm }: CandidateListProps) {
+function CandidateConfirmTable({
+  rows,
+  currentEmployeeId,
+  selectedRowKeys,
+  onSelectChange,
+  onSingleConfirm,
+  onOpenBatch,
+}: CandidateTableProps) {
   const candidates = useMemo(() => rows.filter((r) => r.status === 'CANDIDATE'), [rows])
+
+  const selfAuthoredKeys = useMemo(
+    () =>
+      new Set(
+        candidates
+          .filter((r) => r.createdBy && currentEmployeeId && r.createdBy === currentEmployeeId)
+          .map((r) => r.vcScheduleId),
+      ),
+    [candidates, currentEmployeeId],
+  )
 
   if (candidates.length === 0) {
     return (
@@ -169,45 +224,163 @@ function CandidateConfirmList({ rows, onConfirm }: CandidateListProps) {
     )
   }
 
-  return (
-    <List
-      size="small"
-      bordered
-      dataSource={candidates}
-      renderItem={(r) => (
-        <List.Item
-          actions={[
-            <Button
-              key="confirm"
-              type="primary"
-              size="small"
-              data-testid={`confirm-trigger-${r.vcScheduleId}`}
-              onClick={() =>
-                onConfirm({
-                  vcScheduleId: r.vcScheduleId,
-                  hoseId: r.hoseId,
-                  machineId: r.machineId,
-                  productionDate: r.productionDate,
-                  rotationNo: r.rotationNo,
-                  slotPosition: r.slotPosition,
-                  plannedQty: r.plannedQty,
-                })
-              }
-            >
-              확정
-            </Button>,
-          ]}
+  const columns: TableColumnsType<VcSlotRow> = [
+    {
+      title: '상태',
+      key: 'status',
+      width: 110,
+      render: (_, r) =>
+        selfAuthoredKeys.has(r.vcScheduleId) ? (
+          <Tag color="red">본인 작성</Tag>
+        ) : (
+          <Tag color="orange">CANDIDATE</Tag>
+        ),
+    },
+    { title: 'Hose ID', dataIndex: 'hoseId', width: 160 },
+    {
+      title: '머신·슬롯',
+      key: 'machineSlot',
+      width: 130,
+      render: (_, r) => `${r.machineId}·${r.slotPosition}`,
+    },
+    { title: '생산일', dataIndex: 'productionDate', width: 130 },
+    {
+      title: '회전',
+      key: 'rot',
+      width: 80,
+      render: (_, r) => `rot${r.rotationNo}`,
+    },
+    { title: '수량', dataIndex: 'plannedQty', width: 90, align: 'right' as const },
+    {
+      title: '작성자',
+      dataIndex: 'createdBy',
+      width: 110,
+      render: (v) => v ?? <Text type="secondary">legacy</Text>,
+    },
+    {
+      title: '단건 확정',
+      key: 'single',
+      width: 110,
+      render: (_, r) => (
+        <Button
+          type="primary"
+          size="small"
+          disabled={selfAuthoredKeys.has(r.vcScheduleId)}
+          data-testid={`confirm-trigger-${r.vcScheduleId}`}
+          onClick={() =>
+            onSingleConfirm({
+              vcScheduleId: r.vcScheduleId,
+              hoseId: r.hoseId,
+              machineId: r.machineId,
+              productionDate: r.productionDate,
+              rotationNo: r.rotationNo,
+              slotPosition: r.slotPosition,
+              plannedQty: r.plannedQty,
+            })
+          }
         >
-          <Space size="middle">
-            <Tag color="orange">CANDIDATE</Tag>
-            <Text strong>{r.hoseId}</Text>
-            <Text type="secondary">
-              {r.machineId}·{r.slotPosition} · {r.productionDate} · rot{r.rotationNo} · qty{' '}
-              {r.plannedQty}
-            </Text>
-          </Space>
-        </List.Item>
-      )}
+          확정
+        </Button>
+      ),
+    },
+  ]
+
+  const rowSelection: TableProps<VcSlotRow>['rowSelection'] = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    getCheckboxProps: (r) => ({
+      disabled: selfAuthoredKeys.has(r.vcScheduleId),
+      name: r.vcScheduleId,
+    }),
+  }
+
+  const selectedNonSelfCount = selectedRowKeys.filter(
+    (k) => !selfAuthoredKeys.has(String(k)),
+  ).length
+
+  return (
+    <Space direction="vertical" style={{ width: '100%' }} size="small">
+      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+        <Text type="secondary">
+          CANDIDATE {candidates.length}건 · 본인 작성{' '}
+          <Tag color="red" style={{ marginInline: 4 }}>
+            {selfAuthoredKeys.size}
+          </Tag>{' '}
+          (확정 불가, BR-X05)
+        </Text>
+        <Space>
+          <Button
+            onClick={() =>
+              onSelectChange(
+                candidates
+                  .filter((r) => !selfAuthoredKeys.has(r.vcScheduleId))
+                  .map((r) => r.vcScheduleId),
+              )
+            }
+            data-testid="batch-select-all"
+          >
+            전체 선택 (본인 제외)
+          </Button>
+          <Button onClick={() => onSelectChange([])} disabled={selectedRowKeys.length === 0}>
+            선택 해제
+          </Button>
+          <Button
+            type="primary"
+            disabled={selectedNonSelfCount === 0}
+            onClick={onOpenBatch}
+            data-testid="batch-confirm-trigger"
+          >
+            선택 일괄 확정 ({selectedNonSelfCount}건)
+          </Button>
+        </Space>
+      </Space>
+      <Table<VcSlotRow>
+        size="small"
+        bordered
+        rowKey="vcScheduleId"
+        columns={columns}
+        dataSource={candidates}
+        rowSelection={rowSelection}
+        pagination={{ pageSize: 20, showSizeChanger: true }}
+        scroll={{ x: 'max-content' }}
+      />
+    </Space>
+  )
+}
+
+interface BatchModalWrapperProps {
+  rows: VcSlotRow[]
+  currentEmployeeId: string | null
+  selectedRowKeys: React.Key[]
+  open: boolean
+  onClose: () => void
+  onSuccess: (count: number) => void
+}
+
+function BatchConfirmModalWrapper({
+  rows,
+  currentEmployeeId,
+  selectedRowKeys,
+  open,
+  onClose,
+  onSuccess,
+}: BatchModalWrapperProps) {
+  const candidates = useMemo(() => rows.filter((r) => r.status === 'CANDIDATE'), [rows])
+
+  const { selected, excludedSelfAuthoredCount } = useMemo(() => {
+    const keySet = new Set(selectedRowKeys.map(String))
+    const all = candidates.filter((r) => keySet.has(r.vcScheduleId))
+    const sel = all.filter((r) => !r.createdBy || r.createdBy !== currentEmployeeId)
+    return { selected: sel, excludedSelfAuthoredCount: all.length - sel.length }
+  }, [candidates, selectedRowKeys, currentEmployeeId])
+
+  return (
+    <BatchConfirmModal
+      selected={selected}
+      excludedSelfAuthoredCount={excludedSelfAuthoredCount}
+      open={open}
+      onClose={onClose}
+      onSuccess={onSuccess}
     />
   )
 }

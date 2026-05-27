@@ -50,6 +50,7 @@ function row(
     angleId: 'ANG-A',
     plannedQty: 100,
     status: 'CANDIDATE',
+    createdBy: null,
   }
 }
 

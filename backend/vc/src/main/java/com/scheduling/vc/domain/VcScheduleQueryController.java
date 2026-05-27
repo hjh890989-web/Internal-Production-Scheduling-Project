@@ -40,13 +40,15 @@ public class VcScheduleQueryController {
         short rotationNo,
         String angleId,
         int plannedQty,
-        String status
+        String status,
+        String createdBy        // Sprint 17 BR-X05 dual-review — frontend 가 본인 작성 row 식별
     ) {
         static SlotRow from(VcSchedule s) {
             return new SlotRow(
                 s.getVcScheduleId(), s.getHoseId(), s.getMachineId(),
                 s.getSlotPosition(), s.getProductionDate(), s.getRotationNo(),
-                s.getAngleId(), s.getPlannedQty(), s.getStatus().name());
+                s.getAngleId(), s.getPlannedQty(), s.getStatus().name(),
+                s.getCreatedBy());
         }
     }
 
