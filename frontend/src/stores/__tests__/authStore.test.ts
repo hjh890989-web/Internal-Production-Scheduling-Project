@@ -53,4 +53,20 @@ describe('useAuthStore', () => {
     expect(state.token).toBeNull()
     expect(state.isAuthenticated()).toBe(false)
   })
+
+  // Sprint 11 ST-RBAC-3 — hasRole / hasAnyRole 추가 검증
+  it('hasRole — 미인증 false / 일치 true / 불일치 false', () => {
+    expect(useAuthStore.getState().hasRole('PLANNER')).toBe(false)
+    useAuthStore.getState().setSession('jwt', futureUser)   // PLANNER
+    expect(useAuthStore.getState().hasRole('PLANNER')).toBe(true)
+    expect(useAuthStore.getState().hasRole('IT_OPS')).toBe(false)
+  })
+
+  it('hasAnyRole — 빈 배열 true / 포함 true / 미포함 false / 미인증 false (빈 배열 제외)', () => {
+    expect(useAuthStore.getState().hasAnyRole([])).toBe(true)
+    expect(useAuthStore.getState().hasAnyRole(['PLANNER'])).toBe(false)
+    useAuthStore.getState().setSession('jwt', futureUser)   // PLANNER
+    expect(useAuthStore.getState().hasAnyRole(['PLANNER', 'IT_OPS'])).toBe(true)
+    expect(useAuthStore.getState().hasAnyRole(['IT_OPS', 'READ_ONLY'])).toBe(false)
+  })
 })

@@ -3,9 +3,11 @@ import { lazy, Suspense } from 'react'
 import { Spin } from 'antd'
 import MainLayout from '@/pages/layouts/MainLayout'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
+import { RoleGuard } from '@/routes/RoleGuard'
 
 const HomePage = lazy(() => import('@/pages/HomePage'))
 const LoginPage = lazy(() => import('@/pages/LoginPage'))
+const ForbiddenPage = lazy(() => import('@/pages/ForbiddenPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 const OrderImportPage = lazy(() => import('@/pages/OrderImportPage'))
 const VcSimulationPage = lazy(() => import('@/pages/VcSimulationPage'))
@@ -74,9 +76,11 @@ export const router = createBrowserRouter([
       {
         path: 'vc/capacity-queue',
         element: (
-          <Suspense fallback={fallback}>
-            <CapacityQueuePage />
-          </Suspense>
+          <RoleGuard roles={['PLANNER', 'IT_OPS', 'READ_ONLY']}>
+            <Suspense fallback={fallback}>
+              <CapacityQueuePage />
+            </Suspense>
+          </RoleGuard>
         ),
       },
       {
@@ -90,8 +94,18 @@ export const router = createBrowserRouter([
       {
         path: 'audit/restore',
         element: (
+          <RoleGuard roles={['PLANNER', 'IT_OPS', 'READ_ONLY']}>
+            <Suspense fallback={fallback}>
+              <MasterRestorePage />
+            </Suspense>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'forbidden',
+        element: (
           <Suspense fallback={fallback}>
-            <MasterRestorePage />
+            <ForbiddenPage />
           </Suspense>
         ),
       },

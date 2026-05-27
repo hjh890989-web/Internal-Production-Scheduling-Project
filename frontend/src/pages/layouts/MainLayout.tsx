@@ -1,7 +1,7 @@
 import { Layout, Button, Typography } from 'antd'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore, type Role } from '@/stores/authStore'
 
 const { Header, Content, Footer } = Layout
 const { Text } = Typography
@@ -24,15 +24,23 @@ export default function MainLayout() {
     navigate('/login', { replace: true })
   }
 
-  const menuItems = [
+  // Sprint 11 ST-RBAC-3 — 메뉴 항목별 허용 role (rbac-matrix.md v1.1 §2 정합).
+  // 빈 배열 — 모든 인증 사용자 접근. disabled — Sprint 12 EP-MASTER-UI 진입 후 활성.
+  type MenuItem = { key: string; label: string; allowedRoles?: Role[]; disabled?: boolean }
+  const allMenuItems: MenuItem[] = [
     { key: '/home', label: t('menu.home') },
     { key: '/orders/import', label: t('menu.orders') },
     { key: '/vc/simview', label: t('menu.vc') },
-    { key: '/vc/capacity-queue', label: t('menu.capacityQueue') },
+    { key: '/vc/capacity-queue', label: t('menu.capacityQueue'),
+      allowedRoles: ['PLANNER', 'IT_OPS', 'READ_ONLY'] },
     { key: '/extrusion-matrix', label: t('menu.ex') },
-    { key: '/master', label: t('menu.master'), disabled: true },
-    { key: '/audit/restore', label: t('menu.audit') },
+    { key: '/master', label: t('menu.master'), allowedRoles: ['IT_OPS'], disabled: true },
+    { key: '/audit/restore', label: t('menu.audit'),
+      allowedRoles: ['PLANNER', 'IT_OPS', 'READ_ONLY'] },
   ]
+  const menuItems = allMenuItems.filter((item) =>
+    !item.allowedRoles || (user != null && item.allowedRoles.includes(user.role)),
+  )
 
   const buttonBaseStyle: React.CSSProperties = {
     background: 'linear-gradient(180deg, #374151 0%, #1f2937 100%)',

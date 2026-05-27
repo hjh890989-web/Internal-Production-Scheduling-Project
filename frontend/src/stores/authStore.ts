@@ -21,6 +21,10 @@ interface AuthState {
   setSession: (token: string, user: AuthUser) => void
   logout: () => void
   isAuthenticated: () => boolean
+  /** Sprint 11 ST-RBAC-3 — 현재 사용자가 주어진 role 보유 여부. 미인증 시 false. */
+  hasRole: (role: Role) => boolean
+  /** Sprint 11 ST-RBAC-3 — 주어진 role 중 하나라도 보유 시 true. 빈 배열 → true (제한 없음). */
+  hasAnyRole: (roles: Role[]) => boolean
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -35,6 +39,15 @@ export const useAuthStore = create<AuthState>()(
         if (!state.token || !state.user) return false
         // exp 시점 지나면 인증 무효 — interceptor 401 처리 전 1차 가드
         return new Date(state.user.expiresAt).getTime() > Date.now()
+      },
+      hasRole: (role) => {
+        const state = get()
+        return state.user?.role === role
+      },
+      hasAnyRole: (roles) => {
+        if (roles.length === 0) return true
+        const state = get()
+        return state.user != null && roles.includes(state.user.role)
       },
     }),
     {
