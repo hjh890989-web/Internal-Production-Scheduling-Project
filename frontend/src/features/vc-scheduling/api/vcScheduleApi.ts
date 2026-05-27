@@ -19,3 +19,17 @@ export interface VcSlotRow {
 export async function fetchVcSlots(from: string, to: string): Promise<VcSlotRow[]> {
   return apiFetch<VcSlotRow[]>(`/api/v1/schedule/vc/slots?from=${from}&to=${to}`)
 }
+
+/** Sprint 16 EP-CONFIRM — VC schedule 단건 확정 응답. */
+export interface VcConfirmResponse {
+  vcScheduleId: string
+  status: 'CANDIDATE' | 'CONFIRMED' | 'DONE'
+  confirmedBy: string
+}
+
+/** Sprint 16 EP-CONFIRM — POST /confirm 호출 (PLANNER role). */
+export async function confirmVcSchedule(vcScheduleId: string): Promise<VcConfirmResponse> {
+  return apiFetch<VcConfirmResponse>(`/api/v1/schedule/vc/${vcScheduleId}/confirm`, {
+    method: 'POST',
+  })
+}

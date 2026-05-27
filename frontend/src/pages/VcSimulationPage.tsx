@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Alert, Button, Card, DatePicker, Divider, Space, Tag, Typography } from 'antd'
+import { Alert, Button, Card, DatePicker, Divider, List, Space, Tag, Typography } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import dayjs, { type Dayjs } from 'dayjs'
 import { VcRotationGrid } from '@/features/vc-scheduling/components/VcRotationGrid'
 import { SwapProposalPanel } from '@/features/vc-scheduling/components/SwapProposalPanel'
+import { ConfirmModal, type ConfirmTarget } from '@/features/vc-scheduling/components/ConfirmModal'
 import { fetchVcSlots, type VcSlotRow } from '@/features/vc-scheduling/api/vcScheduleApi'
 import { stompClient, TOPIC_VC_SCHEDULE_UPDATES } from '@/api/stompClient'
 import { useAuthStore } from '@/stores/authStore'
@@ -26,6 +27,7 @@ export default function VcSimulationPage() {
     dayjs().add(7, 'day'),
   ])
   const [stompConnected, setStompConnected] = useState(false)
+  const [confirmTarget, setConfirmTarget] = useState<ConfirmTarget | null>(null)
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const isPlanner = useAuthStore((s) => s.hasRole('PLANNER'))
@@ -109,8 +111,90 @@ export default function VcSimulationPage() {
         <VcRotationGrid rows={query.data ?? []} loading={query.isLoading} />
       </Card>
 
+      {isPlanner && (
+        <>
+          <Divider orientation="left">확정 대기 CANDIDATE (Sprint 16 EP-CONFIRM, BR-X01·X05)</Divider>
+          <CandidateConfirmList
+            rows={query.data ?? []}
+            onConfirm={(t) => setConfirmTarget(t)}
+          />
+        </>
+      )}
+
       <Divider orientation="left">현장 swap 제안 (Planner 1클릭 수용)</Divider>
       <SwapProposalPanel />
+
+      <ConfirmModal
+        target={confirmTarget}
+        open={!!confirmTarget}
+        onClose={() => setConfirmTarget(null)}
+        onSuccess={() => {
+          setConfirmTarget(null)
+          void queryClient.invalidateQueries({ queryKey: ['vc-slots'] })
+        }}
+      />
     </Space>
+  )
+}
+
+interface CandidateListProps {
+  rows: VcSlotRow[]
+  onConfirm: (target: ConfirmTarget) => void
+}
+
+function CandidateConfirmList({ rows, onConfirm }: CandidateListProps) {
+  const candidates = useMemo(() => rows.filter((r) => r.status === 'CANDIDATE'), [rows])
+
+  if (candidates.length === 0) {
+    return (
+      <Alert
+        type="success"
+        showIcon
+        message="확정 대기 row 없음"
+        description="모든 CANDIDATE row 가 확정 완료 또는 시뮬뷰에 데이터가 없습니다."
+      />
+    )
+  }
+
+  return (
+    <List
+      size="small"
+      bordered
+      dataSource={candidates}
+      renderItem={(r) => (
+        <List.Item
+          actions={[
+            <Button
+              key="confirm"
+              type="primary"
+              size="small"
+              data-testid={`confirm-trigger-${r.vcScheduleId}`}
+              onClick={() =>
+                onConfirm({
+                  vcScheduleId: r.vcScheduleId,
+                  hoseId: r.hoseId,
+                  machineId: r.machineId,
+                  productionDate: r.productionDate,
+                  rotationNo: r.rotationNo,
+                  slotPosition: r.slotPosition,
+                  plannedQty: r.plannedQty,
+                })
+              }
+            >
+              확정
+            </Button>,
+          ]}
+        >
+          <Space size="middle">
+            <Tag color="orange">CANDIDATE</Tag>
+            <Text strong>{r.hoseId}</Text>
+            <Text type="secondary">
+              {r.machineId}·{r.slotPosition} · {r.productionDate} · rot{r.rotationNo} · qty{' '}
+              {r.plannedQty}
+            </Text>
+          </Space>
+        </List.Item>
+      )}
+    />
   )
 }
