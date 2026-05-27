@@ -1,14 +1,19 @@
 package com.scheduling.vc.mes;
 
+import com.scheduling.vc.events.MesDegradedModeChangedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -35,15 +40,25 @@ public class DegradedModeService {
     public static final List<String> ACTIVE_MACHINES = List.of("LP-01", "LP-02", "LP-03", "LP-04", "IC-01");
 
     private final MesShiftPort mesPort;
+    private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
     private final boolean mesEnabled;
 
+    /**
+     * Sprint 18 ST-NOTIFY-4 — 머신별 직전 degraded 상태 (in-memory cache).
+     * polling 마다 현재 상태와 비교 → 변화 시 {@link MesDegradedModeChangedEvent} publish.
+     * 서버 재시작 시 초기 false (NORMAL) — 재시작 직후 첫 polling 에서 진입 이벤트 발행 가능.
+     */
+    private final Map<String, Boolean> lastDegradedState = new HashMap<>();
+
     public DegradedModeService(
         MesShiftPort mesPort,
+        ApplicationEventPublisher eventPublisher,
         Clock clock,
         @org.springframework.beans.factory.annotation.Value("${scheduling.mes.enabled:false}") boolean mesEnabled
     ) {
         this.mesPort = mesPort;
+        this.eventPublisher = eventPublisher;
         this.clock = clock;
         this.mesEnabled = mesEnabled;
     }
@@ -86,6 +101,41 @@ public class DegradedModeService {
                 .orElse("Degraded")
             : "MES 정상 수신";
         return new DegradedSnapshot(anyDegraded, now, summary, statuses);
+    }
+
+    /**
+     * Sprint 18 ST-NOTIFY-4 — 1분 주기 polling + 변화 시 이벤트 발행.
+     *
+     * <p>{@code scheduling.notification.degraded-poll.interval-ms} (기본 60s) 주기로 머신별
+     * 현재 degraded 여부 계산 → 직전 상태와 다르면 {@link MesDegradedModeChangedEvent} publish.
+     *
+     * <p>mesEnabled=false 시 polling skip (snapshot 가 항상 NORMAL 반환).
+     */
+    @Scheduled(fixedDelayString = "${scheduling.notification.degraded-poll.interval-ms:60000}")
+    public void pollAndPublish() {
+        if (!mesEnabled) return;
+        Instant now = Instant.now(clock);
+        for (String machineId : ACTIVE_MACHINES) {
+            boolean current = isDegraded(machineId);
+            Boolean prev = lastDegradedState.get(machineId);
+            // 신규 머신 (prev null) 은 baseline 으로 set (이벤트 미발행, NORMAL → NORMAL 노이즈 차단)
+            if (prev == null) {
+                lastDegradedState.put(machineId, current);
+                if (current) {
+                    log.warn("MES degraded baseline 진입 — machineId={} (서버 재시작 직후 첫 polling)", machineId);
+                    eventPublisher.publishEvent(
+                        new MesDegradedModeChangedEvent(machineId, false, true, now));
+                }
+                continue;
+            }
+            if (prev != current) {
+                log.warn("MES degraded 전이 — machineId={} {} → {}", machineId,
+                    prev ? "DEGRADED" : "NORMAL", current ? "DEGRADED" : "NORMAL");
+                eventPublisher.publishEvent(
+                    new MesDegradedModeChangedEvent(machineId, prev, current, now));
+                lastDegradedState.put(machineId, current);
+            }
+        }
     }
 
     public record MachineStatus(String machineId, boolean degraded, Instant lastReceivedAt, MesShiftSource lastSource) {}
