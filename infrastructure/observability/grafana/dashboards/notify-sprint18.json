@@ -1,0 +1,165 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Sprint 19 EP-BETA-LAUNCH ST-BETA-3 — Sprint 18 EP-NOTIFY 신규 metric 시각화 (Critical SLA, Kakao/Slack 도달률, MES degraded, HTTP p95).",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "Critical 알림 1분 overdue retry rate (DeliveryEscalator)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(scheduling_notification_escalator_retry_total[5m])",
+          "legendFormat": "retry_total",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "red", "value": 0.1 }
+          ]}
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Kakao 도달률 — SUCCESS / FAILED / SKIPPED",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(scheduling_kakao_delivery_total{status=\"SUCCESS\"}[5m])",
+          "legendFormat": "SUCCESS",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(scheduling_kakao_delivery_total{status=\"FAILED\"}[5m])",
+          "legendFormat": "FAILED",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(scheduling_kakao_delivery_total{status=\"SKIPPED\"}[5m])",
+          "legendFormat": "SKIPPED",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Slack circuit breaker state (Sprint 18)",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "resilience4j_circuitbreaker_state{name=\"slack\"}",
+          "legendFormat": "{{state}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "CLOSED", "color": "green" } } },
+            { "type": "value", "options": { "1": { "text": "OPEN", "color": "red" } } },
+            { "type": "value", "options": { "2": { "text": "HALF_OPEN", "color": "yellow" } } }
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Slack retry calls (Sprint 18)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(resilience4j_retry_calls_total{name=\"slack\"}[5m])",
+          "legendFormat": "{{kind}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "MES degraded 머신 수 (Sprint 17/18)",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 4, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "scheduling_mes_degraded_machines",
+          "legendFormat": "degraded count",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 1 },
+            { "color": "red", "value": 3 }
+          ]}
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "HTTP request p95 latency by endpoint (REQ-NF-PER-004)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{uri!~\"/api/actuator.*\"}[5m])) by (uri, le))",
+          "legendFormat": "{{uri}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.8 },
+            { "color": "red", "value": 2 }
+          ]}
+        }
+      }
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["sprint18", "ep-notify", "br-x06", "br-o02"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "Asia/Seoul",
+  "title": "EP-NOTIFY — Sprint 18 (Critical SLA · Kakao · Slack · MES degraded · HTTP p95)",
+  "uid": "ep-notify-sprint18",
+  "version": 1,
+  "weekStart": ""
+}
