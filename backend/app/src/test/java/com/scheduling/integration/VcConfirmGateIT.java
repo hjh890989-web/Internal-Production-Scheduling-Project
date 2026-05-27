@@ -63,7 +63,8 @@ class VcConfirmGateIT {
     @Autowired private VcScheduleRepository repository;
     @Autowired private JdbcTemplate jdbc;
 
-    private static final LocalDate PROD = LocalDate.of(2026, 6, 1);
+    // Sprint 16 V041 D-2 hard trigger — production_date 는 today + 5 일 (시간 의존 차단)
+    private static final LocalDate PROD = LocalDate.now().plusDays(5);
     private static final Instant T0 = Instant.parse("2026-05-22T00:00:00Z");
 
     @BeforeEach

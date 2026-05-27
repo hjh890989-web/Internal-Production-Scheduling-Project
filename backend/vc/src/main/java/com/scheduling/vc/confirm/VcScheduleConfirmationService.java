@@ -46,18 +46,34 @@ public class VcScheduleConfirmationService {
 
     /**
      * 단일 row 확정. Planner UI 단건 클릭 시.
+     *
+     * <p>Sprint 16 BR-X05 dual-review — createdBy 와 plannerId 가 동일 사번이면 reject.
+     * createdBy 가 NULL (legacy row, Sprint 15 이전 데이터) 인 경우는 통과 — 이후 row 만 강제.
      */
-    @Auditable("VC schedule Planner 단건 확정 (BR-X01)")
+    @Auditable("VC schedule Planner 단건 확정 (BR-X01·X05)")
     @Transactional
     public VcSchedule confirm(UUID vcScheduleId, String plannerId) {
         VcSchedule schedule = repository.findById(vcScheduleId)
             .orElseThrow(() -> new IllegalArgumentException(
                 "vc_schedule_id 미존재: " + vcScheduleId));
+        enforceDualReview(schedule, plannerId);
         Instant now = Instant.now(clock);
         schedule.confirm(plannerId, now);
         repository.save(schedule);
-        log.info("VC schedule confirmed — id={}, planner={}", vcScheduleId, plannerId);
+        log.info("VC schedule confirmed — id={}, planner={}, createdBy={}",
+            vcScheduleId, plannerId, schedule.getCreatedBy());
         return schedule;
+    }
+
+    /**
+     * BR-X05 dual-review — 작성자(createdBy) ≠ 승인자(plannerId) 강제.
+     * createdBy NULL 은 legacy row (Sprint 16 이전) — 통과.
+     */
+    private void enforceDualReview(VcSchedule schedule, String plannerId) {
+        String createdBy = schedule.getCreatedBy();
+        if (createdBy != null && !createdBy.isBlank() && createdBy.equals(plannerId)) {
+            throw new DualReviewConflictException(schedule.getVcScheduleId(), createdBy, plannerId);
+        }
     }
 
     /**
@@ -65,7 +81,7 @@ public class VcScheduleConfirmationService {
      *
      * @return 확정된 row 수
      */
-    @Auditable("VC schedule Planner 배치 확정 (BR-X01)")
+    @Auditable("VC schedule Planner 배치 확정 (BR-X01·X05)")
     @Transactional
     public int confirmBatch(List<UUID> scheduleIds, String plannerId, UUID batchId) {
         Instant now = Instant.now(clock);
@@ -74,6 +90,7 @@ public class VcScheduleConfirmationService {
         for (UUID id : scheduleIds) {
             VcSchedule s = repository.findById(id).orElse(null);
             if (s == null) continue;
+            enforceDualReview(s, plannerId);
             s.confirm(plannerId, now);
             repository.save(s);
             rows.add(new VcConfirmedEvent.VcConfirmedRow(

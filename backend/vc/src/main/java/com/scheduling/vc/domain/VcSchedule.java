@@ -72,6 +72,9 @@ public class VcSchedule {
     @Column(name = "override_by", length = 40)
     private String overrideBy;
 
+    @Column(name = "created_by", length = 40)
+    private String createdBy;
+
     protected VcSchedule() {}
 
     public VcSchedule(UUID vcScheduleId, String hoseId, String machineId,
@@ -124,6 +127,22 @@ public class VcSchedule {
     public String getConfirmedBy() { return confirmedBy; }
     public String getOverrideReason() { return overrideReason; }
     public String getOverrideBy() { return overrideBy; }
+    public String getCreatedBy() { return createdBy; }
+
+    /**
+     * Sprint 16 BR-X05 — INSERT actor 식별. Allocator/Listener 가 row 생성 직후 호출.
+     * 한 번 set 된 createdBy 는 immutable (재호출 차단).
+     */
+    public void assignCreatedBy(String createdBy) {
+        if (createdBy == null || createdBy.isBlank()) {
+            throw new IllegalArgumentException("createdBy 필수 (BR-X05 dual-review)");
+        }
+        if (this.createdBy != null && !this.createdBy.isBlank()) {
+            throw new IllegalStateException(
+                "BR-X05 createdBy immutable — 이미 " + this.createdBy + " 로 set");
+        }
+        this.createdBy = createdBy;
+    }
 
     /**
      * BR-V07 일중 앵글 교체 override — TK-13-4-1 (EP-13 ST-13-4).
