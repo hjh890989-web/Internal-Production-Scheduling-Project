@@ -2,6 +2,8 @@ import { Layout, Button, Typography } from 'antd'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore, type Role } from '@/stores/authStore'
+import { NotificationDrawer } from '@/features/notify/components/NotificationDrawer'
+import { useStompNotificationFeed } from '@/features/notify/hooks/useStompNotificationFeed'
 
 const { Header, Content, Footer } = Layout
 const { Text } = Typography
@@ -18,6 +20,9 @@ export default function MainLayout() {
   const location = useLocation()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
+
+  // Sprint 18 ST-NOTIFY-5 — STOMP 토픽 구독 → notificationStore 누적
+  useStompNotificationFeed()
 
   const handleLogout = () => {
     logout()
@@ -91,6 +96,7 @@ export default function MainLayout() {
         </div>
         {user && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+            <NotificationDrawer />
             <Text style={{ color: '#d1d5db', fontSize: 13 }}>
               {user.employeeId} ({user.role})
             </Text>

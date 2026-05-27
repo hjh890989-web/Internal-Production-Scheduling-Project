@@ -86,3 +86,9 @@ export const TOPIC_EXTRUSION_UPDATES = '/topic/extrusion-updates'
 
 /** Sprint 14 EP-VC-FULL ST-VC-4 — VC schedule 변경/확정 PUSH 토픽. */
 export const TOPIC_VC_SCHEDULE_UPDATES = '/topic/vc-schedule-updates'
+
+/** Sprint 18 EP-NOTIFY ST-NOTIFY-4 — MES degraded 전이 PUSH 토픽 (DegradedBanner 즉시 갱신). */
+export const TOPIC_MES_DEGRADED_UPDATES = '/topic/mes-degraded-updates'
+
+/** Sprint 18 EP-NOTIFY ST-NOTIFY-5 — role 별 in-app 알림 토픽 prefix. */
+export const TOPIC_NOTIFICATIONS_PREFIX = '/topic/notifications'
