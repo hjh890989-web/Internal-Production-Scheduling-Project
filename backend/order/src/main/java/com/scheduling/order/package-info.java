@@ -8,6 +8,6 @@
  */
 @org.springframework.modulith.ApplicationModule(
     displayName = "Order Consolidation",
-    allowedDependencies = { "common", "master::api", "audit::events", "audit::aop" }
+    allowedDependencies = { "common", "master::api", "audit::events", "audit::aop", "audit::api" }
 )
 package com.scheduling.order;

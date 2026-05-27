@@ -158,6 +158,21 @@ class OrderDiffAndCommitIT {
             assertThat(ev.committedBy()).isEqualTo("00000001");
             assertThat(ev.reason()).isEqualTo("Sprint 13 검증");
         });
+
+        // BR-X02 — Sprint 13 hotfix AuditLogService 검증 (mutation-less endpoint audit)
+        String actor = jdbc.queryForObject(
+            "SELECT actor FROM audit.schedule_audit_log "
+                + "WHERE table_name='order_change' AND row_pk=? "
+                + "ORDER BY occurred_at DESC LIMIT 1",
+            String.class, tracking.toString());
+        assertThat(actor).isEqualTo("00000001");
+
+        String reason = jdbc.queryForObject(
+            "SELECT reason FROM audit.schedule_audit_log "
+                + "WHERE table_name='order_change' AND row_pk=? "
+                + "ORDER BY occurred_at DESC LIMIT 1",
+            String.class, tracking.toString());
+        assertThat(reason).contains("EP-OC-FULL 수주 import 확정").contains("Sprint 13 검증");
     }
 
     @Test

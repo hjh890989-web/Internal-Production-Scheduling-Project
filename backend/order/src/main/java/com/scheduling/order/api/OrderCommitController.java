@@ -1,6 +1,7 @@
 package com.scheduling.order.api;
 
 import com.scheduling.audit.aop.Auditable;
+import com.scheduling.audit.api.AuditLogService;
 import com.scheduling.order.diff.OrderChangeRepository;
 import com.scheduling.order.events.OrderCommittedEvent;
 import jakarta.validation.Valid;
@@ -44,13 +45,16 @@ public class OrderCommitController {
 
     private final OrderChangeRepository repository;
     private final ApplicationEventPublisher eventPublisher;
+    private final AuditLogService auditLog;
     private final Clock clock;
 
     public OrderCommitController(OrderChangeRepository repository,
                                   ApplicationEventPublisher eventPublisher,
+                                  AuditLogService auditLog,
                                   Clock clock) {
         this.repository = repository;
         this.eventPublisher = eventPublisher;
+        this.auditLog = auditLog;
         this.clock = clock;
     }
 
@@ -74,6 +78,9 @@ public class OrderCommitController {
 
         String actor = actorOf(principal);
         Instant now = clock.instant();
+        // BR-X02 — mutation 없는 의사결정 audit (event 만 발행하면 trigger 미발화)
+        auditLog.record("order_change", trackingId.toString(), AuditLogService.Action.UPDATE,
+            actor, "EP-OC-FULL 수주 import 확정 (PLANNER, BR-X05): " + payload.reason());
         eventPublisher.publishEvent(new OrderCommittedEvent(trackingId, actor, now, payload.reason()));
         log.info("EP-OC-FULL commit — tracking={} by {} rows={}", trackingId, actor, rowCount);
 
@@ -93,8 +100,10 @@ public class OrderCommitController {
         }
 
         String actor = actorOf(principal);
+        // BR-X02 — reject 도 의사결정 audit (event 미발행, audit_log 만)
+        auditLog.record("order_change", trackingId.toString(), AuditLogService.Action.UPDATE,
+            actor, "EP-OC-FULL 수주 import 거절 (PLANNER): " + payload.reason());
         log.warn("EP-OC-FULL reject — tracking={} by {} reason={}", trackingId, actor, payload.reason());
-        // reject 는 event 발행 안 함 — PLANNER 가 별도 입력 파일 재요청
         return ResponseEntity.ok(new CommitResponse(trackingId, actor, clock.instant(),
             rowCount, payload.reason()));
     }
