@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button, DatePicker, Form, Input, InputNumber, Modal, Space, Table, Typography, message } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
 import { productPriorityApi, type PrioritySummary, type PriorityPayload } from '@/api/productPriorityApi'
+import { HttpError } from '@/api/client'
 
 const { Title, Paragraph } = Typography
 
@@ -68,8 +69,14 @@ export default function ProductPriorityPage() {
       }
       setModalOpen(false)
       await reload()
-    } catch {
-      message.error(editing ? '수정 실패 (사번 중복 또는 미존재)' : '추가 실패 (사번 중복)')
+    } catch (e) {
+      if (e instanceof HttpError && e.status === 409) {
+        message.error(`Hose ID 중복 — ${v.hoseId} 는 이미 등록됨. 기존 항목을 수정하세요.`)
+      } else if (e instanceof HttpError && e.status === 404) {
+        message.error('대상 Hose ID 미존재')
+      } else {
+        message.error(editing ? '수정 실패' : '추가 실패')
+      }
     }
   }
 

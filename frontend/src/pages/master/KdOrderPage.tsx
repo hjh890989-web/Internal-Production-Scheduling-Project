@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button, DatePicker, Form, Input, InputNumber, Modal, Select, Space, Table, Tag, Typography, message } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
 import { kdOrderApi, type KdOrderSummary, type KdOrderPayload, type KdStatus } from '@/api/kdOrderApi'
+import { HttpError } from '@/api/client'
 
 const { Title, Paragraph } = Typography
 
@@ -71,8 +72,14 @@ export default function KdOrderPage() {
       }
       setModalOpen(false)
       await reload()
-    } catch {
-      message.error(editing ? '수정 실패' : '추가 실패')
+    } catch (e) {
+      if (e instanceof HttpError && e.status === 400) {
+        message.error('입력 검증 실패 — remaining_qty 는 0 ≤ orderQty 범위')
+      } else if (e instanceof HttpError && e.status === 404) {
+        message.error('대상 KD 발주 미존재')
+      } else {
+        message.error(editing ? '수정 실패' : '추가 실패')
+      }
     }
   }
 
