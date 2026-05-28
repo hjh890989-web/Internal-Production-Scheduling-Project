@@ -110,6 +110,10 @@
 - **통합** — Testcontainers (PostgreSQL 16 + Redis 7) · 실제 DB · mock 금지
 - **아키텍처** — ArchUnit (모듈 경계 + `Instant.now()` 금지 + 패키지 의존)
 - **부하** — k6 (1500 row · p95 < 800ms · 동시 10 사용자)
+- **Sprint 마감 검증** — `./gradlew verifyAll` (전체 모듈 test 일괄, ~13분).
+  `:app:test --tests "...integration.*IT"` 같은 부분 패턴은 누락 위험 — `:notify:test`,
+  `:app` 외 모듈 IT, package 패턴 미스매치 IT 가 silently broken 누적 가능
+  (2026-05-28 4 IT 회귀 사례 — `0a540e7` 참조).
 
 ### 버전 관리
 - **브랜치** — Trunk-based (main + short-lived feature/*)

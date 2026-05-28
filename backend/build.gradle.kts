@@ -100,3 +100,28 @@ subprojects {
     // 신규 코드 80% 커버리지 게이트 (SonarQube Quality Gate 가 PR 단위로 검증).
     // 로컬 빌드 게이트는 별도 — Sprint 1+ 도메인 코드 추가 후 활성 검토.
 }
+
+// =============================================================================
+// Sprint 19 hotfix — Sprint 마감 시 회귀 검증 표준 task (검증 범위 누락 방지)
+// =============================================================================
+// 배경: 2026-05-28 베타 시뮬 종료 후 IDE Problems 패널에서 4 IT silently broken 발견.
+//   원인 — `:app:test --tests "*integration.*IT"` 패턴이 `:notify:test` 단위 테스트 +
+//   `com.scheduling.SchedulingApplicationTest` (smoke) + `com.scheduling.order.api.*` 패턴
+//   매치 실패 → 누락된 채 Sprint 16~19 push 누적.
+//
+// 사용:
+//   ./gradlew verifyAll       — Sprint 마감 / commit 직전 표준 검증
+//   ./gradlew test            — gradle 기본 — 모든 모듈 test 포함 (verifyAll 와 동등)
+//
+// 시간 비용: 전체 ~13분 (Testcontainers 다수). 부분 패턴 (`:app:test --tests "..."`) 은
+// 빠르지만 누락 위험 — Sprint 마감 시 verifyAll 필수.
+// =============================================================================
+tasks.register("verifyAll") {
+    group = "verification"
+    description = "Sprint 마감 검증 — 전체 모듈 test + archUnit + 컴파일 일괄 (검증 범위 누락 방지)"
+    dependsOn(subprojects.map { ":${it.name}:test" })
+    dependsOn(subprojects.map { ":${it.name}:compileTestJava" })
+    doLast {
+        println("=== verifyAll 완료 — 전체 ${subprojects.size} 모듈 test/compile GREEN ===")
+    }
+}

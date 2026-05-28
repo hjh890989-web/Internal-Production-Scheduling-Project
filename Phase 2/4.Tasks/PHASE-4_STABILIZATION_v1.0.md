@@ -195,6 +195,13 @@ S23 EP-MES-ADAPTER-1 (← 실 MES 협의 진행 후)    │
 - 사내 IT/관리팀 Slack 채널 + Kakao biz token 발급 협의
 - 베타 운영 1주 실 데이터 누적 (Grafana KPI 측정 시작)
 
+**Pre-Phase 추가 (Sprint 19 carry-over 통합):**
+- **Jenkins CI pipeline 활성** (Sprint 0 EP-32 baseline 위) — push trigger 시 자동
+  `./gradlew verifyAll` (Sprint 19 hotfix `0a540e7` 의 신규 task) 실행 + SonarQube + Trivy.
+  목적: Sprint 16~19 같은 검증 범위 누락 (`:app:test --tests "...integration.*IT"` 부분 패턴)
+  방지. `infrastructure/jenkins/` 활성 여부 확인 후 push webhook 등록.
+- **S20 첫 작업 권고** — Jenkins pipeline GREEN 확인 후 본격 Slack/Kakao webhook 진행.
+
 **Phase 4 Sprint 순서:**
 - **S20 (Week 1)** — EP-EXT-WEBHOOK + S21 병행 시작
 - **S21 (Week 2)** — EP-CRUD-MASTER-2 완성
