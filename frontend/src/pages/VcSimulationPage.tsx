@@ -6,6 +6,8 @@ import {
   Card,
   DatePicker,
   Divider,
+  Input,
+  Select,
   Space,
   Table,
   Tag,
@@ -193,6 +195,8 @@ interface CandidateTableProps {
   onOpenBatch: () => void
 }
 
+type AuthorFilter = 'ALL' | 'MINE' | 'OTHERS' | 'LEGACY'
+
 function CandidateConfirmTable({
   rows,
   currentEmployeeId,
@@ -201,19 +205,58 @@ function CandidateConfirmTable({
   onSingleConfirm,
   onOpenBatch,
 }: CandidateTableProps) {
-  const candidates = useMemo(() => rows.filter((r) => r.status === 'CANDIDATE'), [rows])
+  const allCandidates = useMemo(() => rows.filter((r) => r.status === 'CANDIDATE'), [rows])
 
   const selfAuthoredKeys = useMemo(
     () =>
       new Set(
-        candidates
+        allCandidates
           .filter((r) => r.createdBy && currentEmployeeId && r.createdBy === currentEmployeeId)
           .map((r) => r.vcScheduleId),
       ),
-    [candidates, currentEmployeeId],
+    [allCandidates, currentEmployeeId],
   )
 
-  if (candidates.length === 0) {
+  // Sprint 19 hotfix — 검색/필터 (Hose ID substring + 작성자 분류)
+  const [search, setSearch] = useState('')
+  const [authorFilter, setAuthorFilter] = useState<AuthorFilter>('ALL')
+
+  const candidates = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return allCandidates.filter((r) => {
+      // Hose ID 검색
+      if (q && !r.hoseId.toLowerCase().includes(q)) return false
+      // 작성자 필터
+      if (authorFilter === 'MINE') return selfAuthoredKeys.has(r.vcScheduleId)
+      if (authorFilter === 'OTHERS')
+        return !selfAuthoredKeys.has(r.vcScheduleId) && !!r.createdBy
+      if (authorFilter === 'LEGACY') return !r.createdBy
+      return true
+    })
+  }, [allCandidates, search, authorFilter, selfAuthoredKeys])
+
+  // 필터 변경 시 선택 자동 해제 (안 보이는 row 선택 잔여 차단)
+  const clearSelectionIfHidden = (next: AuthorFilter, nextSearch: string) => {
+    if (selectedRowKeys.length === 0) return
+    const visibleIds = new Set(
+      allCandidates
+        .filter((r) => {
+          const q = nextSearch.trim().toLowerCase()
+          if (q && !r.hoseId.toLowerCase().includes(q)) return false
+          if (next === 'MINE') return selfAuthoredKeys.has(r.vcScheduleId)
+          if (next === 'OTHERS') return !selfAuthoredKeys.has(r.vcScheduleId) && !!r.createdBy
+          if (next === 'LEGACY') return !r.createdBy
+          return true
+        })
+        .map((r) => r.vcScheduleId),
+    )
+    const remaining = selectedRowKeys.filter((k) => visibleIds.has(String(k)))
+    if (remaining.length !== selectedRowKeys.length) {
+      onSelectChange(remaining)
+    }
+  }
+
+  if (allCandidates.length === 0) {
     return (
       <Alert
         type="success"
@@ -300,15 +343,44 @@ function CandidateConfirmTable({
 
   return (
     <Space direction="vertical" style={{ width: '100%' }} size="small">
-      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-        <Text type="secondary">
-          CANDIDATE {candidates.length}건 · 본인 작성{' '}
-          <Tag color="red" style={{ marginInline: 4 }}>
-            {selfAuthoredKeys.size}
-          </Tag>{' '}
-          (확정 불가, BR-X05)
-        </Text>
-        <Space>
+      <Space wrap style={{ width: '100%', justifyContent: 'space-between' }}>
+        <Space wrap>
+          <Input.Search
+            allowClear
+            placeholder="Hose ID 검색 (substring)"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              clearSelectionIfHidden(authorFilter, e.target.value)
+            }}
+            onSearch={(v) => {
+              setSearch(v)
+              clearSelectionIfHidden(authorFilter, v)
+            }}
+            style={{ width: 240 }}
+            data-testid="candidate-search"
+          />
+          <Select
+            value={authorFilter}
+            onChange={(v: AuthorFilter) => {
+              setAuthorFilter(v)
+              clearSelectionIfHidden(v, search)
+            }}
+            style={{ width: 180 }}
+            options={[
+              { value: 'ALL', label: '작성자: 전체' },
+              { value: 'MINE', label: '본인 작성' },
+              { value: 'OTHERS', label: '다른 PLANNER' },
+              { value: 'LEGACY', label: 'legacy (NULL)' },
+            ]}
+            data-testid="candidate-author-filter"
+          />
+          <Text type="secondary">
+            필터 결과 <Tag>{candidates.length}</Tag> / 전체 CANDIDATE {allCandidates.length} · 본인 작성{' '}
+            <Tag color="red">{selfAuthoredKeys.size}</Tag>
+          </Text>
+        </Space>
+        <Space wrap>
           <Button
             onClick={() =>
               onSelectChange(
@@ -319,7 +391,7 @@ function CandidateConfirmTable({
             }
             data-testid="batch-select-all"
           >
-            전체 선택 (본인 제외)
+            필터 결과 전체 선택 (본인 제외)
           </Button>
           <Button onClick={() => onSelectChange([])} disabled={selectedRowKeys.length === 0}>
             선택 해제
@@ -343,6 +415,11 @@ function CandidateConfirmTable({
         rowSelection={rowSelection}
         pagination={{ pageSize: 20, showSizeChanger: true }}
         scroll={{ x: 'max-content' }}
+        locale={{
+          emptyText: search || authorFilter !== 'ALL'
+            ? '필터 결과 없음 — 검색어/작성자 필터 조정'
+            : '확정 대기 row 없음',
+        }}
       />
     </Space>
   )
