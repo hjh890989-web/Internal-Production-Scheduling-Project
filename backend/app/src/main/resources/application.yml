@@ -73,8 +73,13 @@ scheduling:
   notification:
     app-url: ${APP_URL:https://schedule.intranet}
     default-target-role: PLANNER
+    # Sprint 20 ST-COST-2 — Kakao Phase 5+ carry-over (Cost-Zero 정책).
+    # 사용자 10명 이내 운영 / Slack 모바일 push 로 충분 / 월 ~1만원 비용 회피.
+    # KakaoTalkClient + kakao_delivery_log 코드는 stub 유지 → 1년 뒤 부활 시
+    # KAKAO_ENABLED=true + KAKAO_WEBHOOK_URL + KAKAO_BOT_TOKEN NSSM env 추가만으로
+    # 즉시 활성 (~0.5 PD). 자세한 정책: docs/cost-policy/COST-ZERO_POLICY_v1.0.md
     kakao:
-      enabled: ${KAKAO_ENABLED:false}                 # Sprint 1 baseline 기본 비활성 (stub)
+      enabled: ${KAKAO_ENABLED:false}                 # 영구 false (Phase 5+ carry-over)
       webhook-url: ${KAKAO_WEBHOOK_URL:}
       bot-token: ${KAKAO_BOT_TOKEN:}
       timeout-seconds: 5

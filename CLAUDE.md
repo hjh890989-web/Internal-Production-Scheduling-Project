@@ -56,7 +56,7 @@
 - **컨테이너** — Docker Compose v2 (STG/PROD 분리) + Blue/Green (NGINX upstream toggle)
 - **CI/CD** — Jenkins + Harbor + SonarQube + Trivy (ADR-015)
 - **관측성** — Prometheus + Spring Actuator + Micrometer · Loki + Promtail (90일) · Grafana · Slack alert
-- **APM** — OpenTelemetry + Sentry
+- **APM** — OpenTelemetry (Sentry 미도입 — Sprint 20 Cost-Zero 정책. 사용자 10명 이내 운영 / Loki + Promtail label 기반 검색으로 충분. Phase 5+ 재판단 옵션 — docs/cost-policy/COST-ZERO_POLICY_v1.0.md)
 - **백업** — pg_basebackup + WAL archiving + PITR
 
 ### 제약
