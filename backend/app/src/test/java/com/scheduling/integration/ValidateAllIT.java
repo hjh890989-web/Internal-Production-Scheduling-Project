@@ -71,7 +71,9 @@ class ValidateAllIT {
     @Autowired private SlotCompatibilityMatrixService matrixService;
     @Autowired private VcYieldCalculator yieldCalc;
 
-    private static final LocalDate D = LocalDate.of(2026, 2, 23); // 월
+    // Sprint 19 hotfix — V041 D-2 hard trigger 정합 위해 today+5 동적 (이전 하드코드 2026-02-23 은
+    // 시각 drift 로 -94일 → trigger 차단). today + 5 영업일 가정 (월요일 기준 ± 1).
+    private static final LocalDate D = LocalDate.now().plusDays(5);
     private static final Instant T0 = Instant.parse("2026-05-21T00:00:00Z");
 
     @BeforeEach

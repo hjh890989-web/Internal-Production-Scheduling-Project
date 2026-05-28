@@ -64,9 +64,12 @@ class CapacityLedgerIT {
     @Autowired private CapacityLedgerBuilder builder;
     @Autowired private VcScheduleRepository scheduleRepo;
 
-    // TK-06-1-1 master.holiday seed 후 — 설날 연휴(2/16~18)·삼일절(3/1) 회피, 2026-02-23(월) ~ 27(금) 사용
-    private static final LocalDate MON = LocalDate.of(2026, 2, 23);  // 월 (설날 직후 평일 주)
-    private static final LocalDate SAT = LocalDate.of(2026, 2, 28);  // 토
+    // Sprint 19 hotfix — V041 D-2 hard trigger 정합 위해 다음 주 월요일 동적 (이전 하드코드
+    // 2026-02-23 은 시각 drift 로 -94일 → trigger 차단). master.holiday 미시드 평일 = MON,
+    // 같은 주 토요일 = SAT (BR-V05 주말 격자 0 검증). +7~13일 D-2 safe.
+    private static final LocalDate MON = LocalDate.now().plusDays(7)
+        .with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.MONDAY));
+    private static final LocalDate SAT = MON.with(java.time.DayOfWeek.SATURDAY);
     private static final Instant T0 = Instant.parse("2026-05-21T00:00:00Z");
 
     @BeforeEach

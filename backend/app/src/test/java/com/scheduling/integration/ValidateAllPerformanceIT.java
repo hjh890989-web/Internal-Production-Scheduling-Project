@@ -67,8 +67,10 @@ class ValidateAllPerformanceIT {
     @Autowired private SlotCompatibilityMatrixService matrixService;
     @Autowired private VcYieldCalculator yieldCalc;
 
-    private static final LocalDate START = LocalDate.of(2026, 2, 23); // 월
-    private static final LocalDate END = LocalDate.of(2026, 2, 27);   // 금 (1주)
+    // Sprint 19 hotfix — V041 D-2 hard trigger 정합 위해 today+7 ~ today+11 동적
+    // (이전 하드코드 2026-02-23 ~ 27 은 시각 drift 로 -90+일 → trigger 차단). 5 영업일 가정.
+    private static final LocalDate START = LocalDate.now().plusDays(7);
+    private static final LocalDate END = START.plusDays(4);
     private static final Instant T0 = Instant.parse("2026-05-21T00:00:00Z");
 
     private static final int WARMUP_RUNS = 5;
