@@ -32,15 +32,18 @@ public class VcScheduleConfirmationService {
 
     private final VcScheduleRepository repository;
     private final ApplicationEventPublisher eventPublisher;
+    private final D0LockGuard d0LockGuard;
     private final Clock clock;
 
     public VcScheduleConfirmationService(
         VcScheduleRepository repository,
         ApplicationEventPublisher eventPublisher,
+        D0LockGuard d0LockGuard,
         Clock clock
     ) {
         this.repository = repository;
         this.eventPublisher = eventPublisher;
+        this.d0LockGuard = d0LockGuard;
         this.clock = clock;
     }
 
@@ -49,14 +52,20 @@ public class VcScheduleConfirmationService {
      *
      * <p>Sprint 16 BR-X05 dual-review — createdBy 와 plannerId 가 동일 사번이면 reject.
      * createdBy 가 NULL (legacy row, Sprint 15 이전 데이터) 인 경우는 통과 — 이후 row 만 강제.
+     *
+     * <p>Sprint 19 베타 시뮬 hotfix — Sprint 17 V043 D-0 lock trigger 의 service-level 가드
+     * 추가. 기존엔 service 가 D0LockGuard 미호출 → DB trigger 만 발화 → JpaSystemException
+     * wrap → 500 server error. confirm 은 status 전이 (수정) — D-0 row 면 BR-V07 락 정합.
      */
-    @Auditable("VC schedule Planner 단건 확정 (BR-X01·X05)")
+    @Auditable("VC schedule Planner 단건 확정 (BR-X01·X05·V07)")
     @Transactional
     public VcSchedule confirm(UUID vcScheduleId, String plannerId) {
         VcSchedule schedule = repository.findById(vcScheduleId)
             .orElseThrow(() -> new IllegalArgumentException(
                 "vc_schedule_id 미존재: " + vcScheduleId));
         enforceDualReview(schedule, plannerId);
+        // BR-V07 D-0 락 — confirm 은 override 경로 아님 (status 전이만)
+        d0LockGuard.enforce(schedule.getProductionDate(), false);
         Instant now = Instant.now(clock);
         schedule.confirm(plannerId, now);
         repository.save(schedule);
@@ -91,6 +100,8 @@ public class VcScheduleConfirmationService {
             VcSchedule s = repository.findById(id).orElse(null);
             if (s == null) continue;
             enforceDualReview(s, plannerId);
+            // BR-V07 D-0 락 — batch 안 1 row 라도 D-0 시 전체 reject (autocommit)
+            d0LockGuard.enforce(s.getProductionDate(), false);
             s.confirm(plannerId, now);
             repository.save(s);
             rows.add(new VcConfirmedEvent.VcConfirmedRow(

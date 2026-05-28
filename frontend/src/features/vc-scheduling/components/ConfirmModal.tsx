@@ -67,6 +67,15 @@ export function ConfirmModal({ target, open, onClose, onSuccess }: Props) {
           brCode: body.brCode,
         }
       }
+      if (e.status === 423 && body.brCode === 'BR-V07') {
+        return {
+          level: 'error',
+          title: 'BR-V07 D-0 (당일) 락',
+          description:
+            '오늘 (D-0) 의 row 는 일반 수정 불가합니다. 일중 앵글 교체 시 OverrideJustificationForm 으로 사유 입력 후 재시도.',
+          brCode: 'BR-V07',
+        }
+      }
       if (e.status === 423) {
         return {
           level: 'error',
