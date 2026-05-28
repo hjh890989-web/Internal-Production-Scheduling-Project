@@ -73,8 +73,17 @@ export function BatchConfirmModal({
           brCode: 'BR-X05',
         }
       }
+      if (e.status === 423 && body.brCode === 'BR-V07') {
+        return {
+          level: 'error',
+          title: 'BR-V07 D-0 (당일) 락',
+          description:
+            '선택한 row 중 오늘 (D-0) 의 row 가 포함되어 일괄 확정 거부되었습니다. 일중 앵글 교체 시 OverrideJustificationForm 으로 사유 입력 후 단건 처리 권고.',
+          brCode: 'BR-V07',
+        }
+      }
       if (e.status === 423) {
-        return { level: 'error', title: 'BR-X07 D-2 hard 제약', description: detail, brCode: 'BR-X07' }
+        return { level: 'error', title: 'BR-X07 D-2 hard 제약', description: detail, brCode: body.brCode ?? 'BR-X07' }
       }
       if (e.status === 409) {
         return { level: 'warning', title: '확정 상태 충돌', description: detail, brCode: body.brCode }
