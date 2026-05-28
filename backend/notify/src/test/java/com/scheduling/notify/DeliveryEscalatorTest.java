@@ -34,12 +34,15 @@ class DeliveryEscalatorTest {
     private static final Clock CLOCK = Clock.fixed(NOW, ZoneId.of("Asia/Seoul"));
 
     private NotificationRepository repo;
+    private SlackNotifier slackNotifier;
     private DeliveryEscalator escalator;
 
     @BeforeEach
     void setUp() {
         repo = mock(NotificationRepository.class);
-        escalator = new DeliveryEscalator(repo, CLOCK);
+        // Sprint 18 EP-NOTIFY hotfix — DeliveryEscalator 가 SlackNotifier 의존 추가됨
+        slackNotifier = mock(SlackNotifier.class);
+        escalator = new DeliveryEscalator(repo, slackNotifier, CLOCK);
     }
 
     private NotificationEntity dispatched(Instant at) {

@@ -51,7 +51,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * </ul>
  */
 @SpringBootTest
+@org.springframework.test.context.ActiveProfiles("with-infra")
+@org.testcontainers.junit.jupiter.Testcontainers
+@org.springframework.test.annotation.DirtiesContext(
+    classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class OrderImportControllerIT {
+
+    @org.testcontainers.junit.jupiter.Container
+    static final org.testcontainers.containers.PostgreSQLContainer<?> POSTGRES =
+        new org.testcontainers.containers.PostgreSQLContainer<>("postgres:16-alpine")
+            .withDatabaseName("scheduling")
+            .withUsername("app_user")
+            .withPassword("test_secret");
+
+    @org.springframework.test.context.DynamicPropertySource
+    static void datasourceProps(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("spring.data.redis.host", () -> "localhost");
+        registry.add("spring.data.redis.port", () -> "65535");
+        registry.add("scheduling.notification.kakao.enabled", () -> "false");
+    }
 
     private static final String XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
@@ -60,8 +81,6 @@ class OrderImportControllerIT {
     @MockitoBean private ImportOrchestratorService orchestrator;
     @MockitoBean private ImportRetryService retryService;
     @MockitoBean private ImportTrackingService tracking;
-    // Sprint 10 EP-AUTH 도입 후 AppUserDetailsService 가 항상 등록 → Testcontainers 없는 IT 는 JPA scan 안 됨 → mock 필요.
-    @MockitoBean private com.scheduling.security.auth.AppUserRepository appUserRepository;
 
     private MockMvc mockMvc;
 

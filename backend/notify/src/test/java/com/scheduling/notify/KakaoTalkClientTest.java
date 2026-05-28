@@ -50,10 +50,13 @@ class KakaoTalkClientTest {
     }
 
     @Test
-    @DisplayName("kakao.enabled=true → stub 송신 OK, send() = true")
-    void enabled_returns_true_stub() {
+    @DisplayName("kakao.enabled=true + webhookUrl 비어있음 → skip, send() = false (Sprint 18 실 HTTP 진입 가드)")
+    void enabled_but_no_webhook_returns_false() {
+        // Sprint 18 KakaoTalkClient stub log → 실 RestClient POST 로 변경.
+        // enabled=true 만 으로는 부족 — webhookUrl 비어있으면 false 반환 (실 운영 URL 미발급 환경 보호).
         config.getKakao().setEnabled(true);
-        assertThat(client.send(SAMPLE)).isTrue();
+        config.getKakao().setWebhookUrl("");
+        assertThat(client.send(SAMPLE)).isFalse();
     }
 
     @Test
