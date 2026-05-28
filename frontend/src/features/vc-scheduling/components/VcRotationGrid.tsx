@@ -1,9 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import type { ColDef, GridReadyEvent, ValueGetterParams } from 'ag-grid-enterprise'
-import 'ag-grid-enterprise/styles/ag-grid.css'
-import 'ag-grid-enterprise/styles/ag-theme-quartz.css'
-import { initAgGridEnterprise } from '@/grid/agGridSetup'
+import type { ColDef, GridReadyEvent, ValueGetterParams } from 'ag-grid-community'
+import { initAgGrid, agTheme } from '@/grid/agGridSetup'
 import type { VcSlotRow } from '../api/vcScheduleApi'
 
 interface Props {
@@ -25,7 +23,7 @@ interface PivotRow {
  * BR-V07 일중 락 시각화 — 같은 row 의 모든 cell 이 같은 angle 인 것을 한눈에 확인.
  */
 export function VcRotationGrid({ rows, loading }: Props) {
-  initAgGridEnterprise()
+  initAgGrid()
 
   const gridRef = useRef<AgGridReact<PivotRow>>(null)
 
@@ -80,21 +78,16 @@ export function VcRotationGrid({ rows, loading }: Props) {
   }
 
   return (
-    <div className="ag-theme-quartz" style={{ height: 600, width: '100%' }}>
+    <div style={{ height: 600, width: '100%' }}>
       <AgGridReact<PivotRow>
         ref={gridRef}
+        theme={agTheme}
         rowData={pivoted}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         rowSelection="single"
         animateRows
         loading={loading}
-        statusBar={{
-          statusPanels: [
-            { statusPanel: 'agTotalAndFilteredRowCountComponent', align: 'left' },
-            { statusPanel: 'agAggregationComponent', align: 'right' },
-          ],
-        }}
         onGridReady={onGridReady}
       />
     </div>

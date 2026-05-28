@@ -1,9 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import type { ColDef, GridReadyEvent } from 'ag-grid-enterprise'
-import 'ag-grid-enterprise/styles/ag-grid.css'
-import 'ag-grid-enterprise/styles/ag-theme-quartz.css'
-import { initAgGridEnterprise } from '@/grid/agGridSetup'
+import type { ColDef, GridReadyEvent } from 'ag-grid-community'
+import { initAgGrid, agTheme } from '@/grid/agGridSetup'
 import type { ExMatrixRow } from '../api/exMatrixApi'
 
 interface Props {
@@ -18,7 +16,7 @@ interface Props {
  * column filter + status statusBar. AG Grid Enterprise 라이센스는 {@code agGridSetup}.
  */
 export function ExMatrixGrid({ rows, loading }: Props) {
-  initAgGridEnterprise()
+  initAgGrid()
 
   const gridRef = useRef<AgGridReact<ExMatrixRow>>(null)
 
@@ -40,7 +38,7 @@ export function ExMatrixGrid({ rows, loading }: Props) {
       {
         field: 'status',
         headerName: '상태',
-        filter: 'agSetColumnFilter',
+        filter: 'agTextColumnFilter',
         cellStyle: (p) => {
           switch (p.value) {
             case 'CONFIRMED': return { color: '#389e0d' }
@@ -70,22 +68,16 @@ export function ExMatrixGrid({ rows, loading }: Props) {
   }
 
   return (
-    <div className="ag-theme-quartz" style={{ height: 600, width: '100%' }}>
+    <div style={{ height: 600, width: '100%' }}>
       <AgGridReact<ExMatrixRow>
         ref={gridRef}
+        theme={agTheme}
         rowData={rows}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         rowSelection="single"
         animateRows
         loading={loading}
-        statusBar={{
-          statusPanels: [
-            { statusPanel: 'agTotalAndFilteredRowCountComponent', align: 'left' },
-            { statusPanel: 'agSelectedRowCountComponent', align: 'center' },
-            { statusPanel: 'agAggregationComponent', align: 'right' },
-          ],
-        }}
         onGridReady={onGridReady}
       />
     </div>
