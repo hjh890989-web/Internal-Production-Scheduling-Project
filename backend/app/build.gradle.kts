@@ -34,3 +34,10 @@ dependencies {
     // TK-04-2-3 UnschedulableFilterIT — POI XSSF 재읽기 검증
     testImplementation(libs.apache.poi)
 }
+
+// Sprint 20 hotfix — bootRun 시 with-infra profile 자동 활성.
+// default profile 은 JPA/Flyway auto-config excluded (Sprint 0 baseline) 라 AppUserRepository
+// bean 미생성 → AppUserDetailsService 부팅 실패. 환경변수 SPRING_PROFILES_ACTIVE 의존 제거.
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    systemProperty("spring.profiles.active", "with-infra")
+}
