@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -110,8 +111,14 @@ public class DegradedModeService {
      * 현재 degraded 여부 계산 → 직전 상태와 다르면 {@link MesDegradedModeChangedEvent} publish.
      *
      * <p>mesEnabled=false 시 polling skip (snapshot 가 항상 NORMAL 반환).
+     *
+     * <p>Sprint 19 베타 시뮬 hotfix — {@code @Transactional} 필수. {@link DegradedModePushListener}
+     * 의 {@code @ApplicationModuleListener} 는 AFTER_COMMIT 비동기 트리거 — transaction 없으면
+     * 발화 안 됨 (실 운영 polling 흐름에서 발견된 갑). Sprint 18 DegradedModePushIT 는
+     * TransactionTemplate 명시 wrap 으로 통과했었음 (운영 호출 경로 미회귀).
      */
     @Scheduled(fixedDelayString = "${scheduling.notification.degraded-poll.interval-ms:60000}")
+    @Transactional
     public void pollAndPublish() {
         if (!mesEnabled) return;
         Instant now = Instant.now(clock);
