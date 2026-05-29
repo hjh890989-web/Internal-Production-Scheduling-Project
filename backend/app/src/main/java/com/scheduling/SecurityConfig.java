@@ -139,6 +139,10 @@ public class SecurityConfig {
     // DaoAuthenticationProvider — AppUserDetailsService + PasswordEncoder.
     // AuthenticationManager — AuthController (ST-AUTH-4) 에서 inject 받아
     //   authenticate(UsernamePasswordAuthenticationToken) 호출. JWT 발급은 별도.
+    //
+    // Sprint 22 ST-SEC-1 — Spring Security 6.4+ 에서 no-arg 생성자 + setUserDetailsService 가
+    //   deprecated. UserDetailsService 를 생성자 주입으로 전환 (setPasswordEncoder 는 유지 — 비-deprecated).
+    //   AuthenticationManager bean 자체는 AuthController 의존이므로 유지.
     // =========================================================================
 
     @Bean
@@ -149,8 +153,7 @@ public class SecurityConfig {
     @Bean
     AuthenticationManager authenticationManager(AppUserDetailsService userDetailsService,
                                                 PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return new ProviderManager(provider);
     }
