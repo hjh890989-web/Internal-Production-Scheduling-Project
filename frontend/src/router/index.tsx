@@ -20,6 +20,12 @@ const UserAdminPage = lazy(() => import('@/pages/master/UserAdminPage'))
 const ProductPriorityPage = lazy(() => import('@/pages/master/ProductPriorityPage'))
 const KdOrderPage = lazy(() => import('@/pages/master/KdOrderPage'))
 const ProductSpecPage = lazy(() => import('@/pages/master/ProductSpecPage'))
+// Sprint 21 EP-CRUD-MASTER-2 — 5 entity CRUD UI (IT_OPS 자체 운영)
+const VcMachineAdminPage = lazy(() => import('@/pages/master/VcMachineAdminPage'))
+const SettingGroupAdminPage = lazy(() => import('@/pages/master/SettingGroupAdminPage'))
+const VcConstraintAdminPage = lazy(() => import('@/pages/master/VcConstraintAdminPage'))
+const LineAdminPage = lazy(() => import('@/pages/master/LineAdminPage'))
+const HolidayAdminPage = lazy(() => import('@/pages/master/HolidayAdminPage'))
 // Sprint 13 EP-OC-FULL — Diff 검토 페이지 (PLANNER + IT_OPS + READ_ONLY)
 const DiffPage = lazy(() => import('@/pages/DiffPage'))
 
@@ -174,6 +180,57 @@ export const router = createBrowserRouter([
           <RoleGuard roles={['IT_OPS']}>
             <Suspense fallback={fallback}>
               <ProductSpecPage />
+            </Suspense>
+          </RoleGuard>
+        ),
+      },
+      // Sprint 21 EP-CRUD-MASTER-2 — 5 entity CRUD UI (IT_OPS 전용)
+      {
+        path: 'master/machine',
+        element: (
+          <RoleGuard roles={['IT_OPS']}>
+            <Suspense fallback={fallback}>
+              <VcMachineAdminPage />
+            </Suspense>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'master/setting-group',
+        element: (
+          <RoleGuard roles={['IT_OPS']}>
+            <Suspense fallback={fallback}>
+              <SettingGroupAdminPage />
+            </Suspense>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'master/vc-constraint',
+        element: (
+          <RoleGuard roles={['IT_OPS']}>
+            <Suspense fallback={fallback}>
+              <VcConstraintAdminPage />
+            </Suspense>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'master/line',
+        element: (
+          <RoleGuard roles={['IT_OPS']}>
+            <Suspense fallback={fallback}>
+              <LineAdminPage />
+            </Suspense>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'master/holiday',
+        element: (
+          <RoleGuard roles={['IT_OPS']}>
+            <Suspense fallback={fallback}>
+              <HolidayAdminPage />
             </Suspense>
           </RoleGuard>
         ),

@@ -14,8 +14,9 @@ interface MasterCard {
 /**
  * Sprint 12 EP-MASTER-UI Hub 페이지 (TK-MASTER-1-1, IT_OPS 권한).
  *
- * <p>마스터 데이터 4 카드 진입점 — 사용자/우선순위/KD/품번. Sprint 14 EP-VC-FULL 진입 시
- * 장비/셋팅그룹 등 추가. RoleGuard IT_OPS 가 상위 router 에서 처리.
+ * <p>마스터 데이터 진입점. Sprint 21 EP-CRUD-MASTER-2 (ST-CRUD-6) 에서 장비/셋팅그룹/
+ * 합금형 제약/라인/휴일 5 entity 카드 활성 — IT_OPS 마스터 전체 자체 운영.
+ * RoleGuard IT_OPS 가 상위 router 에서 처리.
  */
 export default function MasterHubPage() {
   const navigate = useNavigate()
@@ -52,16 +53,37 @@ export default function MasterHubPage() {
     {
       key: 'machine',
       title: '장비 (LP/IC)',
-      description: 'Sprint 14 EP-VC-FULL 진입 후 활성',
+      description: 'LP-01~04 + IC-01 · 회전수(주/야) + active toggle (BR-V04)',
       path: '/master/machine',
-      enabled: false,
+      enabled: true,
     },
     {
       key: 'setting-group',
-      title: '셋팅 그룹 + 합금형',
-      description: 'Sprint 14 EP-VC-FULL 진입 후 활성',
+      title: '셋팅 그룹 (1~8)',
+      description: 'setting_group 1~8 + active toggle (BR-V12/V13)',
       path: '/master/setting-group',
-      enabled: false,
+      enabled: true,
+    },
+    {
+      key: 'vc-constraint',
+      title: '성형 제약 + 합금형',
+      description: '47 품번 composite_count(1·2·3·6) + slot 가용성 + mold_qty (BR-V14)',
+      path: '/master/vc-constraint',
+      enabled: true,
+    },
+    {
+      key: 'line',
+      title: '라인 (line_type)',
+      description: 'line_type CRUD + product 호환 매핑',
+      path: '/master/line',
+      enabled: true,
+    },
+    {
+      key: 'holiday',
+      title: '휴일 (HOLIDAY)',
+      description: '연도별 휴일 추가/삭제 · WorkingCalendar 정합 (BR-X04 KST)',
+      path: '/master/holiday',
+      enabled: true,
     },
   ]
 
