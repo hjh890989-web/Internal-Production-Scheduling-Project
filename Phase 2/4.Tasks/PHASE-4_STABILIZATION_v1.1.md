@@ -104,7 +104,7 @@
 | Story | 내용 | SP |
 |---|---|:--:|
 | ST-FB-1 | 매뉴얼 스크린샷 추가 — `docs/manual/screenshots/` 4 role × 5+ 핵심 화면 (실 운영 후) | 1.0 |
-| ST-FB-2 | UX 미세 조정 — Drawer 위치 / Batch 확정 selectAll UI / DegradedBanner 시각 + **AG Grid Community Range Selection 폴백 사용자 피드백** 반영 | 1.5 |
+| ST-FB-2 | UX 미세 조정 — Drawer 위치 / Batch 확정 selectAll UI / DegradedBanner 시각 + **AG Grid Community Range Selection 폴백 사용자 피드백** 반영 + **Sprint 21 vitest 7 skip 정비 (AntD Portal/Calendar/Popconfirm jsdom 호환 패턴 일괄 정립)** | 1.5 |
 | ST-FB-3 | Grafana alert rule 정교화 — 1개월 운영 데이터 기반 threshold 재조정 (Critical retry / HTTP p95) — **Kakao 도달률 deferred** | 1.0 |
 | ST-FB-4 | 베타 보고서 v1.0 — 1개월 KPI 측정 결과 + Sprint 25 PROD 진입 권고 + **Kakao 부활 필요성 판단** | 0.5 |
 
