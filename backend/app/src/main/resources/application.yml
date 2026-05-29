@@ -50,6 +50,16 @@ scheduling:
     buffer-size-bytes: 4096
     timeout-seconds: 60                 # REQ-NF-PER-001
 
+  # Sprint 23 EP-MES-ADAPTER-1 — MES 실적 수신 adapter (BR-X06)
+  # adapter=jpa (default) — DB stub (DEV/STG). adapter=http — 실 MES REST polling (PROD).
+  # 실 vendor spec 미확보 — mock contract 기준. Phase 5+ 실 spec DTO 교체.
+  mes:
+    adapter: ${MES_ADAPTER:jpa}
+    http:
+      base-url: ${MES_URL:}
+      bearer-token: ${MES_TOKEN:}
+      timeout-seconds: 10
+
   # TK-03-2-3 Critical 분류 임계치 (BR-O02 / REQ-FUNC-OC-008)
   severity:
     qty-change-threshold-pct: 0.20      # BR-O02 ±20%
@@ -195,6 +205,16 @@ resilience4j:
           - java.io.IOException
           - org.springframework.web.client.RestClientException
           - org.springframework.web.client.HttpServerErrorException
+      # Sprint 23 EP-MES-ADAPTER-1 — MES HTTP polling retry (TK-MES-1-4)
+      mes:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.io.IOException
+          - org.springframework.web.client.RestClientException
+          - org.springframework.web.client.HttpServerErrorException
+          - org.springframework.web.client.ResourceAccessException
   circuitbreaker:
     instances:
       kakaotalk:
@@ -206,6 +226,14 @@ resilience4j:
         automatic-transition-from-open-to-half-open-enabled: true
       # Sprint 18 EP-NOTIFY — Slack webhook circuit breaker (TK-NOTIFY-3-1)
       slack:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+      # Sprint 23 EP-MES-ADAPTER-1 — MES HTTP polling circuit breaker (TK-MES-1-4)
+      mes:
         sliding-window-size: 10
         minimum-number-of-calls: 5
         failure-rate-threshold: 50

@@ -16,6 +16,8 @@ dependencies {
     implementation(libs.spring.modulith.starter.core)
     implementation(libs.spring.modulith.events.api)
     implementation("io.micrometer:micrometer-core")     // Sprint 8 EP-V13-Grafana CapacityOverflowMetrics
+    implementation("org.springframework.boot:spring-boot-starter-aop")  // Sprint 23 ST-MES-1 Resilience4j @Retry AspectJ
+    implementation(libs.resilience4j.spring.boot3)        // Sprint 23 ST-MES-1 MES HTTP @Retry + @CircuitBreaker
     // spring-modulith-starter-jpa 는 Sprint 1+ Task에서 활성
 
     testImplementation(libs.spring.boot.starter.test)
