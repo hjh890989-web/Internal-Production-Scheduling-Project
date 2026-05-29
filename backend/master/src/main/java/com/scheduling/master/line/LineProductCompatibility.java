@@ -39,6 +39,14 @@ public class LineProductCompatibility {
 
     protected LineProductCompatibility() {}
 
+    /** ST-CRUD-4 LineAdminService product 호환 매핑 생성 경로. */
+    public LineProductCompatibility(String hoseId, String lineId, boolean fordOnly, String updatedBy) {
+        this.hoseId = hoseId;
+        this.lineId = lineId;
+        this.fordOnly = fordOnly;
+        this.updatedBy = updatedBy;
+    }
+
     public String getHoseId() { return hoseId; }
     public String getLineId() { return lineId; }
     public boolean isFordOnly() { return fordOnly; }

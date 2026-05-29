@@ -10,4 +10,8 @@ public interface LineProductCompatibilityRepository
     List<LineProductCompatibility> findByHoseId(String hoseId);
 
     List<LineProductCompatibility> findByHoseIdAndFordOnlyTrue(String hoseId);
+
+    List<LineProductCompatibility> findByLineId(String lineId);
+
+    void deleteByLineId(String lineId);
 }

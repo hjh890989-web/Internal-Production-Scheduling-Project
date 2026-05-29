@@ -40,6 +40,29 @@ public class LineType {
 
     protected LineType() {}
 
+    /** ST-CRUD-4 LineAdminService 생성 경로. */
+    public LineType(String lineId, String lineType, short priority,
+                    boolean active, String description, String updatedBy) {
+        this.lineId = lineId;
+        this.lineType = lineType;
+        this.priority = priority;
+        this.active = active;
+        this.description = description;
+        this.updatedBy = updatedBy;
+    }
+
+    public void deactivate(String actor) {
+        this.active = false;
+        this.updatedBy = actor;
+    }
+
+    public void update(String lineType, short priority, String description, String actor) {
+        this.lineType = lineType;
+        this.priority = priority;
+        this.description = description;
+        this.updatedBy = actor;
+    }
+
     public String getLineId() { return lineId; }
     public String getLineType() { return lineType; }
     public short getPriority() { return priority; }
