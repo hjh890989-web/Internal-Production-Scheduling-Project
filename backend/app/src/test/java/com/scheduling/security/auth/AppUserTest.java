@@ -122,7 +122,7 @@ class AppUserTest {
     }
 
     @Test
-    @DisplayName("changePin → 신 hash + failedAttempts/lockedUntil reset")
+    @DisplayName("changePin → 신 hash + failedAttempts/lockedUntil reset + last_pin_change_at 갱신")
     void change_pin_resets_lock() {
         AppUser user = new AppUser("12345678", BCRYPT_SAMPLE_60, AppUser.Role.PLANNER);
         user.recordFailure();
@@ -130,10 +130,26 @@ class AppUserTest {
         user.lock(Instant.now().plusSeconds(600));
 
         String newHash = "$2a$12$98765432109876543210987654321098765432109876543210987";
-        user.changePin(newHash);
+        Instant changedAt = Instant.parse("2026-05-29T04:00:00Z");
+        user.changePin(newHash, changedAt);
 
         assertThat(user.getPinHash()).isEqualTo(newHash);
         assertThat(user.getFailedAttempts()).isZero();
         assertThat(user.getLockedUntil()).isNull();
+        assertThat(user.getLastPinChangeAt()).isEqualTo(changedAt);
+    }
+
+    @Test
+    @DisplayName("isPinExpired — 31일 경과 true / 29일 false (NFR-SEC-007 30일)")
+    void pin_expiry_boundary() {
+        AppUser user = new AppUser("12345678", BCRYPT_SAMPLE_60, AppUser.Role.PLANNER);
+        Instant now = Instant.parse("2026-05-29T00:00:00Z");
+        java.time.Duration maxAge = java.time.Duration.ofDays(30);
+
+        user.changePin(BCRYPT_SAMPLE_60, now.minus(java.time.Duration.ofDays(31)));
+        assertThat(user.isPinExpired(now, maxAge)).isTrue();
+
+        user.changePin(BCRYPT_SAMPLE_60, now.minus(java.time.Duration.ofDays(29)));
+        assertThat(user.isPinExpired(now, maxAge)).isFalse();
     }
 }

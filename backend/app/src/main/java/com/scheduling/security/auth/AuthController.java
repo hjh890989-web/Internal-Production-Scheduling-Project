@@ -47,13 +47,16 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final LoginAttemptService loginAttemptService;
+    private final PinPolicyService pinPolicyService;
 
     public AuthController(AuthenticationManager authenticationManager,
                           JwtService jwtService,
-                          LoginAttemptService loginAttemptService) {
+                          LoginAttemptService loginAttemptService,
+                          PinPolicyService pinPolicyService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.loginAttemptService = loginAttemptService;
+        this.pinPolicyService = pinPolicyService;
     }
 
     public record LoginRequest(
@@ -61,7 +64,14 @@ public class AuthController {
         @NotBlank @Pattern(regexp = "^[0-9]{4}$", message = "PIN 4자리 숫자") String pin
     ) {}
 
-    public record LoginResponse(String token, String employeeId, String role, Instant expiresAt) {}
+    /** Sprint 22 ST-SEC-2 — {@code pinExpired} 추가 (true 시 프론트가 강제 변경 화면 노출). */
+    public record LoginResponse(String token, String employeeId, String role,
+                                Instant expiresAt, boolean pinExpired) {}
+
+    public record ChangePinRequest(
+        @NotBlank @Pattern(regexp = "^[0-9]{4}$", message = "현재 PIN 4자리 숫자") String currentPin,
+        @NotBlank @Pattern(regexp = "^[0-9]{4}$", message = "새 PIN 4자리 숫자") String newPin
+    ) {}
 
     @PostMapping("/login")
     @PreAuthorize("permitAll()")    // ArchUnit PreAuthorizeArchTest 정합 — anonymous 도달 명시
@@ -82,9 +92,13 @@ public class AuthController {
 
             JwtService.TokenResult result = jwtService.generate(req.employeeId(), role);
 
-            log.info("EP-AUTH login success — employee_id={} role={}", req.employeeId(), role);
+            // Sprint 22 ST-SEC-2 — PIN 30일 만료 시 pinExpired=true (프론트 강제 변경 화면)
+            boolean pinExpired = pinPolicyService.isPinExpired(req.employeeId());
+
+            log.info("EP-AUTH login success — employee_id={} role={} pinExpired={}",
+                req.employeeId(), role, pinExpired);
             return ResponseEntity.ok(new LoginResponse(
-                result.token(), req.employeeId(), role, result.expiresAt()));
+                result.token(), req.employeeId(), role, result.expiresAt(), pinExpired));
 
         } catch (LockedException e) {
             log.warn("EP-AUTH login locked — employee_id={}", req.employeeId());
@@ -95,6 +109,38 @@ public class AuthController {
             log.info("EP-AUTH login failed — employee_id={}", req.employeeId());
             return problem(HttpStatus.UNAUTHORIZED, "사번 또는 PIN 불일치");
         }
+    }
+
+    /**
+     * Sprint 22 ST-SEC-2/4 — 인증된 본인 PIN 변경 (강제 변경 화면 / 자가 변경).
+     *
+     * <p>현재 PIN 재인증 후 새 PIN 적용 + last_pin_change_at = now (30일 clock reset).
+     * 사번은 JWT principal (sub) 에서 추출 — body 사번 위조 방지.
+     *
+     * <ul>
+     *   <li>200 OK — 변경 완료 (이후 로그인 pinExpired=false)</li>
+     *   <li>401 — 현재 PIN 불일치</li>
+     *   <li>423 — 5회 실패 누적 잠금</li>
+     * </ul>
+     */
+    @PostMapping("/change-pin")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> changePin(@RequestBody @Valid ChangePinRequest req,
+                                       java.security.Principal principal) {
+        String employeeId = principal.getName();
+        try {
+            authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(employeeId, req.currentPin()));
+        } catch (LockedException e) {
+            return problem(HttpStatus.LOCKED, "계정 잠금 — 5회 실패 후 10분 잠금 적용");
+        } catch (BadCredentialsException | UsernameNotFoundException e) {
+            loginAttemptService.recordFailure(employeeId);
+            return problem(HttpStatus.UNAUTHORIZED, "현재 PIN 불일치");
+        }
+        pinPolicyService.changeOwnPin(employeeId, req.newPin());
+        loginAttemptService.recordSuccess(employeeId);
+        log.info("EP-SEC-HARDEN change-pin success — employee_id={}", employeeId);
+        return ResponseEntity.ok().build();
     }
 
     private static ResponseEntity<ProblemDetail> problem(HttpStatus status, String detail) {

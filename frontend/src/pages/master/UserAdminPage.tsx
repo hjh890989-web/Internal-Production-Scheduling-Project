@@ -64,7 +64,10 @@ export default function UserAdminPage() {
     if (!resetPin.employeeId) return
     try {
       await userAdminApi.resetPin(resetPin.employeeId, values.newPin)
-      message.success(`PIN reset 완료 — ${resetPin.employeeId} / 새 PIN ${values.newPin}`)
+      message.success(
+        `PIN reset 완료 — ${resetPin.employeeId} / 임시 PIN ${values.newPin}. ` +
+        `해당 사용자는 첫 로그인 시 PIN 강제 변경 (ST-SEC-4).`,
+      )
       setResetPin({ open: false, employeeId: null })
       await reload()
     } catch {

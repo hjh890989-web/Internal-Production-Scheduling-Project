@@ -58,6 +58,8 @@ export interface LoginResponse {
   employeeId: string
   role: Role
   expiresAt: string
+  /** Sprint 22 ST-SEC-2 — true 시 PIN 30일 만료 → 강제 변경 화면 노출 (NFR-SEC-007). */
+  pinExpired: boolean
 }
 
 export async function login(employeeId: string, pin: string): Promise<LoginResponse> {
@@ -71,4 +73,22 @@ export async function login(employeeId: string, pin: string): Promise<LoginRespo
     throw new HttpError(res.status, body)
   }
   return body as LoginResponse
+}
+
+/**
+ * Sprint 22 ST-SEC-2 — 인증된 본인 PIN 변경 (강제 변경 화면 / 자가 변경).
+ *
+ * apiFetch 우회 — setSession 전(강제 변경 중) 발급 직후 토큰을 명시 전달. 401 시 redirect 안 함
+ * (모달에서 에러 표시). 성공 시 호출자가 setSession + navigate.
+ */
+export async function changePin(token: string, currentPin: string, newPin: string): Promise<void> {
+  const res = await fetch('/api/v1/auth/change-pin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ currentPin, newPin }),
+  })
+  if (!res.ok) {
+    const body: unknown = await res.json().catch(() => null)
+    throw new HttpError(res.status, body)
+  }
 }

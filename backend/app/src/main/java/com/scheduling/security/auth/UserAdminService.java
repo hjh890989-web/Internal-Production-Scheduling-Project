@@ -9,6 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -22,12 +25,17 @@ public class UserAdminService {
 
     private static final Logger log = LoggerFactory.getLogger(UserAdminService.class);
 
+    /** Sprint 22 ST-SEC-4 — reset 시 강제 만료 폭 (30일 정책보다 크게 → 첫 로그인 즉시 pinExpired). */
+    private static final Duration FORCE_EXPIRE_OFFSET = Duration.ofDays(31);
+
     private final AppUserRepository repository;
     private final PasswordEncoder passwordEncoder;
+    private final Clock clock;
 
-    public UserAdminService(AppUserRepository repository, PasswordEncoder passwordEncoder) {
+    public UserAdminService(AppUserRepository repository, PasswordEncoder passwordEncoder, Clock clock) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.clock = clock;
     }
 
     public List<AppUser> list() {
@@ -45,13 +53,20 @@ public class UserAdminService {
         return repository.save(user);
     }
 
-    @Auditable("EP-MASTER-UI 사용자 PIN reset (IT_OPS)")
+    /**
+     * IT_OPS PIN reset — 임시 PIN 적용 + 강제 만료 (ST-SEC-4).
+     *
+     * <p>last_pin_change_at = now - 31일 강제 set → 대상 사용자 첫 로그인 시 pinExpired=true →
+     * 강제 변경 화면. 임시 PIN 그대로 운영 사용 방지 (NFR-SEC-007).
+     */
+    @Auditable("EP-MASTER-UI 사용자 PIN reset (IT_OPS, 강제 만료)")
     @Transactional
     public void resetPin(String employeeId, String newRawPin) {
         AppUser user = loadUser(employeeId);
-        user.changePin(passwordEncoder.encode(newRawPin));
+        Instant forcedExpiry = clock.instant().minus(FORCE_EXPIRE_OFFSET);
+        user.changePin(passwordEncoder.encode(newRawPin), forcedExpiry);
         repository.save(user);
-        log.info("EP-MASTER-UI user PIN reset — employee_id={}", employeeId);
+        log.info("EP-MASTER-UI user PIN reset (강제 만료) — employee_id={}", employeeId);
     }
 
     @Auditable("EP-MASTER-UI 사용자 잠금 해제 (IT_OPS)")

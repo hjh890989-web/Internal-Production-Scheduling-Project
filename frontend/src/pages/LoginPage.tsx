@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Button, Card, Form, Input, Typography, Alert } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { login, HttpError } from '@/api/client'
+import { login, changePin, HttpError, type LoginResponse } from '@/api/client'
 import { useAuthStore } from '@/stores/authStore'
+import PinForceChangeModal from '@/components/PinForceChangeModal'
 
 const { Title, Text } = Typography
 
@@ -28,20 +29,37 @@ export default function LoginPage() {
   const setSession = useAuthStore((s) => s.setSession)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  // Sprint 22 ST-SEC-2 — pinExpired 로그인 시 강제 변경 모달 (현재 PIN + 발급 토큰 보관)
+  const [pinChange, setPinChange] = useState<{ res: LoginResponse; currentPin: string } | null>(null)
 
   const from = (location.state as LocationState)?.from ?? '/home'
+
+  const completeLogin = (res: LoginResponse) => {
+    setSession(res.token, {
+      employeeId: res.employeeId,
+      role: res.role,
+      expiresAt: res.expiresAt,
+    })
+    navigate(from, { replace: true })
+  }
+
+  const handleForcePinChange = async (newPin: string) => {
+    if (!pinChange) return
+    await changePin(pinChange.res.token, pinChange.currentPin, newPin)
+    completeLogin(pinChange.res)
+  }
 
   const handleSubmit = async (values: LoginFormValues) => {
     setError(null)
     setSubmitting(true)
     try {
       const res = await login(values.employeeId, values.pin)
-      setSession(res.token, {
-        employeeId: res.employeeId,
-        role: res.role,
-        expiresAt: res.expiresAt,
-      })
-      navigate(from, { replace: true })
+      // PIN 30일 만료 → 강제 변경 모달 (변경 완료 후에만 진입)
+      if (res.pinExpired) {
+        setPinChange({ res, currentPin: values.pin })
+        return
+      }
+      completeLogin(res)
     } catch (e) {
       if (e instanceof HttpError) {
         if (e.status === 423) {
@@ -149,6 +167,8 @@ export default function LoginPage() {
           </Form.Item>
         </Form>
       </Card>
+
+      <PinForceChangeModal open={pinChange != null} onSubmit={handleForcePinChange} />
     </div>
   )
 }

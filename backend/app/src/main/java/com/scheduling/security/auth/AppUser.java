@@ -51,6 +51,16 @@ public class AppUser {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /**
+     * Sprint 22 ST-SEC-2 — PIN 마지막 변경 시각 (NFR-SEC-007 30일 강제 변경 기준).
+     *
+     * <p>{@code @CreationTimestamp} — INSERT 시 Hibernate 가 자동 설정 (신규 사용자 = PIN 최초 설정).
+     * {@link #changePin(String, Instant)} 가 이후 UPDATE 로 갱신 (Clock 주입 시각 — BR-X04).
+     */
+    @CreationTimestamp
+    @Column(name = "last_pin_change_at", nullable = false)
+    private Instant lastPinChangeAt;
+
     protected AppUser() {}
 
     public AppUser(String employeeId, String pinHash, Role role) {
@@ -93,14 +103,30 @@ public class AppUser {
         return lockedUntil != null && lockedUntil.isAfter(now);
     }
 
-    /** PIN 변경 — IT_OPS UI 또는 비밀번호 재설정 flow. */
-    public void changePin(String newPinHash) {
+    /**
+     * PIN 변경 — IT_OPS reset / 자가 강제 변경 flow.
+     *
+     * <p>Sprint 22 ST-SEC-2 — {@code changedAt} 으로 {@code last_pin_change_at} 갱신.
+     * 자가 변경 시 {@code clock.instant()} (30일 clock reset), IT_OPS reset 시 {@code now-31d}
+     * (강제 만료 → 첫 로그인 강제 변경, ST-SEC-4).
+     */
+    public void changePin(String newPinHash, Instant changedAt) {
         if (newPinHash == null || newPinHash.length() != 60) {
             throw new IllegalArgumentException("pin_hash BCrypt 60 char 필수");
         }
+        if (changedAt == null) {
+            throw new IllegalArgumentException("changedAt 필수 (BR-X04 Clock 주입)");
+        }
         this.pinHash = newPinHash;
+        this.lastPinChangeAt = changedAt;
         this.failedAttempts = 0;
         this.lockedUntil = null;
+    }
+
+    /** PIN 만료 여부 — now - last_pin_change_at 이 maxAge 초과 시 true (NFR-SEC-007). */
+    public boolean isPinExpired(Instant now, java.time.Duration maxAge) {
+        return lastPinChangeAt != null
+            && java.time.Duration.between(lastPinChangeAt, now).compareTo(maxAge) > 0;
     }
 
     public String getEmployeeId() { return employeeId; }
@@ -110,6 +136,7 @@ public class AppUser {
     public Instant getLockedUntil() { return lockedUntil; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public Instant getLastPinChangeAt() { return lastPinChangeAt; }
 
     /** RBAC 4 역할 — {@link RoleConstants} 와 명칭 정합. */
     public enum Role {
