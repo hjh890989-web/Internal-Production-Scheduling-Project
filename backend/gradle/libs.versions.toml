@@ -25,6 +25,7 @@ springdoc           = "2.6.0"
 flyway              = "10.20.1"
 problem-spring-web  = "0.29.1"
 resilience4j        = "2.2.0"
+wiremock            = "3.10.0"          # Sprint 23 EP-MES-ADAPTER-1 — MES HTTP adapter IT
 
 [libraries]
 # Spring Boot starters
@@ -69,6 +70,9 @@ archunit-junit5                = { module = "com.tngtech.archunit:archunit-junit
 # Resilience4j — Sprint 6 EP-41
 resilience4j-spring-boot3      = { module = "io.github.resilience4j:resilience4j-spring-boot3", version.ref = "resilience4j" }
 resilience4j-reactor           = { module = "io.github.resilience4j:resilience4j-reactor", version.ref = "resilience4j" }
+
+# WireMock — Sprint 23 EP-MES-ADAPTER-1 MES HTTP adapter IT (standalone shaded — Jetty 충돌 회피)
+wiremock-standalone            = { module = "org.wiremock:wiremock-standalone", version.ref = "wiremock" }
 
 [bundles]
 spring-web      = ["spring-boot-starter-web", "spring-boot-starter-validation", "spring-boot-starter-actuator", "micrometer-registry-prometheus"]

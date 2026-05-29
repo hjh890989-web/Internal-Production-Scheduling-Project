@@ -51,9 +51,12 @@ public class HttpMesShiftClient implements MesShiftClient {
         this.restClient = RestClient.builder().requestFactory(factory).build();
     }
 
+    // fallbackMethod 는 @Retry(최외곽 aspect)에 둔다 — @CircuitBreaker 에 두면 첫 실패에서
+    // 즉시 fallback → @Retry 가 예외를 못 보고 재시도 0회. Retry(CB(method)) 순서에서
+    // 3회 재시도 소진 후 fallback 발동 (circuit OPEN 시 CallNotPermittedException 은 retry 대상 외 → 즉시 empty).
     @Override
-    @Retry(name = "mes")
-    @CircuitBreaker(name = "mes", fallbackMethod = "fetchFallback")
+    @Retry(name = "mes", fallbackMethod = "fetchFallback")
+    @CircuitBreaker(name = "mes")
     public Optional<MesShiftResponse> fetchShift(String machineId, LocalDate shiftDate, short shiftNo) {
         MesShiftResponse body = restClient.get()
             .uri(baseUrl + "/api/mes/shift?machine={m}&date={d}&shift_no={s}",

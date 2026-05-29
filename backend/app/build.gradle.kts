@@ -33,6 +33,10 @@ dependencies {
     testImplementation(libs.spring.security.test)
     // TK-04-2-3 UnschedulableFilterIT — POI XSSF 재읽기 검증
     testImplementation(libs.apache.poi)
+    // Sprint 23 ST-MES-3 — MES HTTP adapter WireMock IT (4 시나리오)
+    testImplementation(libs.wiremock.standalone)
+    // Sprint 23 ST-MES-3 — CircuitBreakerRegistry 직접 reset (테스트 격리). vc/notify transitive 라 test 노출 명시
+    testImplementation(libs.resilience4j.spring.boot3)
 }
 
 // Sprint 20 hotfix — bootRun 시 with-infra profile 자동 활성.
