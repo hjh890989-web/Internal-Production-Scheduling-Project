@@ -97,13 +97,28 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - frontend-static:/usr/share/nginx/html:ro
     # PROD 는 DEV 의 backend depends_on 완전 교체 — !reset 으로 명시 (Compose v2.24+)
+    # Issue#2 fix: backend-green 추가 — 최초 부팅 시 blue + green 동시 기동 후 nginx 가 대기
+    # (Blue/Green 운영 중 nginx 는 prod-active.conf 로 라우팅 대상 결정 — 양쪽 기동 무관)
     depends_on: !reset
       backend-blue:
         condition: service_healthy
+      backend-green:
+        condition: service_healthy
       frontend:
         condition: service_healthy
-      # backend-green 는 별도 sidecar — nginx 가 기다리지 않음 (운영 시 활성)
     ports:
       # PROD 는 0.0.0.0:80, 0.0.0.0:443 (사내망 IP whitelist 는 별도 firewall)
       - "80:80"
       - "443:443"
+
+  # ---------------------------------------------------------------------------
+  # Prometheus — base 의 backend.depends_on 을 backend-blue/green 으로 재정의
+  # Sprint 25 ST-PROD-3 verify 발견 fix — base prometheus.depends_on backend (line 241-243)
+  # 가 prod 에서 backend disabled (line 20~22 profiles __disabled__) 와 reference 충돌
+  # ---------------------------------------------------------------------------
+  prometheus:
+    depends_on: !reset
+      backend-blue:
+        condition: service_healthy
+      backend-green:
+        condition: service_healthy
