@@ -1,0 +1,161 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Sprint 24 S24-A ST-FB-3 — Sprint 23 EP-MES-ADAPTER-1 (MES HTTP polling adapter) 시각화. MES polling 성공률 · circuit breaker 상태 · HTTP p95 latency · retry kind 분포 · DegradedMode 머신 수 5 panel. notify-sprint18.json 의 Slack circuit 패널 구조를 mes 로 매핑.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "MES polling 성공률 (5m rate)",
+      "type": "gauge",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(resilience4j_retry_calls_total{name=\"mes\",kind=\"successful_without_retry\"}[5m])) / sum(rate(resilience4j_retry_calls_total{name=\"mes\"}[5m]))",
+          "legendFormat": "success rate",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 0.8 },
+              { "color": "green", "value": 0.95 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 2,
+      "title": "MES circuit breaker state",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "resilience4j_circuitbreaker_state{name=\"mes\"}",
+          "legendFormat": "{{state}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "CLOSED", "color": "green" } } },
+            { "type": "value", "options": { "1": { "text": "OPEN", "color": "red" } } },
+            { "type": "value", "options": { "2": { "text": "HALF_OPEN", "color": "yellow" } } }
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "MES HTTP p95 latency (/mes/shift)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_client_requests_seconds_bucket{uri=~\".*mes/shift.*\"}[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.8 },
+              { "color": "red", "value": 2 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "MES retry calls rate by kind",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum by (kind) (rate(resilience4j_retry_calls_total{name=\"mes\"}[5m]))",
+          "legendFormat": "{{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ops" }
+      }
+    },
+    {
+      "id": 5,
+      "title": "MES DegradedMode 머신 수 (BR-X06)",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "scheduling_mes_degraded_machines",
+          "legendFormat": "degraded",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 3 }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["sprint23", "ep-mes-adapter", "br-x06"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "Asia/Seoul",
+  "title": "EP-MES-ADAPTER — Sprint 23 (MES polling · circuit · p95 · retry · degraded)",
+  "uid": "ep-mes-adapter-sprint23",
+  "version": 1,
+  "weekStart": ""
+}

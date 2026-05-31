@@ -1,0 +1,82 @@
+# =============================================================================
+# baseline-alerts.yml
+# Sprint 24 S24-A ST-FB-3 — Sprint 23 EP-MES-ADAPTER-1 baseline alert rules.
+#
+# Format: Prometheus recording/alerting rules (rules.yml) — Grafana 11
+# alerting 의 "Prometheus rules" import 또는 Prometheus rule_files 로 로드.
+# Datasource uid 는 dashboards/mes-sprint23.json 와 동일 "Prometheus".
+#
+# 4 rule:
+#   - MesRetryCriticalRate    — retry 의 failed_without_retry > 0.05 / 5m
+#   - MesFetchP95High         — /mes/shift p95 > 800ms / 10m
+#   - MesCircuitOpen          — circuit state == OPEN(1) / 1m
+#   - MesDegradedSixHours     — degraded machines > 0 / 6h (BR-X06 장기화)
+#
+# runbook_url 는 docs/user-manual/USER_MANUAL_v1.5.md §3.6.5 MES 장애 대응.
+# =============================================================================
+groups:
+  - name: mes-adapter-baseline
+    interval: 30s
+    rules:
+
+      - alert: MesRetryCriticalRate
+        expr: sum(rate(resilience4j_retry_calls_total{name="mes",kind="failed_without_retry"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: mes-adapter
+          br: BR-X06
+        annotations:
+          summary: "MES polling retry 실패율 critical (>0.05/s)"
+          description: |
+            MES HTTP polling 의 5분 평균 failed_without_retry rate 가 0.05/s 를 초과했습니다.
+            (max-attempts=3 모두 실패한 호출이 5초당 1회 이상 발생 중)
+            BR-X06 fallback 이 다수 trigger 되는 상황 — MES vendor 측 장애 의심.
+            대응: 1) MES 서버 상태 확인 2) MES_URL/MES_TOKEN env 검증 3) 장기화 시 Excel 폴백 안내.
+          runbook_url: "docs/user-manual/USER_MANUAL_v1.5.md#365-mes-장애-대응"
+
+      - alert: MesFetchP95High
+        expr: histogram_quantile(0.95, sum(rate(http_client_requests_seconds_bucket{uri=~".*mes/shift.*"}[5m])) by (le)) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          service: mes-adapter
+          br: BR-X06
+        annotations:
+          summary: "MES /mes/shift p95 latency 800ms 초과 (10m)"
+          description: |
+            MES shift 조회 HTTP p95 응답 시간이 10분 연속 800ms 를 초과했습니다.
+            polling timeout(10s) 도달 위험 — 임박 시 retry/circuit 동작 가능성.
+            대응: 1) MES 네트워크 RTT 확인 2) MES DB 부하 vendor 측 문의 3) timeout-seconds 조정 검토.
+          runbook_url: "docs/user-manual/USER_MANUAL_v1.5.md#365-mes-장애-대응"
+
+      - alert: MesCircuitOpen
+        expr: resilience4j_circuitbreaker_state{name="mes"} == 1
+        for: 1m
+        labels:
+          severity: critical
+          service: mes-adapter
+          br: BR-X06
+        annotations:
+          summary: "MES circuit breaker OPEN (BR-X06 fallback 진입)"
+          description: |
+            MES circuit breaker 가 1분 이상 OPEN 상태입니다.
+            (sliding-window=10 · failure-rate=50% 초과로 trigger)
+            모든 MES polling 호출이 차단되어 BR-X06 degraded mode 로 전환됨.
+            wait-duration-in-open-state=30s 후 HALF_OPEN 시도 — 자동 복구 대기 또는 강제 reset 결정.
+          runbook_url: "docs/user-manual/USER_MANUAL_v1.5.md#365-mes-장애-대응"
+
+      - alert: MesDegradedSixHours
+        expr: scheduling_mes_degraded_machines > 0
+        for: 6h
+        labels:
+          severity: critical
+          service: mes-adapter
+          br: BR-X06
+        annotations:
+          summary: "MES degraded 머신이 6시간 이상 지속"
+          description: |
+            scheduling_mes_degraded_machines 가 6시간 연속 0 초과 — 1 shift 미수신 임계 (BR-X06) 장기화.
+            폴백(Excel 수동 입력)이 6시간 이상 운영 중이며, 실적 데이터 누락 위험 높음.
+            대응: 1) MES 운영팀 escalation 2) 현장 작업자에게 Excel 폴백 절차 재공지 3) 미수신 머신별 RCA.
+          runbook_url: "docs/user-manual/USER_MANUAL_v1.5.md#365-mes-장애-대응"
