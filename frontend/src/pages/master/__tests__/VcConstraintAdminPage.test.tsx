@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { ConfigProvider } from 'antd'
 import koKR from 'antd/locale/ko_KR'
 import VcConstraintAdminPage from '../VcConstraintAdminPage'
@@ -34,7 +34,7 @@ describe('VcConstraintAdminPage — Sprint 21 ST-CRUD-3', () => {
   })
 
   /** Case 1: compositeCount=4 는 Select 옵션에 없음 → backend 호출 자체 불가 */
-  // TODO: Sprint 24 EP-OPS-FEEDBACK ST-FB-2 — AntD Drawer + Select dropdown jsdom 호환 (Phase 4 carry-over)
+  // TODO: Sprint 25 또는 Phase 5 Playwright e2e 이전 — AntD Select dropdown jsdom 미지원 (mouseDown 이벤트 미동작)
   it.skip('compositeCount Select 옵션은 1·2·3·6 만 존재 (4 없음)', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValueOnce(
       new Response(JSON.stringify(STUB_ROWS), {
@@ -70,8 +70,8 @@ describe('VcConstraintAdminPage — Sprint 21 ST-CRUD-3', () => {
   })
 
   /** Case 1b: backend 가 400 "BR-V14 위반" 반환 시 에러 메시지 표시 */
-  // TODO: Sprint 24 EP-OPS-FEEDBACK ST-FB-2 — AntD Drawer + fetch timing jsdom 호환 (Phase 4 carry-over)
-  it.skip('backend 400 BR-V14 → 에러 메시지 표시', async () => {
+  // Sprint 24 ST-FB-2: data-testid="vc-constraint-submit" 추가 + within(document.body) Drawer portal scope
+  it('backend 400 BR-V14 → 에러 메시지 표시', async () => {
     // 목록 로드
     vi.spyOn(global, 'fetch')
       .mockResolvedValueOnce(
@@ -94,14 +94,19 @@ describe('VcConstraintAdminPage — Sprint 21 ST-CRUD-3', () => {
     render(withProviders(<VcConstraintAdminPage />))
     await waitFor(() => screen.getByText('29673-2R060'))
 
+    // 테이블의 수정 버튼 클릭 → Drawer 오픈
     fireEvent.click(screen.getByRole('button', { name: '수정' }))
-    await waitFor(() => screen.getByText(/VC 제약 수정/))
+    await waitFor(() => within(document.body).getByText(/VC 제약 수정/))
 
-    // 수정 버튼 (submit) 클릭
-    fireEvent.click(screen.getByRole('button', { name: '수정', hidden: false }))
+    // Drawer portal 내 submit 버튼 — data-testid 로 특정
+    const submitBtn = within(document.body).getByTestId('vc-constraint-submit')
+    fireEvent.click(submitBtn)
 
     await waitFor(() => {
-      expect(screen.getByText(/BR-V14/)).toBeInTheDocument()
+      // AntD message.error 는 .ant-message 컨테이너에 렌더 — static 페이지 텍스트와 구분
+      expect(
+        within(document.body).getByText(/BR-V14 위반/),
+      ).toBeInTheDocument()
     })
   })
 

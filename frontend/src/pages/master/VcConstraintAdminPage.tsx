@@ -257,7 +257,12 @@ export default function VcConstraintAdminPage() {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              data-testid="vc-constraint-submit"
+            >
               {editing ? '수정' : '추가'}
             </Button>
           </Form.Item>

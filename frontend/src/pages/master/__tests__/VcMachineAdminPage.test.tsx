@@ -5,6 +5,7 @@ import koKR from 'antd/locale/ko_KR'
 import VcMachineAdminPage from '../VcMachineAdminPage'
 import { HttpError } from '@/api/client'
 import * as vcMachineApiModule from '@/api/vcMachineApi'
+import { openPopconfirmAndConfirm } from '@/test-utils/antdHelpers'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -85,8 +86,8 @@ describe('VcMachineAdminPage — Sprint 21 ST-CRUD-1', () => {
   })
 
   // Case 3: 비활성 toggle — DELETE 호출 + 안내 메시지 검증
-  // TODO: Sprint 24 EP-OPS-FEEDBACK ST-FB-2 — AntD Popconfirm Portal jsdom 호환 (Phase 4 carry-over)
-  it.skip('활성 기계 비활성화 Popconfirm 확인 → vcMachineApi.delete() 호출', async () => {
+  // Sprint 24 ST-FB-2: openPopconfirmAndConfirm helper (#4 재사용) 로 portal scope 해결
+  it('활성 기계 비활성화 Popconfirm 확인 → vcMachineApi.delete() 호출', async () => {
     vi.spyOn(vcMachineApiModule.vcMachineApi, 'list').mockResolvedValue(MACHINES)
     const deleteSpy = vi.spyOn(vcMachineApiModule.vcMachineApi, 'delete').mockResolvedValueOnce(undefined)
 
@@ -94,16 +95,8 @@ describe('VcMachineAdminPage — Sprint 21 ST-CRUD-1', () => {
 
     await waitFor(() => expect(screen.getByText('LP-01')).toBeInTheDocument())
 
-    // LP-01(active=true) 비활성화 버튼 클릭
-    const deactivateButtons = screen.getAllByText('비활성화')
-    fireEvent.click(deactivateButtons[0]!)
-
-    // Popconfirm OK 클릭
-    await waitFor(() => expect(screen.getByText('비활성화')).toBeInTheDocument())
-    const popOkButtons = screen.getAllByText('비활성화')
-    // Popconfirm 내 확인 버튼 (button role 중 마지막)
-    const confirmBtn = popOkButtons[popOkButtons.length - 1]!
-    fireEvent.click(confirmBtn)
+    // openPopconfirmAndConfirm: 트리거("비활성화") → popup 내 OK("비활성화")
+    await openPopconfirmAndConfirm('비활성화', '비활성화')
 
     await waitFor(() => {
       expect(deleteSpy).toHaveBeenCalledWith('LP-01')

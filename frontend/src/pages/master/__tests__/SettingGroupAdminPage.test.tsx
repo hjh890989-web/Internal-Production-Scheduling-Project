@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { ConfigProvider } from 'antd'
 import koKR from 'antd/locale/ko_KR'
 import SettingGroupAdminPage from '../SettingGroupAdminPage'
+import { openPopconfirmAndConfirm } from '@/test-utils/antdHelpers'
 
 const mockRows = [
   { groupId: 1, displayName: '그룹 A', active: true },
@@ -53,9 +54,9 @@ describe('SettingGroupAdminPage — Sprint 21 ST-CRUD-2', () => {
 
   /**
    * Case 2: EDIT 저장 — PUT + reload
+   * Sprint 24 ST-FB-2: within(document.body) 로 Modal portal scope 해결
    */
-  // TODO: Sprint 24 EP-OPS-FEEDBACK ST-FB-2 — AntD Modal Portal jsdom 호환 (Phase 4 carry-over)
-  it.skip('수정 Modal 저장 → PUT 호출 후 목록 재조회', async () => {
+  it('수정 Modal 저장 → PUT 호출 후 목록 재조회', async () => {
     // 초기 list
     vi.spyOn(global, 'fetch')
       .mockResolvedValueOnce(
@@ -90,12 +91,19 @@ describe('SettingGroupAdminPage — Sprint 21 ST-CRUD-2', () => {
     const editButtons = screen.getAllByText('수정')
     fireEvent.click(editButtons[0]!)
 
-    await waitFor(() => expect(screen.getByTestId('edit-display-name')).toBeInTheDocument())
+    // Modal은 document.body portal에 렌더 — within(document.body)로 scope
+    await waitFor(() =>
+      expect(within(document.body).getByTestId('edit-display-name')).toBeInTheDocument(),
+    )
 
-    const editInput = screen.getByTestId('edit-display-name')
+    const editInput = within(document.body).getByTestId('edit-display-name')
     fireEvent.change(editInput, { target: { value: '그룹 A 수정' } })
 
-    fireEvent.click(screen.getByText('수정', { selector: 'button[type="submit"]' }))
+    // submit 버튼 — document.body 내 type="submit" button
+    const submitBtn = within(document.body).getAllByRole('button', { name: '수정' }).find(
+      (btn) => btn.getAttribute('type') === 'submit',
+    )!
+    fireEvent.click(submitBtn)
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -110,9 +118,9 @@ describe('SettingGroupAdminPage — Sprint 21 ST-CRUD-2', () => {
 
   /**
    * Case 3: 비활성 toggle — DELETE + 안내
+   * Sprint 24 ST-FB-2: openPopconfirmAndConfirm helper 로 portal scope 해결
    */
-  // TODO: Sprint 24 EP-OPS-FEEDBACK ST-FB-2 — AntD Popconfirm Portal jsdom 호환 (Phase 4 carry-over)
-  it.skip('비활성화 Popconfirm 확인 → DELETE 호출 + 성공 메시지', async () => {
+  it('비활성화 Popconfirm 확인 → DELETE 호출 + 성공 메시지', async () => {
     vi.spyOn(global, 'fetch')
       .mockResolvedValueOnce(
         new Response(JSON.stringify(mockRows), {
@@ -136,17 +144,8 @@ describe('SettingGroupAdminPage — Sprint 21 ST-CRUD-2', () => {
 
     await waitFor(() => expect(screen.getByText('그룹 A')).toBeInTheDocument())
 
-    // 첫 번째 활성 그룹의 비활성화 버튼 클릭
-    const deactivateButtons = screen.getAllByText('비활성화')
-    fireEvent.click(deactivateButtons[0]!)
-
-    // Popconfirm 확인 버튼 클릭
-    await waitFor(() => {
-      const popconfirmOk = screen.getAllByText('비활성화').find(
-        el => el.closest('button')?.className.includes('ant-btn-dangerous'),
-      )
-      if (popconfirmOk) fireEvent.click(popconfirmOk)
-    })
+    // openPopconfirmAndConfirm: 트리거("비활성화") 클릭 → popup 내 OK("비활성화") 클릭
+    await openPopconfirmAndConfirm('비활성화', '비활성화')
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
