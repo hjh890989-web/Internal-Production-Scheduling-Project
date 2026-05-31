@@ -102,7 +102,7 @@ export default function ExMatrixPage() {
             key: 'matrix',
             label: '매트릭스 (EP-17)',
             children: (
-              <Card bodyStyle={{ padding: 0 }}>
+              <Card styles={{ body: { padding: 0 } }}>
                 <ExMatrixGrid rows={data ?? []} loading={isLoading} />
               </Card>
             ),

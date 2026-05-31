@@ -138,7 +138,7 @@ export function BatchConfirmModal({
       open={open}
       onCancel={handleClose}
       width={620}
-      destroyOnClose
+      destroyOnHidden
       footer={[
         <Button
           key="cancel"

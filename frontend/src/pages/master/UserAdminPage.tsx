@@ -178,7 +178,7 @@ export default function UserAdminPage() {
         open={createOpen}
         onCancel={() => setCreateOpen(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form layout="vertical" onFinish={handleCreate}>
           <Form.Item
@@ -210,7 +210,7 @@ export default function UserAdminPage() {
         open={resetPin.open}
         onCancel={() => setResetPin({ open: false, employeeId: null })}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Alert
           type="warning"

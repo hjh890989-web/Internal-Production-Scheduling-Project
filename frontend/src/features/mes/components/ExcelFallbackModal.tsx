@@ -87,7 +87,7 @@ export function ExcelFallbackModal({ open, onClose, onSuccess }: Props) {
       open={open}
       onCancel={handleClose}
       width={520}
-      destroyOnClose
+      destroyOnHidden
       footer={[
         <Button key="cancel" onClick={handleClose} disabled={loading} data-testid="fallback-cancel">
           취소

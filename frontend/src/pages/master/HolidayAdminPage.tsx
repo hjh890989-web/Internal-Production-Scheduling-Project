@@ -224,7 +224,7 @@ export default function HolidayAdminPage() {
         open={addModalOpen}
         onCancel={() => setAddModalOpen(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form<AddFormValues>
           form={addForm}

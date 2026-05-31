@@ -185,7 +185,7 @@ export default function VcMachineAdminPage() {
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         {editing && (
           <Paragraph type="secondary" style={{ marginBottom: 16 }}>

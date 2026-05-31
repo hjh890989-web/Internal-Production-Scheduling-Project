@@ -169,7 +169,7 @@ export default function SettingGroupAdminPage() {
         open={createOpen}
         onCancel={() => setCreateOpen(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         {createError && (
           <div
@@ -209,7 +209,7 @@ export default function SettingGroupAdminPage() {
         open={!!editTarget}
         onCancel={() => setEditTarget(null)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form<EditFormValues> form={editForm} layout="vertical" onFinish={handleEdit}>
           <Form.Item

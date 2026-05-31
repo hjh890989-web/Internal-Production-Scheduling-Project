@@ -136,7 +136,7 @@ export function ConfirmModal({ target, open, onClose, onSuccess }: Props) {
       open={open}
       onCancel={handleClose}
       width={560}
-      destroyOnClose
+      destroyOnHidden
       footer={[
         <Button key="cancel" onClick={handleClose} disabled={loading} data-testid="confirm-cancel">
           취소

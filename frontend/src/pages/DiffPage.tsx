@@ -198,7 +198,7 @@ export default function DiffPage() {
         open={!!decisionModal}
         onCancel={() => setDecisionModal(null)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Alert
           type={decisionModal === 'commit' ? 'info' : 'warning'}

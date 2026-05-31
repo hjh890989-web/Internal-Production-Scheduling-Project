@@ -62,12 +62,16 @@ export function KdSupplementPanel() {
             style={{ width: 200 }}
           />
           <Text strong>부족량:</Text>
-          <InputNumber
-            min={0}
-            value={shortage}
-            onChange={(v) => setShortage(v ?? 0)}
-            addonAfter="회전"
-          />
+          <Space.Compact>
+            <InputNumber
+              min={0}
+              value={shortage}
+              onChange={(v) => setShortage(v ?? 0)}
+            />
+            <span className="ant-input-group-addon inline-flex items-center rounded-r border border-l-0 border-solid border-gray-300 bg-gray-50 px-3 text-sm text-gray-600">
+              회전
+            </span>
+          </Space.Compact>
           <Button
             type="primary"
             onClick={() => supplementMutation.mutate()}

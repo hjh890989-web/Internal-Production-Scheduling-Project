@@ -139,7 +139,7 @@ export default function KdOrderPage() {
         open={modalOpen}
         onCancel={() => setModalOpen(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form<FormValues> form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item label="Hose ID" name="hoseId" rules={[{ required: true }]}>

@@ -44,7 +44,7 @@ export function ViolationModal({ violation, onClose, onOverride }: Props) {
       open={!!violation}
       onCancel={handleClose}
       width={640}
-      destroyOnClose
+      destroyOnHidden
       footer={
         showOverride
           ? null

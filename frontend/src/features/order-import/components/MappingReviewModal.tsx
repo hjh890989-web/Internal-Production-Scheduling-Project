@@ -59,7 +59,7 @@ export function MappingReviewModal({ trackingId, open, onClose, onProceed }: Pro
       open={open}
       onCancel={onClose}
       width={1100}
-      destroyOnClose={false}
+      destroyOnHidden={false}
       footer={
         <Space>
           <Button onClick={onClose}>닫기</Button>

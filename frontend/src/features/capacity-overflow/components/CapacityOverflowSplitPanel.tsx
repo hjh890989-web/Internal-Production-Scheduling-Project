@@ -92,13 +92,17 @@ export function CapacityOverflowSplitPanel() {
         <Space direction="vertical" style={{ width: '100%' }}>
           <Space>
             <Text strong>Daily capacity (BR-V05):</Text>
-            <InputNumber
-              min={1}
-              max={1000}
-              value={dailyCapa}
-              onChange={(v) => setDailyCapa(v ?? 90)}
-              addonAfter="회전"
-            />
+            <Space.Compact>
+              <InputNumber
+                min={1}
+                max={1000}
+                value={dailyCapa}
+                onChange={(v) => setDailyCapa(v ?? 90)}
+              />
+              <span className="ant-input-group-addon inline-flex items-center rounded-r border border-l-0 border-solid border-gray-300 bg-gray-50 px-3 text-sm text-gray-600">
+                회전
+              </span>
+            </Space.Compact>
             <Text type="secondary">기본 LP 72 + IC 18 = 90 (1일)</Text>
           </Space>
           <Table
