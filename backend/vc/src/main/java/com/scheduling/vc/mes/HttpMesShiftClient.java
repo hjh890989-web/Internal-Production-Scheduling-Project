@@ -15,17 +15,26 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 /**
- * Sprint 23 ST-MES-1 — 외부 MES REST polling 클라이언트 (EP-MES-ADAPTER-1).
+ * Sprint 23 ST-MES-1 — 외부 MES REST polling 클라이언트 (Adapter 패턴 — read/fetch side).
  *
- * <p>{@code scheduling.mes.adapter=http} 일 때만 bean 활성 (default jpa 모드는 미존재).
- * {@code GET ${base-url}/api/mes/shift?machine=&date=&shift_no=} + Bearer 인증.
+ * <h2>Adapter 패턴 위치</h2>
+ * <p>{@link MesShiftClient} 구현체 (fetch Port). {@code scheduling.mes.adapter=http} 일 때만
+ * bean 활성. default {@code jpa} 모드에서는 이 bean 미존재 — {@link MesPollingService} 도
+ * {@code adapter=http} 조건부 활성이므로 jpa 모드에서는 polling scheduler 자체 미동작.
+ *
+ * <p>{@code GET ${base-url}/api/mes/shift?machine=&date=&shift_no=} + Bearer 인증.
  *
  * <p>Resilience4j {@code @Retry(name=mes)} + {@code @CircuitBreaker(name=mes)} — 3회 retry,
  * 5회 연속 실패 시 30초 OPEN (application.yml). 실패·timeout·circuit OPEN 시 fallback →
  * {@link Optional#empty()} (호출부 {@link MesPollingService} 가 skip, degraded mode 가 임계 감지).
  *
- * <p>실 vendor spec 미확보 — mock contract 으로 baseline. Phase 5+ 실 spec 적용 시
- * {@link MesShiftResponse} 매핑만 교체.
+ * <p>실 vendor spec 미확보 — mock contract 기준 ({@link MesShiftResponse} 필드 참조).
+ * Sprint 26 S26-B: vendor 실 spec 수신 후 {@link MesShiftResponse} DTO 필드 재정의 예정.
+ * Phase 5+ 실 spec 적용 시 {@link MesShiftResponse} 매핑만 교체 — 본 클래스 로직 불변.
+ *
+ * @see MesShiftClient
+ * @see MesShiftResponse
+ * @see MesPollingService
  */
 @Component
 @ConditionalOnProperty(name = "scheduling.mes.adapter", havingValue = "http")

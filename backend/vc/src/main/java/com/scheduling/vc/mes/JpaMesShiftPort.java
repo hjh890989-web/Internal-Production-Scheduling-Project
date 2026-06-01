@@ -14,10 +14,19 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Sprint 17 BR-X06 MesShiftPort JPA stub impl — TK-DAY-LOCK-3-1.
+ * Sprint 17 BR-X06 MesShiftPort JPA 구현체 (Adapter 패턴 — write side, default adapter).
  *
- * <p>UNIQUE (machine, shift_date, shift_no) 충돌 시 update — MES 자동 수신 후 Excel 폴백
+ * <p>활성 조건: {@code spring.profiles.active=with-infra} — JPA/DB Bean 필요.
+ *
+ * <p>UNIQUE (machine_id, shift_date, shift_no) 충돌 시 UPDATE — MES 자동 수신 후 Excel 폴백
  * 으로 override 가능 (source = EXCEL_FALLBACK 우선). DB UNIQUE constraint 가 결정성 보장.
+ *
+ * <p>Sprint 26 S26-A: Adapter 패턴 Javadoc 보강. MesShiftPort 인터페이스는 write/persist Port
+ * 로 read/fetch Port (MesShiftClient) 와 분리되어 adapter 모드(jpa/http) 와 무관하게 항상 활성.
+ * HttpMesShiftClient 는 별도 read Port — {@code @ConditionalOnProperty(adapter=http)} 자체 조건.
+ *
+ * @see MesShiftPort
+ * @see MesShiftClient
  */
 @Component
 @Profile("with-infra")
