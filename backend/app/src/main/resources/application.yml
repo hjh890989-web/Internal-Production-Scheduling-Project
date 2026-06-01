@@ -51,8 +51,10 @@ scheduling:
     timeout-seconds: 60                 # REQ-NF-PER-001
 
   # Sprint 23 EP-MES-ADAPTER-1 — MES 실적 수신 adapter (BR-X06)
-  # adapter=jpa (default) — DB stub (DEV/STG). adapter=http — 실 MES REST polling (PROD).
-  # 실 vendor spec 미확보 — mock contract 기준. Phase 5+ 실 spec DTO 교체.
+  # adapter=jpa (default) — JpaMesShiftPort 활성, DB stub (DEV/STG).
+  # adapter=http          — HttpMesShiftClient + MesPollingService 활성, 실 MES REST polling (PROD).
+  # Sprint 26 S26-A: ConditionalOnProperty 정합 완료. S26-B carry-over: vendor 실 spec 수신 후
+  #   MesShiftResponse DTO 필드 재정의 예정 (MesShiftPort/MesShiftClient 인터페이스 불변).
   mes:
     adapter: ${MES_ADAPTER:jpa}
     http:
@@ -95,6 +97,13 @@ scheduling:
       timeout-seconds: 5
     in-app:
       topic-prefix: /topic/notifications
+
+  # Sprint 26 ST-ORDER-3 — Order 자동 INSERT chain (Phase 4 carry-over 해소).
+  # default false — PROD 점진 활성 (Sprint 27+ 또는 사용자 결정 후 true).
+  # OrderCommittedEvent 발행 시 VcScheduleService.draftBatch 자동 호출 여부.
+  order:
+    auto-draft:
+      enabled: ${ORDER_AUTO_DRAFT_ENABLED:false}
 
 management:
   endpoints:
