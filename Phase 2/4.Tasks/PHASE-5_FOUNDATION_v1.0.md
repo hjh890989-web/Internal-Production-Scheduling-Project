@@ -88,6 +88,7 @@
 | 4 | S24-B #3 | Sprint 28 EP-OBS-ENHANCE | Grafana threshold 실측 기반 조정 |
 | 5 | S24-B #4 / S25-B | Sprint 28 EP-OBS-ENHANCE | BETA_REPORT v1.0 발행 |
 | 6 | S25-B Keycloak | Sprint 26 / 29 | 실 활성 + 실 부하 측정 + 튜닝 |
+| **7** | **BR-X07 날짜 회귀 IT 18건** | **Sprint 27 첫 작업 또는 환경 hotfix** | **2026-06-01 발견 — V039 sample seed production_date 가 today (=오늘) hardcode → BR-X07 D-2 hard trigger 거부. 영향 IT 4 클래스 (AuditTriggerIT 5 + IntraDayLockIT 5 + SwapProposalIT 6 + VcScheduleQueryControllerIT 2). 해결 — sample seed production_date 를 (a) LocalDate.now().plusDays(7) 또는 (b) hardcode future (2026-12-31) 로 일괄 갱신. Sprint 26 S26-A commit 13e957e~40dd80f 변경과 무관 (회귀 0건 확정)** |
 
 ---
 
